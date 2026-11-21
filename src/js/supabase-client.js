@@ -108,7 +108,13 @@
         .filter(b => b.is_active !== false)
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
+      const initialBrandsMap = {};
+      (window.DLM_BRANDS || []).forEach(ib => {
+        initialBrandsMap[ib.id] = ib;
+      });
+
       const mappedBrands = activeBrands.map(b => {
+        const localBrand = initialBrandsMap[b.id] || {};
         const items = payload.menuItems
           .filter(it => it.brand_id === b.id && it.is_available !== false)
           .sort((a, c) => (a.sort_order || 0) - (c.sort_order || 0))
@@ -130,30 +136,39 @@
             rating: it.rating || "4.8",
             sold: it.sold_label || "1k+",
             soldCount: Number(it.sold_count || 0),
-            optionGroups: Array.isArray(it.option_groups) ? it.option_groups : []
+            optionGroups: Array.isArray(it.option_groups) && it.option_groups.length ? it.option_groups : []
           }));
 
-        const baseCats = Array.isArray(b.categories) && b.categories.length ? b.categories : ["Semua"];
-        const itemCats = items.map(it => it.category).filter(Boolean);
+        const finalItems = items.length >= (localBrand.items ? localBrand.items.length : 0)
+          ? items
+          : (localBrand.items || items);
+
+        const baseCats = Array.isArray(localBrand.categories) && localBrand.categories.length
+          ? localBrand.categories
+          : (Array.isArray(b.categories) && b.categories.length ? b.categories : ["Semua"]);
+        const itemCats = finalItems.map(it => it.category).filter(Boolean);
         const mergedCats = ["Semua"].concat(Array.from(new Set(baseCats.concat(itemCats).filter(c => c !== "Semua"))));
 
-        const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || b.logo_url || "";
+        const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || localBrand.logo || b.logo_url || "";
         return {
           id: b.id,
           name: b.name,
-          shortName: b.short_name || b.name,
-          monogram: b.monogram || b.name.charAt(0),
+          shortName: b.short_name || localBrand.shortName || b.name,
+          monogram: b.monogram || localBrand.monogram || b.name.charAt(0),
           logo: lockedLogo,
-          tagline: b.tagline || "",
-          description: b.description || "",
-          promoBadge: b.promo_badge || "Promo Spesial",
-          accent: b.accent || "#0B6BCB",
-          accentSoft: b.accent_soft || "#E3F0FF",
-          accentDeep: b.accent_deep || "#084F99",
-          rating: b.rating || "4.9",
-          totalSold: b.total_sold || "10k+",
+          wordmark: localBrand.wordmark || lockedLogo,
+          themeStyle: localBrand.themeStyle || b.id,
+          ads: Array.isArray(localBrand.ads) ? localBrand.ads : [],
+          tagline: b.tagline || localBrand.tagline || "",
+          description: b.description || localBrand.description || "",
+          promoBadge: b.promo_badge || localBrand.promoBadge || "Promo Spesial",
+          accent: localBrand.accent || b.accent || "#0B6BCB",
+          accentSoft: localBrand.accentSoft || b.accent_soft || "#E3F0FF",
+          accentDeep: localBrand.accentDeep || b.accent_deep || "#084F99",
+          rating: b.rating || localBrand.rating || "4.9",
+          totalSold: b.total_sold || localBrand.totalSold || "10k+",
           categories: mergedCats,
-          items
+          items: finalItems
         };
       });
 

@@ -1,11 +1,12 @@
 /* ============================================================
-   DIBELIIN LEBIH MURAH — APP CONTROLLER (V3 OFFICIAL COFFEE APP UX)
-   Mobile-first ordering flow with Per-Customer Cache Isolation:
-   1. #/outlet  (Auto-Rotating Promo Carousel + Pilih Brand & Lokasi Outlet)
-   2. #/menu    (Official-Style Menu Navigation + No-Outlet Guard)
-   3. #/cart    (Keranjang + Salin Patungan Teman)
-   4. #/checkout(Data Pemesan + Kirim WhatsApp Resmi)
-   5. #/history (Riwayat Transaksi Pelanggan via Cache Device ID + Live Supabase)
+   DIBELIIN LEBIH MURAH — APP CONTROLLER (V4 OFFICIAL SUPER-UX)
+   1. Intro Promo Story Splash Showcase (#splash-root)
+   2. Smart Auto-Hide Header on Scroll Down / Reveal on Scroll Up
+   3. Organic Curved Wave Hero & Physics-Spring Ad Carousel (#/outlet)
+   4. Modern Pickup vs Delivery Dual-Method Selector Card
+   5. 4 Distinct Brand Menu UI Personalities (Fore, Tomoro, Kenangan, Janji Jiwa)
+   6. Balanced Floating Dock Bottom Action Bar (Cart & Checkout)
+   7. Per-Customer Isolated Transaction History (#/history) + Modern Order Tracker
    ============================================================ */
 (function () {
   "use strict";
@@ -28,9 +29,21 @@
   let revealObserver = null;
   let modalLastFocus = null;
 
-  // Auto-rotating promo carousel state
+  // Smart scroll direction state
+  let lastScrollY = 0;
+
+  // Physics-spring promo carousel state (#/outlet)
   let promoSlideIndex = 0;
   let promoInterval = null;
+  let touchStartX = 0;
+
+  // Intro promo story splash state (#splash-root)
+  let splashIndex = 0;
+  let splashInterval = null;
+
+  // Brand menu ad banner state (#/menu)
+  let brandAdIndex = 0;
+  let brandAdInterval = null;
 
   // Live merged history cache for current customer device
   let customerHistoryCache = null;
@@ -44,19 +57,23 @@
   }, 140);
 
   /* ============================================================
-     ROUTER & SHELL
+     ROUTER, SMART SCROLL HEADER & SHELL
      ============================================================ */
 
   function init() {
     renderRoute();
+    maybeShowIntroSplash();
+
     window.addEventListener("hashchange", renderRoute);
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
+
     CART.subscribe(summary => {
       updateCartBadge(summary);
       renderBottomBar(STORE.getRoute());
       renderBottomNav(STORE.getRoute());
     });
+
     document.addEventListener("click", handleClick);
     document.addEventListener("input", handleInput);
     document.addEventListener("change", handleChange);
@@ -76,7 +93,24 @@
 
   function handleScroll() {
     const topBar = $(".app-top");
-    if (topBar) topBar.classList.toggle("is-scrolled", window.scrollY > 6);
+    if (!topBar) return;
+
+    const currentY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+    const delta = currentY - lastScrollY;
+
+    topBar.classList.toggle("is-scrolled", currentY > 8);
+
+    if (currentY < 32) {
+      topBar.classList.remove("is-hidden-up");
+    } else if (delta > 9 && currentY > 72) {
+      // Scrolling down -> hide header smoothly
+      topBar.classList.add("is-hidden-up");
+    } else if (delta < -7) {
+      // Scrolling up -> reveal header immediately
+      topBar.classList.remove("is-hidden-up");
+    }
+
+    lastScrollY = currentY;
   }
 
   function setupReveal() {
@@ -92,12 +126,12 @@
           entry.target.classList.add("is-in");
           revealObserver.unobserve(entry.target);
         });
-      }, { threshold: 0.06, rootMargin: "0px 0px -4% 0px" });
+      }, { threshold: 0.05, rootMargin: "0px 0px -3% 0px" });
     }
     elements.forEach((el, index) => {
       if (el.classList.contains("is-in")) return;
       if (!el.style.getPropertyValue("--reveal-delay")) {
-        el.style.setProperty("--reveal-delay", `${Math.min(index, 8) * 35}ms`);
+        el.style.setProperty("--reveal-delay", `${Math.min(index, 8) * 30}ms`);
       }
       revealObserver.observe(el);
     });
@@ -117,6 +151,11 @@
     }
 
     stopPromoCarousel();
+    stopBrandAdCarousel();
+
+    const topBar = $(".app-top");
+    if (topBar) topBar.classList.remove("is-hidden-up");
+
     renderHeader(route);
     renderProgress(route);
 
@@ -125,6 +164,7 @@
       startPromoCarousel();
     } else if (route === "menu") {
       renderMenuStep();
+      startBrandAdCarousel();
     } else if (route === "cart") {
       renderCartStep();
     } else if (route === "checkout") {
@@ -162,7 +202,7 @@
     let showBack = false;
 
     if (route === "menu") {
-      eyebrow = brand ? `${brand.name} • Diskon s/d 50%` : "Katalog Menu";
+      eyebrow = brand ? `${brand.name} • ${brand.promoBadge}` : "Katalog Menu";
       title = outlet ? outlet.name : "Pilih Menu";
     } else if (route === "cart") {
       eyebrow = "Ringkasan Pesanan";
@@ -189,7 +229,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <button type="button" class="track-btn" data-action="open-tracker" aria-label="Lacak kode pesanan">
+        <button type="button" class="track-btn" data-action="open-tracker" aria-label="Lacak status pesanan">
           ${ICON.icon("package", "w-4 h-4", 2)}
           <span>Lacak</span>
         </button>
@@ -248,17 +288,23 @@
         <div class="bottom-bar-inner">
           <button type="button" class="bottom-cart-summary" data-action="go-cart">
             <span class="bottom-cart-icon">${ICON.icon("shopping-bag", "w-5 h-5", 2)}<span>${summary.totalItems}</span></span>
-            <span class="bottom-cart-copy"><small>${summary.totalSavings > 0 ? `Hemat ${U.rp(summary.totalSavings)}` : "Total pesanan"}</small><strong>${U.rp(summary.subtotal)}</strong></span>
+            <span class="bottom-cart-copy">
+              <small>${summary.totalSavings > 0 ? `Hemat ${U.rp(summary.totalSavings)}` : "Total pesanan"}</small>
+              <strong>${U.rp(summary.subtotal)}</strong>
+            </span>
           </button>
           <button type="button" class="btn-primary btn-bottom" data-action="go-cart">
-            Checkout ${ICON.icon("arrow-right", "w-4 h-4", 2.4)}
+            Lihat Keranjang ${ICON.icon("arrow-right", "w-4 h-4", 2.4)}
           </button>
         </div>
       `;
     } else if (route === "cart" && summary.totalItems > 0) {
       html = `
         <div class="bottom-bar-inner">
-          <div class="bottom-total"><small>Total Bayar</small><strong>${U.rp(summary.grandTotal)}</strong></div>
+          <div class="bottom-total">
+            <small>Total Pembayaran ${summary.totalSavings > 0 ? `<span class="bottom-total-save">Hemat ${U.rp(summary.totalSavings)}</span>` : ""}</small>
+            <strong>${U.rp(summary.grandTotal)}</strong>
+          </div>
           <button type="button" class="btn-primary btn-bottom" data-action="go-checkout">
             Lanjut Isi Data ${ICON.icon("arrow-right", "w-4 h-4", 2.4)}
           </button>
@@ -267,7 +313,10 @@
     } else if (route === "checkout" && summary.totalItems > 0) {
       html = `
         <div class="bottom-bar-inner">
-          <div class="bottom-total"><small>Total Bayar</small><strong>${U.rp(summary.grandTotal)}</strong></div>
+          <div class="bottom-total">
+            <small>Total Akhir (${summary.totalItems} Cup)</small>
+            <strong>${U.rp(summary.grandTotal)}</strong>
+          </div>
           <button type="button" class="btn-wa btn-bottom" data-action="submit-order">
             ${ICON.brand("whatsapp", "w-4 h-4")} Kirim Pesanan WA
           </button>
@@ -309,16 +358,155 @@
     return (CFG.lockedBrandLogos && CFG.lockedBrandLogos[brand.id]) || brand.logo || `src/assets/brands/${brand.id}.svg`;
   }
 
-  function brandMark(brand, className) {
-    const logoUrl = getLockedBrandLogo(brand);
-    if (logoUrl) {
-      return `<span class="${className} brand-logo"><img src="${U.esc(logoUrl)}" alt="${U.esc(brand ? brand.name : "")}" loading="lazy" decoding="async"></span>`;
+  /* ============================================================
+     1. INTRO PROMO STORY SPLASH SHOWCASE (#splash-root)
+     ============================================================ */
+
+  function getSplashPromos() {
+    return Array.isArray(CFG.splashPromos) && CFG.splashPromos.length ? CFG.splashPromos : [];
+  }
+
+  function maybeShowIntroSplash() {
+    try {
+      const seen = sessionStorage.getItem(CFG.storageKeys.splashSeen);
+      if (seen === "1") return;
+      sessionStorage.setItem(CFG.storageKeys.splashSeen, "1");
+    } catch (e) {
+      /* ignore */
     }
-    return `<span class="${className}">${U.esc(brand ? brand.monogram : "K")}</span>`;
+    openIntroSplash(0);
+  }
+
+  function openIntroSplash(startIndex) {
+    const root = $("#splash-root");
+    const promos = getSplashPromos();
+    if (!root || !promos.length) return;
+
+    stopIntroSplashTimer();
+    splashIndex = startIndex || 0;
+
+    root.innerHTML = `
+      <div class="splash-overlay" id="splash-overlay" role="dialog" aria-modal="true" aria-label="Highlight Promo Hari Ini">
+        <div class="splash-card">
+          <div class="splash-progress-row">
+            ${promos.map((p, idx) => `
+              <span class="splash-prog-seg ${idx < splashIndex ? "is-done" : ""} ${idx === splashIndex ? "is-active" : ""}" data-splash-seg="${idx}">
+                <span class="splash-prog-fill"></span>
+              </span>
+            `).join("")}
+          </div>
+
+          <div class="splash-top-bar">
+            <div class="splash-brand-pill" id="splash-brand-pill">
+              <img src="${U.esc(promos[splashIndex].logo)}" alt="" id="splash-brand-logo" />
+              <span id="splash-brand-name">${U.esc(promos[splashIndex].brandName)}</span>
+            </div>
+            <button type="button" class="splash-skip-btn" data-action="close-splash">
+              Lewati ${ICON.icon("x", "w-3.5 h-3.5", 2.4)}
+            </button>
+          </div>
+
+          <div class="splash-stage">
+            ${promos.map((p, idx) => `
+              <article class="splash-slide ${idx === splashIndex ? "is-active" : ""}" data-splash-slide="${idx}" style="--splash-accent:${U.esc(p.accent || "#0B6BCB")}">
+                <img src="${U.esc(p.image)}" alt="${U.esc(p.title)}" class="splash-slide-bg" loading="${idx === 0 ? "eager" : "lazy"}" />
+                <div class="splash-slide-shade"></div>
+                <div class="splash-slide-content">
+                  ${p.secondaryImage ? `
+                    <div class="splash-secondary-banner">
+                      <img src="${U.esc(p.secondaryImage)}" alt="${U.esc(p.brandName)}" loading="lazy" />
+                    </div>
+                  ` : ""}
+                  <span class="splash-badge">${ICON.icon("sparkles", "w-3 h-3", 2.2)} ${U.esc(p.badge)}</span>
+                  <h2 class="splash-title">${U.esc(p.title)}</h2>
+                  <p class="splash-sub">${U.esc(p.subtitle)}</p>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+
+          <div class="splash-footer">
+            <div class="splash-nav-dots">
+              ${promos.map((p, idx) => `
+                <button type="button" class="splash-dot ${idx === splashIndex ? "is-active" : ""}" data-action="splash-goto" data-index="${idx}" aria-label="Promo ${idx + 1}"></button>
+              `).join("")}
+            </div>
+            <button type="button" class="btn-primary btn-sm" id="splash-cta-btn" data-action="splash-pick-brand" data-brand-id="${U.esc(promos[splashIndex].brandId)}" style="min-height:40px;padding:0 14px;border-radius:999px">
+              Pilih Outlet ${U.esc(promos[splashIndex].brandName)} ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    startIntroSplashTimer();
+  }
+
+  function setIntroSplashSlide(nextIndex) {
+    const promos = getSplashPromos();
+    const overlay = $("#splash-overlay");
+    if (!overlay || !promos.length) return;
+
+    if (nextIndex >= promos.length) {
+      closeIntroSplash();
+      return;
+    }
+
+    splashIndex = ((nextIndex % promos.length) + promos.length) % promos.length;
+    const current = promos[splashIndex];
+
+    $$("[data-splash-slide]", overlay).forEach((el, idx) => {
+      el.classList.toggle("is-active", idx === splashIndex);
+    });
+    $$("[data-splash-seg]", overlay).forEach((seg, idx) => {
+      seg.classList.remove("is-active", "is-done");
+      void seg.offsetWidth;
+      if (idx < splashIndex) seg.classList.add("is-done");
+      else if (idx === splashIndex) seg.classList.add("is-active");
+    });
+    $$(".splash-dot", overlay).forEach((dot, idx) => {
+      dot.classList.toggle("is-active", idx === splashIndex);
+    });
+
+    const bLogo = $("#splash-brand-logo");
+    const bName = $("#splash-brand-name");
+    const ctaBtn = $("#splash-cta-btn");
+    if (bLogo) bLogo.src = current.logo;
+    if (bName) bName.textContent = current.brandName;
+    if (ctaBtn) {
+      ctaBtn.dataset.brandId = current.brandId;
+      ctaBtn.innerHTML = `Pilih Outlet ${U.esc(current.brandName)} ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}`;
+    }
+  }
+
+  function startIntroSplashTimer() {
+    stopIntroSplashTimer();
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    splashInterval = setInterval(() => {
+      setIntroSplashSlide(splashIndex + 1);
+    }, 3400);
+  }
+
+  function stopIntroSplashTimer() {
+    if (splashInterval) {
+      clearInterval(splashInterval);
+      splashInterval = null;
+    }
+  }
+
+  function closeIntroSplash() {
+    stopIntroSplashTimer();
+    const overlay = $("#splash-overlay");
+    if (!overlay) return;
+    overlay.classList.add("is-closing");
+    setTimeout(() => {
+      const root = $("#splash-root");
+      if (root) root.innerHTML = "";
+    }, 400);
   }
 
   /* ============================================================
-     AUTO-ROTATING PROMO CAROUSEL (#/outlet)
+     2. PHYSICS-SPRING PROMO CAROUSEL (#/outlet & #/menu)
      ============================================================ */
 
   function getPromoSlides() {
@@ -337,7 +525,7 @@
         return;
       }
       setPromoSlide((promoSlideIndex + 1) % slides.length);
-    }, 4200);
+    }, 4000);
   }
 
   function stopPromoCarousel() {
@@ -351,12 +539,47 @@
     const slides = getPromoSlides();
     if (!slides.length) return;
     promoSlideIndex = ((index % slides.length) + slides.length) % slides.length;
-    $$(".promo-slide").forEach((el, idx) => {
+
+    const track = $("#ad-showcase-track");
+    if (track) {
+      track.style.transform = `translate3d(-${promoSlideIndex * 100}%, 0, 0)`;
+    }
+    $$(".ad-showcase-slide").forEach((el, idx) => {
       el.classList.toggle("is-active", idx === promoSlideIndex);
     });
     $$(".promo-dot").forEach((dot, idx) => {
       dot.classList.toggle("is-active", idx === promoSlideIndex);
     });
+  }
+
+  function startBrandAdCarousel() {
+    stopBrandAdCarousel();
+    const brand = STORE.getBrand();
+    if (!brand || !Array.isArray(brand.ads) || brand.ads.length <= 1) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    brandAdInterval = setInterval(() => {
+      if (STORE.getRoute() !== "menu") {
+        stopBrandAdCarousel();
+        return;
+      }
+      const ads = (STORE.getBrand() && STORE.getBrand().ads) || [];
+      const landscapeAds = ads.filter(a => !a.isPortrait);
+      const list = landscapeAds.length ? landscapeAds : ads;
+      if (list.length <= 1) return;
+      brandAdIndex = (brandAdIndex + 1) % list.length;
+      const imgEl = $("#brand-menu-ad-img");
+      if (imgEl && list[brandAdIndex]) {
+        imgEl.src = list[brandAdIndex].image;
+      }
+    }, 4200);
+  }
+
+  function stopBrandAdCarousel() {
+    if (brandAdInterval) {
+      clearInterval(brandAdInterval);
+      brandAdInterval = null;
+    }
   }
 
   /* ============================================================
@@ -368,7 +591,6 @@
     if (!main) return;
 
     const selectedBrand = STORE.getBrand();
-    const selectedOutlet = STORE.getOutlet();
     const slides = getPromoSlides();
     if (promoSlideIndex >= slides.length) promoSlideIndex = 0;
 
@@ -376,62 +598,86 @@
     const delivery = STORE.state.orderMode === "delivery";
 
     main.innerHTML = `
-      <!-- Auto-Rotating Promo & Discount Carousel -->
-      <section class="promo-carousel reveal" aria-label="Promo & Diskon Kopi Samarinda">
-        <div class="promo-track">
-          ${slides.map((slide, idx) => `
-            <article class="promo-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-theme="${U.esc(slide.theme || "blue")}">
-              <div class="promo-slide-copy">
-                <span class="promo-slide-badge">${ICON.icon("sparkles", "w-3 h-3", 2.2)} ${U.esc(slide.badge)}</span>
-                <h2 class="promo-slide-title">${U.esc(slide.title)}</h2>
-                <p class="promo-slide-sub">${U.esc(slide.subtitle)}</p>
-                <button type="button" class="promo-slide-cta" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}">
-                  Pilih Outlet ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
-                </button>
-              </div>
-              <div class="promo-slide-art">
-                <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" loading="${idx === 0 ? "eager" : "lazy"}" decoding="async" />
-              </div>
-            </article>
-          `).join("")}
+      <!-- Organic Curved Wave Hero Stage + Physics-Spring Official Ad Carousel -->
+      <section class="outlet-hero-stage reveal" aria-label="Promo & Iklan Kopi Samarinda">
+        <span class="outlet-hero-orb orb-1" aria-hidden="true"></span>
+        <span class="outlet-hero-orb orb-2" aria-hidden="true"></span>
+
+        <div class="outlet-hero-top">
+          <span class="outlet-loc-pill">
+            ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}, ${U.esc(CFG.region)}
+          </span>
+          <button type="button" class="outlet-story-btn" data-action="open-splash-stories">
+            ${ICON.icon("sparkles", "w-3.5 h-3.5", 2.2)} Lihat Semua Iklan
+          </button>
         </div>
-        <div class="promo-controls">
-          <div class="promo-dots" role="tablist" aria-label="Slide promo">
-            ${slides.map((slide, idx) => `
-              <button type="button" class="promo-dot ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-dot" data-index="${idx}" aria-label="Slide ${idx + 1}: ${U.esc(slide.title)}"></button>
-            `).join("")}
+
+        <div class="ad-showcase-carousel" id="ad-showcase-carousel">
+          <div class="ad-showcase-viewport">
+            <div class="ad-showcase-track" id="ad-showcase-track" style="transform:translate3d(-${promoSlideIndex * 100}%,0,0)">
+              ${slides.map((slide, idx) => `
+                <article class="ad-showcase-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}" style="cursor:pointer">
+                  <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" loading="${idx === 0 ? "eager" : "lazy"}" decoding="async" />
+                  <div class="ad-showcase-overlay">
+                    <span class="ad-showcase-tag">${U.esc(slide.badge)}</span>
+                    <h2 class="ad-showcase-title">${U.esc(slide.title)}</h2>
+                    <p class="ad-showcase-sub">${U.esc(slide.subtitle)}</p>
+                  </div>
+                </article>
+              `).join("")}
+            </div>
           </div>
-          <div class="promo-nav-btns">
-            <button type="button" class="promo-nav-btn" data-action="promo-prev" aria-label="Promo sebelumnya">${ICON.icon("chevron-left", "w-3.5 h-3.5", 2.4)}</button>
-            <button type="button" class="promo-nav-btn" data-action="promo-next" aria-label="Promo selanjutnya">${ICON.icon("chevron-right", "w-3.5 h-3.5", 2.4)}</button>
+
+          <div class="ad-showcase-bar">
+            <div class="promo-dots" role="tablist" aria-label="Slide iklan resmi">
+              ${slides.map((slide, idx) => `
+                <button type="button" class="promo-dot ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-dot" data-index="${idx}" aria-label="Iklan ${idx + 1}: ${U.esc(slide.title)}"></button>
+              `).join("")}
+            </div>
+            <div class="promo-nav-btns">
+              <button type="button" class="promo-nav-btn" data-action="promo-prev" aria-label="Iklan sebelumnya">${ICON.icon("chevron-left", "w-3.5 h-3.5", 2.4)}</button>
+              <button type="button" class="promo-nav-btn" data-action="promo-next" aria-label="Iklan selanjutnya">${ICON.icon("chevron-right", "w-3.5 h-3.5", 2.4)}</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Pickup / Delivery Toggle Pill (Official App Style) -->
-      <section class="service-bar-card reveal">
-        <div class="service-bar-copy">
-          <small>Metode Pesanan • ${U.esc(CFG.city)}</small>
-          <strong id="service-mode-label">${delivery ? "Kirim Driver (GoSend / Grab)" : "Pickup • Ambil di Outlet"}</strong>
+      <!-- Modern Pickup vs Delivery Dual-Method Selector Card -->
+      <section class="method-hub-card reveal" aria-label="Metode Pesanan">
+        <div class="method-hub-switch" role="group" aria-label="Pilih metode pengambilan">
+          <button type="button" class="method-option-btn ${delivery ? "" : "is-active"}" data-action="quick-mode" data-mode="pickup" aria-pressed="${delivery ? "false" : "true"}">
+            <span class="method-option-icon">${ICON.icon("store", "w-4 h-4", 2.2)}</span>
+            <span class="method-option-copy">
+              <strong>Pickup Outlet</strong>
+              <small>Ambil tanpa antre</small>
+            </span>
+          </button>
+          <button type="button" class="method-option-btn ${delivery ? "is-active" : ""}" data-action="quick-mode" data-mode="delivery" aria-pressed="${delivery ? "true" : "false"}">
+            <span class="method-option-icon">${ICON.icon("truck", "w-4 h-4", 2.2)}</span>
+            <span class="method-option-copy">
+              <strong>Delivery Kurir</strong>
+              <small>Kirim ke alamatmu</small>
+            </span>
+          </button>
         </div>
-        <div class="mode-toggle-pill" role="group" aria-label="Metode pengambilan">
-          <button type="button" class="mode-pill-btn ${delivery ? "" : "is-active"}" data-action="quick-mode" data-mode="pickup">
-            ${ICON.icon("store", "w-3.5 h-3.5", 2.2)} Pickup
-          </button>
-          <button type="button" class="mode-pill-btn ${delivery ? "is-active" : ""}" data-action="quick-mode" data-mode="delivery">
-            ${ICON.icon("truck", "w-3.5 h-3.5", 2.2)} Delivery
-          </button>
+
+        <div class="method-info-strip" id="method-info-strip">
+          <span class="method-info-left">
+            ${ICON.icon(delivery ? "truck" : "clock", "w-4 h-4", 2.2)}
+            <span id="service-mode-label">${delivery ? "Dikirim via GoSend / Grab Instant ke titik lokasimu" : "Pesanan disiapkan barista, langsung ambil di kasir outlet"}</span>
+          </span>
+          <span class="method-info-badge" id="service-mode-badge">${delivery ? "Kurir Instant" : "10–15 Menit"}</span>
         </div>
       </section>
 
-      <!-- Step 1: Pilih Brand Kopi -->
-      <section class="section reveal" id="brand-section" style="margin-top:16px">
+      <!-- Step 1: Pilih Brand Kopi Resmi -->
+      <section class="section reveal" id="brand-section" style="margin-top:18px">
         <div class="section-head compact">
           <div>
-            <p class="eyebrow">Langkah 1</p>
-            <h2 class="section-title">Pilih Brand Kopi</h2>
+            <p class="eyebrow">Langkah 1 • Katalog Resmi</p>
+            <h2 class="section-title">Pilih Brand Favoritmu</h2>
           </div>
-          <span class="section-count">${window.DLM_BRANDS.length} Brand Resmi</span>
+          <span class="section-count">4 Brand • 327 Menu</span>
         </div>
         <div class="brand-selector-grid">
           ${window.DLM_BRANDS.map(brand => brandSelectorCard(brand, brand.id === selectedBrand.id)).join("")}
@@ -458,19 +704,17 @@
         </div>
 
         <div class="outlet-list" id="outlet-list"></div>
-
-        <div class="note-card" style="margin-top:14px">
-          ${ICON.icon("shield-check", "w-4 h-4", 2)}
-          <p><strong>Keranjang & Pesanan Terisolasi Aman:</strong> Setiap pelanggan memiliki sesi perangkat unik, sehingga pilihan outlet dan keranjang Anda tidak akan tercampur dengan pelanggan lain yang mengakses bersamaan.</p>
-        </div>
       </section>
 
       <footer class="app-footer reveal">
         <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
         <p>Jasa order minuman &amp; makanan resmi • ${CFG.city}, ${CFG.region}</p>
         <div class="footer-links" style="flex-wrap:wrap">
+          <button type="button" class="footer-link" data-action="open-splash-stories">
+            ${ICON.icon("sparkles", "w-3.5 h-3.5", 2)} Poster Promo
+          </button>
           <button type="button" class="footer-link" data-action="nav-tab" data-tab="history">
-            ${ICON.icon("receipt", "w-3.5 h-3.5", 2)} Riwayat Transaksi
+            ${ICON.icon("receipt", "w-3.5 h-3.5", 2)} Riwayat Saya
           </button>
           <a href="lisensi.html" class="footer-link">
             ${ICON.icon("shield-check", "w-3.5 h-3.5", 2)} Lisensi Aset
@@ -482,21 +726,39 @@
       </footer>
     `;
 
+    bindCarouselTouch();
     renderOutletList();
+  }
+
+  function bindCarouselTouch() {
+    const carousel = $("#ad-showcase-carousel");
+    if (!carousel) return;
+    carousel.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches[0]) touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    carousel.addEventListener("touchend", (e) => {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      const diff = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(diff) > 36) {
+        setPromoSlide(diff < 0 ? promoSlideIndex + 1 : promoSlideIndex - 1);
+        startPromoCarousel();
+      }
+    }, { passive: true });
   }
 
   function brandSelectorCard(brand, isSelected) {
     const outletCount = STORE.getBrandOutlets(brand.id).length;
+    const menuCount = (brand.items || []).length;
     const logoUrl = getLockedBrandLogo(brand);
     return `
-      <button type="button" class="brand-select-card ${isSelected ? "is-selected" : ""}" data-brand-id="${U.esc(brand.id)}" aria-pressed="${isSelected ? "true" : "false"}">
+      <button type="button" class="brand-select-card ${isSelected ? "is-selected" : ""}" data-brand-id="${U.esc(brand.id)}" aria-pressed="${isSelected ? "true" : "false"}" style="--brand-tint:${U.esc(brand.accentSoft || "#eaf3ff")}">
         <span class="brand-select-logo">
           <img src="${U.esc(logoUrl)}" alt="Logo ${U.esc(brand.name)}" loading="lazy" decoding="async" />
         </span>
         <span class="brand-select-info">
-          <span class="brand-select-promo">${U.esc(brand.promoBadge)}</span>
+          <span class="brand-select-promo" style="background:${U.esc(brand.accentSoft)};color:${U.esc(brand.accent)}">${U.esc(brand.promoBadge)}</span>
           <span class="brand-select-name">${U.esc(brand.name)}</span>
-          <span class="brand-select-meta">${outletCount} outlet • ★ ${U.esc(brand.rating)}</span>
+          <span class="brand-select-meta">${outletCount} cabang • ${menuCount} menu</span>
         </span>
         <span class="brand-select-check" aria-hidden="true">${ICON.icon("check", "w-3 h-3", 2.8)}</span>
       </button>
@@ -551,7 +813,7 @@
               ${U.esc(outlet.distance)}${isNearest ? " • Terdekat" : ""} • ${U.esc(outlet.area)}
             </span>
             ${isOpen
-              ? `<span class="open-badge">${ICON.icon("circle-check", "w-3 h-3", 2.4)} Buka</span>`
+              ? `<span class="open-badge"><span class="open-pulse-dot"></span> Buka</span>`
               : `<span class="closed-badge">${ICON.icon("circle-alert", "w-3 h-3", 2.4)} Tutup</span>`}
           </div>
           <div class="outlet-v2-main">
@@ -565,7 +827,7 @@
             <span class="outlet-arrow">${ICON.icon("chevron-right", "w-4 h-4", 2.4)}</span>
           </div>
           <div class="outlet-v2-foot">
-            <span>${ICON.icon("clock", "w-3.5 h-3.5", 2)} ${U.esc(outlet.hours)}</span>
+            <span>${ICON.icon("clock", "w-3.5 h-3.5", 2)} ${U.esc(outlet.hours)} • ${(brand.items || []).length} Menu Resmi</span>
             <span class="service-dots">
               <span class="service-dot">Pickup</span>
               <span class="service-dot">Delivery</span>
@@ -577,7 +839,7 @@
   }
 
   /* ============================================================
-     TAB 2 — MENU PESANAN SESUAI OUTLET (#/menu)
+     TAB 2 — MENU PESANAN UNIK SESUAI KARAKTER BRAND (#/menu)
      ============================================================ */
 
   function renderMenuStep() {
@@ -611,59 +873,73 @@
 
     const logoUrl = getLockedBrandLogo(brand);
     const priceFilters = [
-      { id: "all", label: "Semua Menu" },
-      { id: "bestseller", label: "★ Best Seller" },
-      { id: "under15k", label: "Di Bawah Rp 15rb" },
-      { id: "disc40", label: "Diskon ≥ 35%" }
+      { id: "all", label: `Semua (${brand.items.length})` },
+      { id: "bestseller", label: "★ Paling Laris" },
+      { id: "under15k", label: "≤ Rp 15.000" },
+      { id: "disc40", label: "Diskon ≥ 38%" }
     ];
 
+    const brandAds = Array.isArray(brand.ads) ? brand.ads : [];
+    const landscapeAds = brandAds.filter(a => !a.isPortrait);
+    const activeAds = landscapeAds.length ? landscapeAds : brandAds;
+    brandAdIndex = 0;
+
     main.innerHTML = `
-      <!-- Floating Top Outlet Bar (inspired by Fore & Tomoro official apps) -->
-      <section class="top-outlet-pill reveal">
-        <div class="top-outlet-left">
-          <span class="top-outlet-logo">
-            <img src="${U.esc(logoUrl)}" alt="${U.esc(brand.name)}" />
-          </span>
-          <div class="top-outlet-copy">
-            <span class="top-outlet-eyebrow">
-              ${ICON.icon("map-pin", "w-3 h-3", 2.4)} ${U.esc(brand.shortName)} • ${STORE.state.orderMode === "delivery" ? "Delivery" : "Pickup"}
+      <div data-brand-theme="${U.esc(brand.id)}">
+        <!-- Floating Top Outlet Bar -->
+        <section class="top-outlet-pill reveal" style="border-color:${U.esc(brand.accentSoft)}">
+          <div class="top-outlet-left">
+            <span class="top-outlet-logo">
+              <img src="${U.esc(logoUrl)}" alt="${U.esc(brand.name)}" />
             </span>
-            <h2 class="top-outlet-name">${U.esc(outlet.name)}</h2>
-            <span class="top-outlet-sub">${U.esc(outlet.address)} • ${U.esc(outlet.hours)}</span>
+            <div class="top-outlet-copy">
+              <span class="top-outlet-eyebrow" style="color:${U.esc(brand.accent)}">
+                ${ICON.icon("map-pin", "w-3 h-3", 2.4)} ${U.esc(brand.name)} • ${STORE.state.orderMode === "delivery" ? "Delivery" : "Pickup"}
+              </span>
+              <h2 class="top-outlet-name">${U.esc(outlet.name)}</h2>
+              <span class="top-outlet-sub">${U.esc(outlet.address)} • ${U.esc(outlet.hours)}</span>
+            </div>
           </div>
-        </div>
-        <button type="button" class="btn-soft btn-sm" data-action="change-outlet">
-          Ganti ${ICON.icon("chevron-down", "w-3.5 h-3.5", 2.4)}
-        </button>
-      </section>
+          <button type="button" class="btn-soft btn-sm" data-action="change-outlet">
+            Ganti ${ICON.icon("chevron-down", "w-3.5 h-3.5", 2.4)}
+          </button>
+        </section>
 
-      <section class="menu-section reveal" style="margin-top:12px">
-        <div class="search-field">
-          ${ICON.icon("search", "w-4 h-4", 2.2)}
-          <input type="search" id="menu-search" class="search-input" placeholder="Cari Aren Latte, Matcha, Butterscotch..." value="${U.esc(STORE.state.searchQuery)}" autocomplete="off">
-        </div>
+        <!-- Brand-Specific Official Promo Banner -->
+        ${activeAds.length ? `
+          <section class="brand-menu-banner reveal" aria-label="Promo ${U.esc(brand.name)}">
+            <img src="${U.esc(activeAds[0].image)}" alt="Promo ${U.esc(brand.name)}" id="brand-menu-ad-img" loading="eager" decoding="async" />
+          </section>
+        ` : ""}
 
-        <!-- Category Tabs -->
-        <div class="chip-row no-scrollbar" id="menu-categories">
-          ${brand.categories.map(category => `<button type="button" class="chip ${STORE.state.activeCategory === category ? "is-active" : ""}" data-category="${U.esc(category)}">${U.esc(category)}</button>`).join("")}
-        </div>
+        <section class="menu-section reveal" style="margin-top:12px">
+          <div class="search-field">
+            ${ICON.icon("search", "w-4 h-4", 2.2)}
+            <input type="search" id="menu-search" class="search-input" placeholder="Cari di ${U.esc(brand.name)} (${brand.items.length} menu resmi)..." value="${U.esc(STORE.state.searchQuery)}" autocomplete="off">
+          </div>
 
-        <!-- Quick Price / Discount Filter Pills -->
-        <div class="price-filter-row no-scrollbar" id="menu-price-filters">
-          ${priceFilters.map(pf => `
-            <button type="button" class="filter-pill ${STORE.state.priceFilter === pf.id ? "is-active" : ""}" data-price-filter="${U.esc(pf.id)}">
-              ${U.esc(pf.label)}
-            </button>
-          `).join("")}
-        </div>
+          <!-- Category Tabs -->
+          <div class="chip-row no-scrollbar" id="menu-categories">
+            ${brand.categories.map(category => `<button type="button" class="chip ${STORE.state.activeCategory === category ? "is-active" : ""}" data-category="${U.esc(category)}">${U.esc(category)}</button>`).join("")}
+          </div>
 
-        <div id="menu-results"></div>
+          <!-- Quick Price / Discount Filter Pills -->
+          <div class="price-filter-row no-scrollbar" id="menu-price-filters">
+            ${priceFilters.map(pf => `
+              <button type="button" class="filter-pill ${STORE.state.priceFilter === pf.id ? "is-active" : ""}" data-price-filter="${U.esc(pf.id)}">
+                ${U.esc(pf.label)}
+              </button>
+            `).join("")}
+          </div>
 
-        <div class="note-card" style="margin-top:16px">
-          ${ICON.icon("info", "w-4 h-4", 2)}
-          <p>Harga promo di atas sudah bersih termasuk biaya jasa. Ketuk menu untuk atur ukuran cup, takaran gula, es, dan topping.</p>
-        </div>
-      </section>
+          <div id="menu-results"></div>
+
+          <div class="note-card" style="margin-top:16px">
+            ${ICON.icon("info", "w-4 h-4", 2)}
+            <p>Harga promo ${U.esc(brand.name)} sudah bersih termasuk biaya jasa. Ketuk menu untuk memilih suhu, ukuran cup, gula, es, dan topping.</p>
+          </div>
+        </section>
+      </div>
     `;
 
     renderMenuGrid();
@@ -671,12 +947,6 @@
 
   function sortItems(items, sort) {
     const list = items.slice();
-    const soldValue = (item) => {
-      const raw = String(item.sold || "").toLowerCase();
-      const number = parseFloat(raw.replace(/[^\d.]/g, "")) || 0;
-      return raw.includes("k") ? number * 1000 : number;
-    };
-
     if (sort === "cheapest") {
       list.sort((a, b) => a.priceDiscount - b.priceDiscount);
     } else if (sort === "discount") {
@@ -684,11 +954,6 @@
         const da = (a.priceOriginal - a.priceDiscount) / a.priceOriginal;
         const db = (b.priceOriginal - b.priceDiscount) / b.priceOriginal;
         return db - da;
-      });
-    } else {
-      list.sort((a, b) => {
-        if (a.isBestSeller !== b.isBestSeller) return a.isBestSeller ? -1 : 1;
-        return soldValue(b) - soldValue(a);
       });
     }
     return list;
@@ -714,7 +979,7 @@
     } else if (pFilter === "disc40") {
       items = items.filter(item => {
         const disc = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
-        return disc >= 35;
+        return disc >= 38;
       });
     }
 
@@ -741,9 +1006,8 @@
     }
 
     const showMustTry = STORE.state.activeCategory === "Semua" && pFilter === "all" && !query;
-    const mustTryItems = brand.items.filter(item => item.isBestSeller).slice(0, 4);
+    const mustTryItems = brand.items.filter(item => item.isBestSeller).slice(0, 6);
 
-    // Group items by category for official app look
     const groups = [];
     const groupMap = {};
     items.forEach(item => {
@@ -755,15 +1019,23 @@
       groupMap[cat].push(item);
     });
 
+    const showcaseLabel = brand.id === "fore"
+      ? "Must Try! • Fore Favorites"
+      : (brand.id === "tomoro"
+        ? "Tomoro Highlights • Mont Blanc & S.O.E."
+        : (brand.id === "kenangan"
+          ? "Baru & Favorit • Purple Cloud & Mantan"
+          : "Janji Jiwa Specials • Borneo & Toast"));
+
     results.innerHTML = `
       ${showMustTry && mustTryItems.length ? `
         <section class="menu-category-group">
           <div class="menu-category-header">
-            <h3>Must Try! • Paling Laris</h3>
-            <span>${mustTryItems.length} menu favorit</span>
+            <h3>${U.esc(showcaseLabel)}</h3>
+            <span>${mustTryItems.length} menu unggulan</span>
           </div>
           <div class="must-try-grid">
-            ${mustTryItems.map(item => mustTryCard(item)).join("")}
+            ${mustTryItems.map(item => mustTryCard(brand, item)).join("")}
           </div>
         </section>
       ` : ""}
@@ -775,7 +1047,7 @@
             <span>${group.list.length} menu</span>
           </div>
           <div class="menu-rows-list">
-            ${group.list.map(item => menuRowCard(item)).join("")}
+            ${group.list.map(item => menuRowCard(brand, item)).join("")}
           </div>
         </section>
       `).join("")}
@@ -784,13 +1056,24 @@
     setupReveal();
   }
 
-  function mustTryCard(item) {
+  function brandMediaDecoration(brand, item) {
+    if (brand.id === "fore" && item.isBestSeller) {
+      return `<span class="fore-popular-pill">★ Most Popular</span>`;
+    }
+    if (brand.id === "kenangan") {
+      return `<img src="src/assets/brands/kenangan-official.webp" alt="" class="kenangan-heart-stamp" loading="lazy" />`;
+    }
+    return "";
+  }
+
+  function mustTryCard(brand, item) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
     return `
       <button type="button" class="must-try-card reveal" data-item-id="${U.esc(item.id)}">
         <span class="must-try-media">
           ${U.imageTag(item.image, item.name, "product-img")}
           <span class="menu-row-badge">-${discount}%</span>
+          ${brandMediaDecoration(brand, item)}
         </span>
         <span class="must-try-title">${U.esc(item.name)}</span>
         <span class="must-try-foot">
@@ -804,14 +1087,20 @@
     `;
   }
 
-  function menuRowCard(item) {
+  function menuRowCard(brand, item) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
     const savingAmount = Math.max(0, item.priceOriginal - item.priceDiscount);
+    const watermark = brand.id === "tomoro"
+      ? `<span class="tomoro-watermark" aria-hidden="true">${U.esc(item.category.split(" ")[0])}</span>`
+      : "";
+
     return `
       <button type="button" class="menu-row-card reveal" data-item-id="${U.esc(item.id)}">
+        ${watermark}
         <span class="menu-row-media">
           ${U.imageTag(item.image, item.name, "product-img")}
           <span class="menu-row-badge">-${discount}%</span>
+          ${brandMediaDecoration(brand, item)}
         </span>
         <span class="menu-row-body">
           <span class="menu-row-top">
@@ -1173,7 +1462,6 @@
       const code = String(loc.orderId || "").toUpperCase();
       if (!code) return;
       if (map[code]) {
-        // enrich remote with local item details for "Beli Lagi"
         if ((!map[code].items || !map[code].items.length) && Array.isArray(loc.items)) {
           map[code].items = loc.items;
         } else if (Array.isArray(loc.items) && loc.items.length) {
@@ -1360,6 +1648,17 @@
     if (action === "nav-tab") {
       const tab = el.dataset.tab || "outlet";
       STORE.navigate(tab);
+    } else if (action === "open-splash-stories") {
+      openIntroSplash(0);
+    } else if (action === "close-splash") {
+      closeIntroSplash();
+    } else if (action === "splash-goto") {
+      setIntroSplashSlide(parseInt(el.dataset.index, 10) || 0);
+      startIntroSplashTimer();
+    } else if (action === "splash-pick-brand") {
+      const bId = el.dataset.brandId;
+      closeIntroSplash();
+      if (bId) handleBrandClick(bId, true);
     } else if (action === "back") {
       STORE.navigate(STORE.prevRoute(STORE.getRoute()));
     } else if (action === "go-cart") {
@@ -1390,9 +1689,21 @@
     } else if (action === "quick-mode") {
       const mode = el.dataset.mode === "delivery" ? "delivery" : "pickup";
       STORE.state.orderMode = mode;
-      $$(".mode-pill-btn").forEach(btn => btn.classList.toggle("is-active", btn.dataset.mode === mode));
+      $$(".method-option-btn").forEach(btn => {
+        const active = btn.dataset.mode === mode;
+        btn.classList.toggle("is-active", active);
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+      });
       const lbl = $("#service-mode-label");
-      if (lbl) lbl.textContent = mode === "delivery" ? "Kirim Driver (GoSend / Grab)" : "Pickup • Ambil di Outlet";
+      const bdg = $("#service-mode-badge");
+      if (lbl) {
+        lbl.textContent = mode === "delivery"
+          ? "Dikirim via GoSend / Grab Instant ke titik lokasimu"
+          : "Pesanan disiapkan barista, langsung ambil di kasir outlet";
+      }
+      if (bdg) {
+        bdg.textContent = mode === "delivery" ? "Kurir Instant" : "10–15 Menit";
+      }
     } else if (action === "reset-menu-filter") {
       STORE.state.activeCategory = "Semua";
       STORE.state.priceFilter = "all";
@@ -1456,6 +1767,11 @@
     } else if (action === "track-submit") {
       const input = $("#tracker-code-input");
       if (input) runOrderTrack(input.value);
+    } else if (action === "tracker-quick-code") {
+      const code = el.dataset.code || "";
+      const input = $("#tracker-code-input");
+      if (input) input.value = code;
+      runOrderTrack(code);
     }
   }
 
@@ -1466,7 +1782,6 @@
       if (STORE.getRoute() !== "outlet") {
         STORE.navigate("outlet");
       } else {
-        // Update brand cards & outlet list in-place
         $$(".brand-select-card").forEach(card => {
           const selected = card.dataset.brandId === brandId;
           card.classList.toggle("is-selected", selected);
@@ -1612,6 +1927,12 @@
   }
 
   function handleKeydown(event) {
+    const splashOverlay = $("#splash-overlay");
+    if (splashOverlay && event.key === "Escape") {
+      closeIntroSplash();
+      return;
+    }
+
     const modalRoot = $("#modal-root");
     const modalOpen = modalRoot && modalRoot.children.length > 0;
     if (!modalOpen) return;
@@ -1864,7 +2185,7 @@
   }
 
   /* ============================================================
-     MODALS & TOAST
+     MODALS, MODERN ORDER TRACKER & TOAST
      ============================================================ */
 
   function showSuccessModal(order) {
@@ -1957,21 +2278,36 @@
     if (!modalRoot) return;
     modalLastFocus = document.activeElement;
     const cleanCode = String(initialCode || "").replace(/^#/, "").trim();
+    const recentOrders = (WA.getOrders() || []).slice(0, 4);
 
     modalRoot.innerHTML = `
       <div class="modal-overlay" data-modal-overlay>
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tracker-title">
-          <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
-          <div class="success-icon" style="background:var(--primary-soft);color:var(--primary)">${ICON.icon("package", "w-7 h-7", 2)}</div>
-          <h2 id="tracker-title" class="modal-title">Lacak Status Pesanan</h2>
-          <p class="modal-text">Masukkan kode pesanan (contoh: <strong>DLM-261121-1042</strong>) untuk melihat status terbaru dari admin.</p>
-
-          <div class="tracker-search-row">
-            <input type="text" id="tracker-code-input" class="form-input" placeholder="DLM-XXXXXX-XXXX" value="${U.esc(cleanCode)}" aria-label="Kode pesanan">
-            <button type="button" class="btn-primary btn-sm" data-action="track-submit">Cek</button>
+        <div class="modal-card tracker-modal-card" role="dialog" aria-modal="true" aria-labelledby="tracker-title">
+          <div class="tracker-hero-banner">
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+            <span class="tracker-hero-badge">${ICON.icon("package", "w-3.5 h-3.5", 2.2)} Live Order Radar</span>
+            <h2 id="tracker-title" class="modal-title" style="color:#fff;margin-top:2px">Lacak Status Pesanan</h2>
+            <p style="font-size:12px;color:rgba(255,255,255,0.86);margin-top:4px">Pantau progres racikan pesananmu dari konfirmasi WhatsApp hingga siap diambil di outlet.</p>
           </div>
 
-          <div id="tracker-body"></div>
+          <div class="tracker-modal-body">
+            <div class="tracker-search-row" style="margin-bottom:10px">
+              <input type="text" id="tracker-code-input" class="form-input" placeholder="DLM-XXXXXX-XXXX" value="${U.esc(cleanCode)}" aria-label="Kode pesanan">
+              <button type="button" class="btn-primary btn-sm" data-action="track-submit" style="min-height:46px;padding:0 16px">Lacak</button>
+            </div>
+
+            ${recentOrders.length ? `
+              <div class="tracker-quick-chips no-scrollbar" aria-label="Pesanan terakhir di perangkat ini">
+                ${recentOrders.map(ro => `
+                  <button type="button" class="tracker-code-chip" data-action="tracker-quick-code" data-code="${U.esc(ro.orderId)}">
+                    ${ICON.icon("receipt", "w-3 h-3", 2.2)} #${U.esc(ro.orderId)}
+                  </button>
+                `).join("")}
+              </div>
+            ` : ""}
+
+            <div id="tracker-body"></div>
+          </div>
         </div>
       </div>
     `;
@@ -1988,6 +2324,9 @@
     }
     if (cleanCode) {
       runOrderTrack(cleanCode);
+    } else if (recentOrders[0]) {
+      if (input) input.value = recentOrders[0].orderId;
+      runOrderTrack(recentOrders[0].orderId);
     }
   }
 
@@ -2047,6 +2386,8 @@
       </div>
     `).join("");
 
+    const waAdminLink = `https://wa.me/${U.normalizePhone(CFG.adminWhatsApp)}?text=${encodeURIComponent(`Halo Admin Dibeliin, saya ingin menanyakan status pesanan #${data.order_code} (${data.brand_name} - ${data.outlet_name}).`)}`;
+
     container.innerHTML = `
       <div class="tracker-result">
         <div class="tracker-head">
@@ -2055,19 +2396,32 @@
         </div>
 
         ${data.status !== "cancelled" ? `
-          <div class="tracker-steps" aria-label="Tahap pesanan">
-            <div class="tracker-step ${meta.step >= 1 ? (meta.step > 1 ? "is-done" : "is-active") : ""}">1. Konfirmasi WA</div>
-            <div class="tracker-step ${meta.step >= 2 ? (meta.step > 2 ? "is-done" : "is-active") : ""}">2. Diproses Outlet</div>
-            <div class="tracker-step ${meta.step >= 3 ? "is-done" : ""}">3. Selesai</div>
+          <div class="tracker-timeline" aria-label="Tahap pesanan">
+            <div class="tracker-tl-item ${meta.step >= 1 ? (meta.step > 1 ? "is-done" : "is-active") : ""}">
+              <span class="tracker-tl-dot">${meta.step > 1 ? "✓" : "1"}</span>
+              <div><strong>Konfirmasi &amp; Pembayaran WA</strong><div style="font-size:11px;opacity:0.85">Pesanan diterima admin via WhatsApp</div></div>
+            </div>
+            <div class="tracker-tl-item ${meta.step >= 2 ? (meta.step > 2 ? "is-done" : "is-active") : ""}">
+              <span class="tracker-tl-dot">${meta.step > 2 ? "✓" : "2"}</span>
+              <div><strong>Diracik Barista di Outlet</strong><div style="font-size:11px;opacity:0.85">${U.esc(data.outlet_name)}</div></div>
+            </div>
+            <div class="tracker-tl-item ${meta.step >= 3 ? "is-done" : ""}">
+              <span class="tracker-tl-dot">${meta.step >= 3 ? "✓" : "3"}</span>
+              <div><strong>Pesanan Siap / Selesai</strong><div style="font-size:11px;opacity:0.85">${data.order_mode === "delivery" ? "Dikirim kurir ke alamatmu" : "Siap diambil di pickup counter"}</div></div>
+            </div>
           </div>
         ` : ""}
 
         <div class="success-row"><span>Pemesan</span><strong>${U.esc(data.customer_name || "-")}</strong></div>
         <div class="success-row"><span>Outlet</span><strong>${U.esc(data.brand_name)} • ${U.esc(data.outlet_name)}</strong></div>
-        <div class="success-row"><span>Metode</span><strong>${data.order_mode === "delivery" ? "Kirim Driver" : "Ambil Sendiri"}</strong></div>
+        <div class="success-row"><span>Metode</span><strong>${data.order_mode === "delivery" ? "Kirim Driver" : "Ambil Sendiri (Pickup)"}</strong></div>
         ${itemsHtml ? `<div style="margin:8px 0;padding-top:8px;border-top:1px dashed var(--border)">${itemsHtml}</div>` : ""}
-        <div class="success-row" style="padding-top:6px;border-top:1px solid var(--border)"><span>Total</span><strong>${U.rp(data.final_paid_total)}</strong></div>
-        ${data.admin_notes ? `<p style="margin-top:8px;padding:8px;border-radius:8px;background:#fff;border:1px solid var(--border);font-size:12px"><strong>Catatan Admin:</strong> ${U.esc(data.admin_notes)}</p>` : ""}
+        <div class="success-row" style="padding-top:6px;border-top:1px solid var(--border)"><span>Total Pembayaran</span><strong>${U.rp(data.final_paid_total)}</strong></div>
+        ${data.admin_notes ? `<p style="margin-top:8px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-size:12px"><strong>Catatan Admin:</strong> ${U.esc(data.admin_notes)}</p>` : ""}
+
+        <a href="${U.esc(waAdminLink)}" target="_blank" rel="noopener" class="btn-wa btn-full" style="margin-top:12px;min-height:42px;font-size:12.5px;text-decoration:none">
+          ${ICON.brand("whatsapp", "w-4 h-4")} Tanya Admin via WhatsApp
+        </a>
       </div>
     `;
   }
@@ -2100,7 +2454,8 @@
     toast,
     renderRoute,
     renderMenuGrid,
-    renderOutletList
+    renderOutletList,
+    openIntroSplash
   };
 
   document.addEventListener("DOMContentLoaded", init);
