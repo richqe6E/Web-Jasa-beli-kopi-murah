@@ -49,6 +49,17 @@
     document.addEventListener("input", handleInput);
     document.addEventListener("change", handleChange);
     document.addEventListener("keydown", handleKeydown);
+
+    if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.syncCatalog === "function") {
+      window.DLM_SUPABASE.syncCatalog().then(res => {
+        if (res && res.ok) {
+          const r = STORE.getRoute();
+          if (r === "brand" || r === "outlet" || r === "menu") {
+            renderRoute();
+          }
+        }
+      });
+    }
   }
 
   function handleScroll() {
@@ -157,10 +168,16 @@
           ${step === 2 && outlet ? `<span class="header-subtitle">${U.esc(outlet.name)}</span>` : ""}
         </div>
       </div>
-      <button type="button" class="cart-btn" data-action="go-cart" aria-label="Buka keranjang">
-        ${ICON.icon("shopping-bag", "w-5 h-5", 2)}
-        <span class="cart-badge is-hidden" id="cart-badge">0</span>
-      </button>
+      <div class="header-actions">
+        <button type="button" class="track-btn" data-action="open-tracker" aria-label="Lacak status pesanan">
+          ${ICON.icon("package", "w-4 h-4", 2)}
+          <span>Cek Order</span>
+        </button>
+        <button type="button" class="cart-btn" data-action="go-cart" aria-label="Buka keranjang">
+          ${ICON.icon("shopping-bag", "w-5 h-5", 2)}
+          <span class="cart-badge is-hidden" id="cart-badge">0</span>
+        </button>
+      </div>
     `;
   }
 
@@ -354,8 +371,16 @@
 
       <footer class="app-footer reveal">
         <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
-        <p>Layanan order minuman & makanan • ${CFG.city}</p>
+        <p>Layanan order minuman & makanan • ${CFG.city}, ${CFG.region}</p>
         <p>Harga sudah termasuk biaya jasa. Pembayaran dikonfirmasi admin via WhatsApp.</p>
+        <div class="footer-links">
+          <button type="button" class="footer-link" data-action="open-tracker">
+            ${ICON.icon("package", "w-3.5 h-3.5", 2)} Lacak Pesanan
+          </button>
+          <a href="admin.html" class="footer-link">
+            ${ICON.icon("layout-dashboard", "w-3.5 h-3.5", 2)} Panel Admin
+          </a>
+        </div>
       </footer>
     `;
   }
@@ -368,6 +393,7 @@
   }
 
   function brandCard(brand) {
+    const outletCount = STORE.getBrandOutlets(brand.id).length;
     return `
       <button type="button" class="brand-card" data-brand-id="${U.esc(brand.id)}" style="--brand:${brand.accent};--brand-soft:${brand.accentSoft};--brand-deep:${brand.accentDeep}">
         <span class="sr-only">Pilih brand: </span>
@@ -382,7 +408,7 @@
           <span class="brand-tagline">${U.esc(brand.tagline)}</span>
         </span>
         <span class="brand-card-foot">
-          <span class="brand-menu-count">${brand.items.length} menu</span>
+          <span class="brand-menu-count">${outletCount} outlet • ${brand.items.length} menu</span>
           <span class="brand-cta">Pilih ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}</span>
         </span>
       </button>
@@ -688,6 +714,7 @@
 
   function productCard(brand, item) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
+    const savingAmount = Math.max(0, item.priceOriginal - item.priceDiscount);
     return `
       <button type="button" class="product-card reveal" data-item-id="${U.esc(item.id)}">
         <span class="sr-only">Tambah ke keranjang: </span>
@@ -704,6 +731,7 @@
           <span class="product-category">${U.esc(item.category)}</span>
           <span class="product-name">${U.esc(item.name)}</span>
           <span class="product-desc">${U.esc(item.description)}</span>
+          ${savingAmount > 0 ? `<span class="product-save-chip">Hemat ${U.rp(savingAmount)}</span>` : ""}
           <span class="product-price-row">
             <span class="product-price"><strong>${U.rp(item.priceDiscount)}</strong><s>${U.rp(item.priceOriginal)}</s></span>
             <span class="product-rating">${ICON.icon("star", "w-3 h-3", 2.4)} ${U.esc(item.rating)}</span>
@@ -1054,6 +1082,12 @@
       }
     } else if (action === "order-again") {
       orderAgain();
+    } else if (action === "open-tracker") {
+      const code = el.dataset.code || (lastSuccess && lastSuccess.orderId) || (WA.getLastOrder() && WA.getLastOrder().orderId) || "";
+      showTrackerModal(code);
+    } else if (action === "track-submit") {
+      const input = $("#tracker-code-input");
+      if (input) runOrderTrack(input.value);
     }
   }
 
@@ -1341,6 +1375,38 @@
     WA.saveOrder(order);
     lastSuccess = order;
     CART.clear();
+
+    if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.submitCustomerOrder === "function") {
+      window.DLM_SUPABASE.submitCustomerOrder({
+        order_code: orderId,
+        status: "pending_wa",
+        brand_id: brand.id,
+        brand_name: brand.name,
+        outlet_id: outlet.id,
+        outlet_name: outlet.name,
+        outlet_area: outlet.area,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        order_mode: STORE.state.orderMode,
+        pickup_time: customer.pickupTime,
+        delivery_address: customer.address,
+        customer_notes: customer.notes,
+        wa_message: message,
+        items: summary.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category || "",
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          unit_original_price: item.unitOriginalPrice,
+          selections: item.selections || [],
+          notes: item.notes || ""
+        }))
+      }).catch(() => {
+        /* fallback tersimpan di localStorage */
+      });
+    }
+
     showSuccessModal(order);
     STORE.navigate("brand", true);
     renderRoute();
@@ -1399,6 +1465,9 @@
           <button type="button" class="btn-wa btn-full" data-action="open-wa">
             ${ICON.brand("whatsapp", "w-4 h-4")} Buka WhatsApp
           </button>
+          <button type="button" class="btn-soft btn-full" data-action="open-tracker" data-code="${U.esc(order.orderId)}">
+            ${ICON.icon("package", "w-4 h-4", 2)} Lacak Status Pesanan
+          </button>
           <button type="button" class="btn-soft btn-full" data-action="copy-message">
             ${ICON.icon("copy", "w-4 h-4", 2)} Salin Pesan
           </button>
@@ -1452,6 +1521,133 @@
       const mainEl = $("#app-main");
       if (mainEl) mainEl.focus({ preventScroll: true });
     }
+  }
+
+  function statusMeta(status) {
+    if (status === "completed") return { label: "Selesai", cls: "is-completed", step: 3 };
+    if (status === "processing") return { label: "Diproses di Outlet", cls: "is-processing", step: 2 };
+    if (status === "cancelled") return { label: "Dibatalkan", cls: "is-cancelled", step: 0 };
+    return { label: "Menunggu Konfirmasi WA", cls: "is-pending_wa", step: 1 };
+  }
+
+  function showTrackerModal(initialCode) {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const cleanCode = String(initialCode || "").replace(/^#/, "").trim();
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" data-modal-overlay>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tracker-title">
+          <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+          <div class="success-icon" style="background:var(--primary-soft);color:var(--primary)">${ICON.icon("package", "w-7 h-7", 2)}</div>
+          <h2 id="tracker-title" class="modal-title">Lacak Status Pesanan</h2>
+          <p class="modal-text">Masukkan kode pesanan (contoh: <strong>DLM-261121-1042</strong>) untuk melihat status terbaru dari admin.</p>
+
+          <div class="tracker-search-row">
+            <input type="text" id="tracker-code-input" class="form-input" placeholder="DLM-XXXXXX-XXXX" value="${U.esc(cleanCode)}" aria-label="Kode pesanan">
+            <button type="button" class="btn-primary btn-sm" data-action="track-submit">Cek</button>
+          </div>
+
+          <div id="tracker-body"></div>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+    const input = $("#tracker-code-input");
+    if (input) {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          runOrderTrack(input.value);
+        }
+      });
+      setTimeout(() => input.focus({ preventScroll: true }), 80);
+    }
+    if (cleanCode) {
+      runOrderTrack(cleanCode);
+    }
+  }
+
+  function runOrderTrack(rawCode) {
+    const body = $("#tracker-body");
+    if (!body) return;
+    const code = String(rawCode || "").replace(/^#/, "").trim().toUpperCase();
+    if (!code) {
+      body.innerHTML = `<p class="form-error" style="display:block">Masukkan kode pesanan terlebih dahulu.</p>`;
+      return;
+    }
+
+    body.innerHTML = `<div class="tracker-result"><p style="text-align:center;color:var(--muted)">Mengecek status pesanan <strong>#${U.esc(code)}</strong>...</p></div>`;
+
+    if (!window.DLM_SUPABASE || typeof window.DLM_SUPABASE.trackOrder !== "function") {
+      body.innerHTML = `<div class="tracker-result"><p>Koneksi pelacakan belum tersedia.</p></div>`;
+      return;
+    }
+
+    window.DLM_SUPABASE.trackOrder(code).then(data => {
+      if (!data || !data.order_code) {
+        const localMatch = WA.getOrders().find(o => String(o.orderId || "").toUpperCase() === code);
+        if (localMatch) {
+          renderTrackerResult(body, {
+            order_code: localMatch.orderId,
+            status: "pending_wa",
+            brand_name: localMatch.brandName,
+            outlet_name: localMatch.outletName,
+            customer_name: STORE.state.customer.name || "Pelanggan",
+            order_mode: localMatch.mode || "pickup",
+            items_count: localMatch.itemsCount,
+            final_paid_total: localMatch.total,
+            customer_savings: 0,
+            items: (localMatch.items || []).map(it => ({
+              item_name: it.name,
+              quantity: it.quantity,
+              line_total_selling: it.unitPrice * it.quantity
+            }))
+          });
+          return;
+        }
+        body.innerHTML = `<div class="tracker-result"><p style="color:var(--danger);font-weight:700">Pesanan #${U.esc(code)} tidak ditemukan.</p><p style="font-size:12px;color:var(--muted);margin-top:4px">Pastikan kode sesuai dengan yang tertera di pesan WhatsApp Anda.</p></div>`;
+        return;
+      }
+      renderTrackerResult(body, data);
+    }).catch(() => {
+      body.innerHTML = `<div class="tracker-result"><p style="color:var(--danger)">Gagal memuat status pesanan. Periksa koneksi internet Anda.</p></div>`;
+    });
+  }
+
+  function renderTrackerResult(container, data) {
+    const meta = statusMeta(data.status);
+    const itemsHtml = (data.items || []).map(it => `
+      <div class="success-row">
+        <span>${it.quantity}x ${U.esc(it.item_name)}</span>
+        <strong>${U.rp(it.line_total_selling)}</strong>
+      </div>
+    `).join("");
+
+    container.innerHTML = `
+      <div class="tracker-result">
+        <div class="tracker-head">
+          <span class="tracker-code">#${U.esc(data.order_code)}</span>
+          <span class="status-pill ${meta.cls}">${U.esc(meta.label)}</span>
+        </div>
+
+        ${data.status !== "cancelled" ? `
+          <div class="tracker-steps" aria-label="Tahap pesanan">
+            <div class="tracker-step ${meta.step >= 1 ? (meta.step > 1 ? "is-done" : "is-active") : ""}">1. Konfirmasi WA</div>
+            <div class="tracker-step ${meta.step >= 2 ? (meta.step > 2 ? "is-done" : "is-active") : ""}">2. Diproses Outlet</div>
+            <div class="tracker-step ${meta.step >= 3 ? "is-done" : ""}">3. Selesai</div>
+          </div>
+        ` : ""}
+
+        <div class="success-row"><span>Pemesan</span><strong>${U.esc(data.customer_name || "-")}</strong></div>
+        <div class="success-row"><span>Outlet</span><strong>${U.esc(data.brand_name)} • ${U.esc(data.outlet_name)}</strong></div>
+        <div class="success-row"><span>Metode</span><strong>${data.order_mode === "delivery" ? "Kirim Driver" : "Ambil Sendiri"}</strong></div>
+        ${itemsHtml ? `<div style="margin:8px 0;padding-top:8px;border-top:1px dashed var(--border)">${itemsHtml}</div>` : ""}
+        <div class="success-row" style="padding-top:6px;border-top:1px solid var(--border)"><span>Total</span><strong>${U.rp(data.final_paid_total)}</strong></div>
+        ${data.admin_notes ? `<p style="margin-top:8px;padding:8px;border-radius:8px;background:#fff;border:1px solid var(--border);font-size:12px"><strong>Catatan Admin:</strong> ${U.esc(data.admin_notes)}</p>` : ""}
+      </div>
+    `;
   }
 
   function toast(message, type) {
