@@ -64,8 +64,10 @@
   --pad: 16px;
   --safe-b: env(safe-area-inset-bottom, 0px);
 
-  /* Typography */
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+  /* Typography (Outfit Heading + DM Sans Body + JetBrains Mono Numbers) */
+  --font-heading: "Outfit", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, monospace;
@@ -3155,6 +3157,149 @@ body.modal-open {
   color: var(--body);
   font-size: 11.5px;
   font-weight: 700;
+}
+
+/* ============================================================
+   OUTFIT HEADINGS + WELCOME VECTOR DELIGHT + LINEAL COLOR ICONS
+   ============================================================ */
+h1,
+h2,
+h3,
+.header-title,
+.hero-title,
+.section-title,
+.brand-name,
+.product-name,
+.sheet-title,
+.modal-title {
+  font-family: var(--font-heading);
+}
+
+.hero-card.is-delight {
+  background: linear-gradient(155deg, #ffffff 10%, #eaf3ff 100%);
+  border-color: var(--primary-line);
+}
+
+.hero-vector-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 14px 4px;
+  background: radial-gradient(circle at 50% 45%, rgba(11, 107, 203, 0.1) 0%, transparent 72%);
+}
+
+.hero-vector-art {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  border-radius: 18px;
+  animation: float-gentle 5.5s ease-in-out infinite;
+}
+
+.hero-card.is-delight .hero-content {
+  margin-top: 4px;
+  padding: 6px 18px 18px;
+}
+
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.step-icon.is-art,
+.trust-icon.is-art {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.trust-icon.is-art {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 5px;
+}
+
+.step-icon.is-art img,
+.trust-icon.is-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.28s var(--ease);
+}
+
+.step-item:hover .step-icon.is-art img,
+.trust-item:hover .trust-icon.is-art img {
+  transform: translateY(-2px) scale(1.06);
+}
+
+/* Closed outlet status */
+.outlet-card.is-closed {
+  opacity: 0.68;
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.closed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+/* Savings Delight Celebration Banner */
+.savings-delight-banner {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  color: #065f46;
+}
+
+.savings-delight-banner img {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.savings-delight-banner strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #047857;
+}
+
+.savings-delight-banner span {
+  font-size: 12px;
+  color: #065f46;
+}
+
+.last-order-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 /* ------------------------------------------------------------

@@ -25,7 +25,8 @@
   --danger: #dc2626;
   --danger-soft: #fef2f2;
   --wa: #16a34a;
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --r-sm: 10px;
   --r-md: 14px;
@@ -69,6 +70,10 @@ button {
 
 h1, h2, h3, h4, p {
   margin: 0;
+}
+
+h1, h2, h3, .auth-title, .panel-title {
+  font-family: var(--font-heading);
 }
 
 a {
@@ -706,4 +711,62 @@ a {
 
 .admin-toast.is-error {
   background: #991b1b;
+}
+
+/* Image compression feedback & live profit preview */
+.upload-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-mute);
+}
+
+.upload-preview-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.compress-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profit-preview-box {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--primary-line);
+  background: linear-gradient(145deg, #f8fbff, #eaf2fb);
+}
+
+.profit-preview-item small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.profit-preview-item strong {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
 }
