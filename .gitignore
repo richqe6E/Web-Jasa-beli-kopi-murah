@@ -1,0 +1,29 @@
+# Dependencies & build output
+node_modules/
+dist/
+build/
+.vercel/
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+
+# OS & editor
+.DS_Store
+Thumbs.db
+__pycache__/
+.vscode/
+.idea/
+
+# Local agent skills & reference scratch files (not needed in deployment)
+.agents/
+Context7.md.docx
+SKILL.md
+SKILL (1).md
+SKILL (2).md
+SKILL (3).md
+SKILL (4).md
+glass.html
+macos_liquid_glass_landing_preview (1).html
+link_repo_logo&icon.md

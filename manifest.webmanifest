@@ -1,0 +1,20 @@
+{
+  "name": "Dibeliin Lebih Murah",
+  "short_name": "Dibeliin",
+  "description": "Jasa order minuman & makanan dari Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa. Harga lebih ramah, pesanan rapi lewat WhatsApp.",
+  "lang": "id",
+  "start_url": "./index.html#/brand",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f8fe",
+  "theme_color": "#0b6bcb",
+  "icons": [
+    {
+      "src": "src/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
