@@ -68,10 +68,14 @@
 
     lines.push("*RINGKASAN*");
     lines.push(`Subtotal: ${U.rp(cartSummary.subtotal)}`);
+    if (cartSummary.orderServiceFee > 0) {
+      lines.push(`Biaya jasa order: ${U.rp(cartSummary.orderServiceFee)}`);
+    } else {
+      lines.push("Harga sudah termasuk biaya jasa.");
+    }
     if (cartSummary.totalSavings > 0) {
       lines.push(`Hemat promo: -${U.rp(cartSummary.totalSavings)}`);
     }
-    lines.push("Harga sudah termasuk biaya jasa.");
     lines.push(`*Total: ${U.rp(cartSummary.grandTotal)}*`);
     lines.push("");
 

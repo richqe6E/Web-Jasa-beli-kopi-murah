@@ -283,24 +283,27 @@
     const lastOrder = WA.getLastOrder();
 
     main.innerHTML = `
-      <section class="hero-card reveal">
-        <div class="hero-media">
-          <div class="media-fallback">${ICON.icon("coffee", "w-14 h-14", 1.4)}</div>
-          ${U.imageTag("src/assets/products/hero-coffee.webp", "Suasana kedai kopi", "hero-img", true)}
-          <div class="hero-shade"></div>
+      <section class="hero-card is-delight reveal">
+        <div class="hero-vector-stage">
+          <img src="src/assets/vectors/coffee-delight-hero.svg" alt="Ilustrasi es kopi susu hemat di Dibeliin Lebih Murah" class="hero-vector-art" fetchpriority="high" decoding="async" />
         </div>
         <div class="hero-content">
           <span class="hero-eyebrow">${ICON.icon("map-pin", "w-3.5 h-3.5", 2.2)} ${CFG.city}, ${CFG.region}</span>
-          <h2 class="hero-title">Minuman favorit,<br><span>harga lebih ramah.</span></h2>
-          <p class="hero-text">Pesan dari Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa. Harga sudah termasuk biaya jasa.</p>
-          <div class="hero-brand-row">
-            ${window.DLM_BRANDS.map(brand => `<span class="hero-brand-dot" style="--dot:${brand.accent}" title="${U.esc(brand.name)}">${U.esc(brand.monogram)}</span>`).join("")}
-            <span class="hero-brand-note">4 brand pilihan</span>
+          <h2 class="hero-title">Ngopi brand favorit,<br><span>bayar lebih hemat.</span></h2>
+          <p class="hero-text">Pilih dari Tomoro, Fore, Kopi Kenangan, hingga Janji Jiwa. Custom varian sesukamu, struk rapi langsung meluncur ke WhatsApp admin.</p>
+          <div class="hero-cta-row">
+            <div class="hero-brand-row" style="margin-top:0">
+              ${window.DLM_BRANDS.map(brand => `<span class="hero-brand-dot" style="--dot:${brand.accent}" title="${U.esc(brand.name)}">${U.esc(brand.monogram)}</span>`).join("")}
+              <span class="hero-brand-note">${window.DLM_BRANDS.length} brand aktif</span>
+            </div>
+            <button type="button" class="btn-primary btn-sm" data-action="scroll-brands">
+              Mulai Pesan ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
+            </button>
           </div>
         </div>
       </section>
 
-      <section class="section reveal">
+      <section class="section reveal" id="brand-section">
         <div class="section-head">
           <div>
             <p class="eyebrow">Mulai dari sini</p>
@@ -337,46 +340,49 @@
         </div>
         <div class="steps-list">
           <div class="step-item">
-            <span class="step-icon">${ICON.icon("store", "w-5 h-5", 2)}</span>
-            <div><strong>Pilih brand & outlet</strong><p>Tentukan cabang Samarinda yang paling dekat.</p></div>
+            <span class="step-icon is-art"><img src="src/assets/icons/lineal-color/store-pin.svg" alt="" loading="lazy" decoding="async" /></span>
+            <div><strong>Pilih brand &amp; outlet terdekat</strong><p>Tentukan cabang ${U.esc(CFG.city)} favoritmu yang sedang buka.</p></div>
           </div>
           <div class="step-item">
-            <span class="step-icon">${ICON.icon("cup-soda", "w-5 h-5", 2)}</span>
-            <div><strong>Pilih menu & custom</strong><p>Atur ukuran, gula, es, susu, dan topping.</p></div>
+            <span class="step-icon is-art"><img src="src/assets/icons/lineal-color/iced-coffee.svg" alt="" loading="lazy" decoding="async" /></span>
+            <div><strong>Pilih menu &amp; atur varian</strong><p>Bebas atur suhu, ukuran cup, gula, es, susu, hingga topping.</p></div>
           </div>
           <div class="step-item">
-            <span class="step-icon">${ICON.brand("whatsapp", "w-5 h-5")}</span>
-            <div><strong>Checkout via WhatsApp</strong><p>Pesanan dikirim rapi, admin konfirmasi pembayaran.</p></div>
+            <span class="step-icon is-art"><img src="src/assets/icons/lineal-color/fast-chat.svg" alt="" loading="lazy" decoding="async" /></span>
+            <div><strong>Checkout rapi via WhatsApp</strong><p>Rincian pesanan otomatis tersusun &amp; bisa dilacak real-time.</p></div>
           </div>
         </div>
       </section>
 
       <section class="trust-row reveal">
         <div class="trust-item">
-          <span class="trust-icon">${ICON.icon("badge-percent", "w-5 h-5", 2)}</span>
-          <strong>Harga lebih murah</strong>
-          <small>Hemat sampai 50%</small>
+          <span class="trust-icon is-art"><img src="src/assets/icons/lineal-color/discount-tag.svg" alt="" loading="lazy" decoding="async" /></span>
+          <strong>Lebih hemat</strong>
+          <small>Diskon s/d 50%</small>
         </div>
         <div class="trust-item">
-          <span class="trust-icon">${ICON.icon("timer", "w-5 h-5", 2)}</span>
+          <span class="trust-icon is-art"><img src="src/assets/icons/lineal-color/fast-chat.svg" alt="" loading="lazy" decoding="async" /></span>
           <strong>Respon cepat</strong>
-          <small>Admin bantu via WA</small>
+          <small>Admin via WA</small>
         </div>
         <div class="trust-item">
-          <span class="trust-icon">${ICON.icon("shield-check", "w-5 h-5", 2)}</span>
-          <strong>Pesanan rapi</strong>
-          <small>Rincian jelas</small>
+          <span class="trust-icon is-art"><img src="src/assets/icons/lineal-color/store-pin.svg" alt="" loading="lazy" decoding="async" /></span>
+          <strong>Outlet lengkap</strong>
+          <small>Area ${U.esc(CFG.city)}</small>
         </div>
       </section>
 
       <footer class="app-footer reveal">
         <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
-        <p>Layanan order minuman & makanan • ${CFG.city}, ${CFG.region}</p>
-        <p>Harga sudah termasuk biaya jasa. Pembayaran dikonfirmasi admin via WhatsApp.</p>
-        <div class="footer-links">
+        <p>Layanan order minuman &amp; makanan • ${CFG.city}, ${CFG.region}</p>
+        <p>${CFG.serviceFeeIncluded ? "Harga sudah termasuk biaya jasa." : "Biaya jasa transparan ditampilkan di ringkasan."} Pembayaran dikonfirmasi admin via WhatsApp.</p>
+        <div class="footer-links" style="flex-wrap:wrap">
           <button type="button" class="footer-link" data-action="open-tracker">
             ${ICON.icon("package", "w-3.5 h-3.5", 2)} Lacak Pesanan
           </button>
+          <a href="lisensi.html" class="footer-link">
+            ${ICON.icon("shield-check", "w-3.5 h-3.5", 2)} Lisensi Aset
+          </a>
           <a href="admin.html" class="footer-link">
             ${ICON.icon("layout-dashboard", "w-3.5 h-3.5", 2)} Panel Admin
           </a>
@@ -450,7 +456,10 @@
             <strong>${U.esc(order.brandName)} • ${U.esc(order.outletName)}</strong>
             <span>${order.itemsCount} item • ${U.rp(order.total)}</span>
           </div>
-          <button type="button" class="btn-soft btn-sm" data-action="order-again">Pesan lagi</button>
+          <div class="last-order-actions">
+            <button type="button" class="btn-soft btn-sm" data-action="open-tracker" data-code="${U.esc(order.orderId)}">Cek Status</button>
+            <button type="button" class="btn-primary btn-sm" data-action="order-again">Pesan lagi</button>
+          </div>
         </div>
       </section>
     `;
@@ -542,14 +551,18 @@
       return;
     }
 
-    listEl.innerHTML = outlets.map(outlet => `
-      <button type="button" class="outlet-card" data-outlet-id="${U.esc(outlet.id)}">
-        <span class="sr-only">Pilih outlet: </span>
+    listEl.innerHTML = outlets.map(outlet => {
+      const isOpen = outlet.isOpen !== false;
+      return `
+      <button type="button" class="outlet-card ${isOpen ? "" : "is-closed"}" data-outlet-id="${U.esc(outlet.id)}" data-outlet-open="${isOpen ? "true" : "false"}" aria-disabled="${isOpen ? "false" : "true"}">
+        <span class="sr-only">${isOpen ? "Pilih outlet: " : "Outlet sedang tutup: "}</span>
         <span class="outlet-icon">${ICON.icon("store", "w-5 h-5", 2)}</span>
         <span class="outlet-copy">
           <span class="outlet-title-row">
             <span class="outlet-name">${U.esc(outlet.name)}</span>
-            <span class="open-badge">${ICON.icon("circle-check", "w-3 h-3", 2.4)} Buka</span>
+            ${isOpen
+              ? `<span class="open-badge">${ICON.icon("circle-check", "w-3 h-3", 2.4)} Buka</span>`
+              : `<span class="closed-badge">${ICON.icon("circle-alert", "w-3 h-3", 2.4)} Tutup</span>`}
           </span>
           <span class="outlet-address">${U.esc(outlet.address)}</span>
           <span class="outlet-meta">
@@ -560,7 +573,8 @@
         </span>
         <span class="outlet-arrow">${ICON.icon("chevron-right", "w-4 h-4", 2.4)}</span>
       </button>
-    `).join("");
+    `;
+    }).join("");
   }
 
   /* ============================================================
@@ -804,10 +818,21 @@
         </button>
       </section>
 
+      ${summary.totalSavings > 0 ? `
+        <div class="savings-delight-banner reveal">
+          <img src="src/assets/icons/lineal-color/discount-tag.svg" alt="" loading="lazy" decoding="async" />
+          <div>
+            <strong>Asyik! Kamu hemat ${U.rp(summary.totalSavings)}</strong>
+            <span>Lebih murah dibanding beli harga normal langsung di outlet.</span>
+          </div>
+        </div>
+      ` : ""}
+
       <section class="summary-card reveal">
         <div class="summary-row"><span>Subtotal</span><strong>${U.rp(summary.subtotal)}</strong></div>
+        ${summary.orderServiceFee > 0 ? `<div class="summary-row"><span>Biaya jasa order</span><strong>${U.rp(summary.orderServiceFee)}</strong></div>` : ""}
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Hemat promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
-        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} Harga sudah termasuk biaya jasa admin.</div>
+        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Biaya jasa order sudah termasuk di total akhir." : "Harga sudah termasuk biaya jasa admin."}</div>
         <div class="summary-total"><span>Total</span><strong>${U.rp(summary.grandTotal)}</strong></div>
       </section>
 
@@ -939,8 +964,9 @@
           ${summary.items.map(item => `<div class="checkout-line"><span>${item.quantity}x ${U.esc(item.name)}</span><strong>${U.rp(item.unitPrice * item.quantity)}</strong></div>`).join("")}
         </div>
         <div class="summary-row"><span>Subtotal</span><strong>${U.rp(summary.subtotal)}</strong></div>
+        ${summary.orderServiceFee > 0 ? `<div class="summary-row"><span>Biaya jasa order</span><strong>${U.rp(summary.orderServiceFee)}</strong></div>` : ""}
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Hemat promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
-        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} Harga sudah termasuk biaya jasa admin.</div>
+        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Biaya jasa order sudah termasuk di total akhir." : "Harga sudah termasuk biaya jasa admin."}</div>
         <div class="summary-total"><span>Total</span><strong>${U.rp(summary.grandTotal)}</strong></div>
       </section>
 
@@ -1005,6 +1031,10 @@
     const outletEl = event.target.closest("[data-outlet-id]");
     if (outletEl) {
       event.preventDefault();
+      if (outletEl.dataset.outletOpen === "false") {
+        toast("Outlet ini sedang tutup. Silakan pilih cabang lain yang buka.", "error");
+        return;
+      }
       STORE.setOutlet(outletEl.dataset.outletId);
       STORE.navigate("menu");
       return;
@@ -1088,6 +1118,9 @@
     } else if (action === "track-submit") {
       const input = $("#tracker-code-input");
       if (input) runOrderTrack(input.value);
+    } else if (action === "scroll-brands") {
+      const sec = $("#brand-section");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 

@@ -133,6 +133,10 @@
             optionGroups: Array.isArray(it.option_groups) ? it.option_groups : []
           }));
 
+        const baseCats = Array.isArray(b.categories) && b.categories.length ? b.categories : ["Semua"];
+        const itemCats = items.map(it => it.category).filter(Boolean);
+        const mergedCats = ["Semua"].concat(Array.from(new Set(baseCats.concat(itemCats).filter(c => c !== "Semua"))));
+
         return {
           id: b.id,
           name: b.name,
@@ -147,7 +151,7 @@
           accentDeep: b.accent_deep || "#084F99",
           rating: b.rating || "4.9",
           totalSold: b.total_sold || "10k+",
-          categories: Array.isArray(b.categories) && b.categories.length ? b.categories : ["Semua"],
+          categories: mergedCats,
           items
         };
       });

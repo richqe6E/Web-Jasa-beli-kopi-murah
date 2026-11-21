@@ -260,7 +260,10 @@
           </div>
           <div class="admin-header-right">
             <a href="index.html" class="btn btn-outline btn-xs">
-              ${ICON.icon("external-link", "w-3.5 h-3.5", 2)} Lihat Web Pelanggan
+              ${ICON.icon("external-link", "w-3.5 h-3.5", 2)} Web Pelanggan
+            </a>
+            <a href="lisensi.html" class="btn btn-outline btn-xs">
+              ${ICON.icon("shield-check", "w-3.5 h-3.5", 2)} Lisensi
             </a>
             <button type="button" class="btn btn-soft btn-xs" data-action="refresh-data">
               ${ICON.icon("refresh-cw", "w-3.5 h-3.5", 2)} Sinkronisasi
@@ -639,6 +642,7 @@
                       <div style="display:flex;gap:6px;flex-wrap:wrap">
                         ${o.status !== "completed" ? `<button type="button" class="btn btn-success btn-xs" data-action="quick-complete-order" data-id="${o.id}">Selesai</button>` : ""}
                         <button type="button" class="btn btn-soft btn-xs" data-action="edit-order" data-id="${o.id}">Rekonsiliasi</button>
+                        <button type="button" class="btn btn-danger btn-xs" data-action="delete-order" data-id="${o.id}" aria-label="Hapus pesanan #${U.esc(o.order_code)}">Hapus</button>
                       </div>
                     </td>
                   </tr>
@@ -1190,14 +1194,27 @@
               <label class="field-label" for="mf-fee">Porsi Biaya Jasa / Cup (Rp)</label>
               <input type="number" id="mf-fee" class="input mono" value="${Number(it.service_fee_unit)}" min="0" step="500" required>
             </div>
+            <div class="profit-preview-box" id="mf-profit-preview">
+              <div class="profit-preview-item"><small>Diskon Pelanggan</small><strong id="pv-disc">0%</strong></div>
+              <div class="profit-preview-item"><small>Untung Selisih Harga</small><strong id="pv-spread">Rp 0</strong></div>
+              <div class="profit-preview-item"><small>Untung Biaya Jasa</small><strong id="pv-fee">Rp 0</strong></div>
+              <div class="profit-preview-item"><small>Total Laba / Cup</small><strong id="pv-net" style="color:var(--success)">+Rp 0</strong></div>
+            </div>
             <div class="field" style="grid-column:1 / -1">
-              <label class="field-label" for="mf-image">Path / URL Foto Produk</label>
+              <label class="field-label" for="mf-image">Path / URL Foto Produk (Otomatis Kompres WebP max 800px)</label>
               <div style="display:flex;gap:8px">
                 <input type="text" id="mf-image" class="input" value="${U.esc(it.image_url)}" required>
                 <label class="btn btn-soft btn-xs" style="cursor:pointer">
-                  ${ICON.icon("upload", "w-3.5 h-3.5", 2)} Upload Foto
+                  ${ICON.icon("upload", "w-3.5 h-3.5", 2)} Upload &amp; Kompres
                   <input type="file" id="mf-image-file" accept="image/*" style="display:none">
                 </label>
+              </div>
+              <div class="upload-preview-row" id="mf-upload-preview">
+                <img src="${U.esc(it.image_url)}" alt="Preview produk" class="upload-preview-thumb" id="mf-thumb">
+                <div style="font-size:12px;color:var(--body)">
+                  <strong style="display:block">Kompresi Otomatis Aktif</strong>
+                  <span id="mf-compress-status" style="color:var(--muted)">Foto yang diunggah dari HP/PC akan otomatis dikonversi ke WebP ringan sebelum disimpan ke Supabase.</span>
+                </div>
               </div>
             </div>
             <div class="field" style="grid-column:1 / -1">
@@ -1225,6 +1242,121 @@
         </form>
       </div>
     `;
+    updateMenuProfitPreview();
+  }
+
+  function updateMenuProfitPreview() {
+    const origEl = $("#mf-orig");
+    const costEl = $("#mf-cost");
+    const sellEl = $("#mf-sell");
+    const feeEl = $("#mf-fee");
+    if (!origEl || !costEl || !sellEl || !feeEl) return;
+
+    const orig = Number(origEl.value || 0);
+    const cost = Number(costEl.value || 0);
+    const sell = Number(sellEl.value || 0);
+    const fee = Number(feeEl.value || 0);
+    const net = sell - cost;
+    const spread = net - fee;
+    const disc = orig > 0 ? Math.max(0, Math.round(((orig - sell) / orig) * 100)) : 0;
+
+    const pvDisc = $("#pv-disc");
+    const pvSpread = $("#pv-spread");
+    const pvFee = $("#pv-fee");
+    const pvNet = $("#pv-net");
+    if (pvDisc) pvDisc.textContent = `-${disc}% (${U.rp(Math.max(0, orig - sell))})`;
+    if (pvSpread) pvSpread.textContent = U.rp(spread);
+    if (pvFee) pvFee.textContent = U.rp(fee);
+    if (pvNet) {
+      pvNet.textContent = `${net >= 0 ? "+" : ""}${U.rp(net)}`;
+      pvNet.style.color = net >= 0 ? "var(--success)" : "var(--danger)";
+    }
+  }
+
+  function buildDefaultOptionGroups(type) {
+    if (type === "food") {
+      return [
+        {
+          id: "addons",
+          label: "Tambahan",
+          helper: "Bisa lebih dari 1",
+          type: "multiple",
+          required: false,
+          max: 3,
+          options: [
+            { id: "extra-cheese", label: "Extra Keju", price: 4000, note: "" },
+            { id: "extra-butter", label: "Extra Butter", price: 3000, note: "" }
+          ]
+        }
+      ];
+    }
+    return [
+      {
+        id: "temp",
+        label: "Suhu",
+        helper: "Pilih 1",
+        type: "single",
+        required: true,
+        defaultOptionId: "iced",
+        options: [
+          { id: "iced", label: "Iced", price: 0, note: "Dingin" },
+          { id: "hot", label: "Hot", price: 0, note: "Panas" }
+        ]
+      },
+      {
+        id: "size",
+        label: "Ukuran",
+        helper: "Pilih 1",
+        type: "single",
+        required: true,
+        defaultOptionId: "regular",
+        options: [
+          { id: "regular", label: "Regular", price: 0, note: "16 oz" },
+          { id: "large", label: "Large", price: 3500, note: "22 oz" }
+        ]
+      },
+      {
+        id: "sugar",
+        label: "Tingkat Gula",
+        helper: "Pilih 1",
+        type: "single",
+        required: true,
+        defaultOptionId: "normal",
+        options: [
+          { id: "normal", label: "100%", price: 0, note: "Normal" },
+          { id: "less", label: "70%", price: 0, note: "Less sugar" },
+          { id: "half", label: "50%", price: 0, note: "Half sugar" },
+          { id: "none", label: "0%", price: 0, note: "No sugar" }
+        ]
+      },
+      {
+        id: "ice",
+        label: "Porsi Es",
+        helper: "Pilih 1",
+        type: "single",
+        required: true,
+        defaultOptionId: "normal",
+        dependsOn: { groupId: "temp", optionId: "iced" },
+        options: [
+          { id: "normal", label: "Normal", price: 0, note: "Es normal" },
+          { id: "less", label: "Less", price: 0, note: "Sedikit es" },
+          { id: "none", label: "No Ice", price: 0, note: "Tanpa es" }
+        ]
+      },
+      {
+        id: "toppings",
+        label: "Topping",
+        helper: "Bisa lebih dari 1",
+        type: "multiple",
+        required: false,
+        max: 3,
+        options: [
+          { id: "extra-shot", label: "Extra Espresso", price: 5000, note: "" },
+          { id: "grass-jelly", label: "Grass Jelly", price: 4000, note: "" },
+          { id: "cheese-foam", label: "Cheese Foam", price: 6000, note: "" }
+        ]
+      }
+    ];
   }
 
   function openOutletModal(outletId) {
@@ -1322,13 +1454,17 @@
               <input type="text" id="bf-tagline" class="input" value="${U.esc(b.tagline)}" required>
             </div>
             <div class="field" style="grid-column:1 / -1">
-              <label class="field-label" for="bf-logo">Path / URL Logo Brand</label>
+              <label class="field-label" for="bf-logo">Path / URL Logo Brand (SVG utuh / PNG otomatis WebP 512px)</label>
               <div style="display:flex;gap:8px">
                 <input type="text" id="bf-logo" class="input" value="${U.esc(b.logo_url)}">
                 <label class="btn btn-soft btn-xs" style="cursor:pointer">
                   ${ICON.icon("upload", "w-3.5 h-3.5", 2)} Upload Logo
                   <input type="file" id="bf-logo-file" accept="image/*" style="display:none">
                 </label>
+              </div>
+              <div class="upload-preview-row">
+                <img src="${U.esc(b.logo_url || `src/assets/brands/${b.id}.svg`)}" alt="Preview logo" class="upload-preview-thumb" id="bf-thumb">
+                <span id="bf-compress-status" style="font-size:12px;color:var(--muted)">File PNG/JPG akan dikompres ke WebP transparan; SVG dipertahankan sebagai vektor tajam.</span>
               </div>
             </div>
           </div>
@@ -1441,6 +1577,15 @@
       closeAdminModal();
     } else if (action === "edit-order") {
       openReconcileModal(actEl.dataset.id);
+    } else if (action === "delete-order") {
+      if (!confirm("Hapus pesanan ini dari riwayat & laporan keuangan secara permanen?")) return;
+      try {
+        await SB.deleteOrder(actEl.dataset.id);
+        toast("Pesanan dihapus.");
+        await reloadData();
+      } catch (err) {
+        toast("Gagal menghapus pesanan: " + err.message, "error");
+      }
     } else if (action === "quick-complete-order") {
       const ord = (state.dataset.orders || []).find(o => String(o.id) === String(actEl.dataset.id));
       if (!ord) return;
@@ -1511,23 +1656,40 @@
     }
   }
 
+  const debouncedRenderOrders = U.debounce(() => {
+    render();
+    const input = $("#order-search");
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }, 260);
+
+  const debouncedRenderMenus = U.debounce(() => {
+    render();
+    const input = $("#admin-menu-search");
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }, 260);
+
   function handleInput(e) {
-    if (e.target.id === "order-search") {
+    const id = e.target.id;
+    if (id === "order-search") {
       state.orderQuery = e.target.value;
-      render();
-      const input = $("#order-search");
-      if (input) {
-        input.focus();
-        input.setSelectionRange(input.value.length, input.value.length);
-      }
-    } else if (e.target.id === "admin-menu-search") {
+      debouncedRenderOrders();
+    } else if (id === "admin-menu-search") {
       state.menuQuery = e.target.value;
-      render();
-      const input = $("#admin-menu-search");
-      if (input) {
-        input.focus();
-        input.setSelectionRange(input.value.length, input.value.length);
-      }
+      debouncedRenderMenus();
+    } else if (id === "mf-orig" || id === "mf-cost" || id === "mf-sell" || id === "mf-fee") {
+      updateMenuProfitPreview();
+    } else if (id === "mf-image") {
+      const thumb = $("#mf-thumb");
+      if (thumb && e.target.value.trim()) thumb.src = e.target.value.trim();
+    } else if (id === "bf-logo") {
+      const thumb = $("#bf-thumb");
+      if (thumb && e.target.value.trim()) thumb.src = e.target.value.trim();
     }
   }
 
@@ -1558,21 +1720,55 @@
       if (menSel) menSel.innerHTML = menus.map(m => `<option value="${U.esc(m.id)}">${U.esc(m.name)} — ${U.rp(m.price_discount)}</option>`).join("");
     } else if (id === "mf-image-file" && e.target.files && e.target.files[0]) {
       try {
-        toast("Mengunggah foto produk...");
-        const url = await SB.uploadPublicAsset("products", e.target.files[0]);
+        const rawFile = e.target.files[0];
+        const statusEl = $("#mf-compress-status");
+        if (statusEl) statusEl.textContent = "Mengompres gambar ke WebP & mengunggah ke Supabase...";
+        toast("Mengompres & mengunggah foto produk...");
+
+        const comp = window.DLM_COMPRESSOR
+          ? await window.DLM_COMPRESSOR.compress(rawFile, "product")
+          : { file: rawFile, originalSize: rawFile.size, compressedSize: rawFile.size, savedPercent: 0, skipped: true };
+
+        const url = await SB.uploadPublicAsset("products", comp.file);
         const inp = $("#mf-image");
+        const thumb = $("#mf-thumb");
         if (inp) inp.value = url;
-        toast("Foto berhasil diunggah.");
+        if (thumb) thumb.src = url;
+
+        if (statusEl) {
+          if (comp.skipped) {
+            statusEl.innerHTML = `<span class="compress-badge">${U.esc(comp.reason || "Siap pakai")} • ${window.DLM_COMPRESSOR.formatBytes(comp.compressedSize)}</span>`;
+          } else {
+            statusEl.innerHTML = `<span class="compress-badge">Dikompres WebP: ${window.DLM_COMPRESSOR.formatBytes(comp.originalSize)} → ${window.DLM_COMPRESSOR.formatBytes(comp.compressedSize)} (Hemat ${comp.savedPercent}%)</span>`;
+          }
+        }
+        toast(comp.skipped ? "Foto berhasil diunggah." : `Foto dikompres (hemat ${comp.savedPercent}%) & berhasil diunggah!`);
       } catch (err) {
         toast("Gagal upload: " + err.message, "error");
       }
     } else if (id === "bf-logo-file" && e.target.files && e.target.files[0]) {
       try {
-        toast("Mengunggah logo brand...");
-        const url = await SB.uploadPublicAsset("brands", e.target.files[0]);
+        const rawFile = e.target.files[0];
+        const statusEl = $("#bf-compress-status");
+        if (statusEl) statusEl.textContent = "Memproses & mengunggah logo...";
+        toast("Memproses & mengunggah logo brand...");
+
+        const comp = window.DLM_COMPRESSOR
+          ? await window.DLM_COMPRESSOR.compress(rawFile, "logo")
+          : { file: rawFile, originalSize: rawFile.size, compressedSize: rawFile.size, savedPercent: 0, skipped: true };
+
+        const url = await SB.uploadPublicAsset("brands", comp.file);
         const inp = $("#bf-logo");
+        const thumb = $("#bf-thumb");
         if (inp) inp.value = url;
-        toast("Logo berhasil diunggah.");
+        if (thumb) thumb.src = url;
+
+        if (statusEl) {
+          statusEl.innerHTML = comp.skipped
+            ? `<span class="compress-badge">${U.esc(comp.reason || "Dipertahankan utuh")} • ${window.DLM_COMPRESSOR.formatBytes(comp.compressedSize)}</span>`
+            : `<span class="compress-badge">WebP: ${window.DLM_COMPRESSOR.formatBytes(comp.originalSize)} → ${window.DLM_COMPRESSOR.formatBytes(comp.compressedSize)} (Hemat ${comp.savedPercent}%)</span>`;
+        }
+        toast("Logo brand berhasil diunggah.");
       } catch (err) {
         toast("Gagal upload: " + err.message, "error");
       }
@@ -1698,7 +1894,9 @@
           service_fee_unit: Number($("#mf-fee").value),
           is_best_seller: $("#mf-best").checked,
           is_available: $("#mf-avail").checked,
-          option_groups: existingObj ? existingObj.option_groups : [],
+          option_groups: (existingObj && Array.isArray(existingObj.option_groups) && existingObj.option_groups.length)
+            ? existingObj.option_groups
+            : buildDefaultOptionGroups($("#mf-type").value),
           sort_order: existingObj ? existingObj.sort_order : 10,
           updated_at: new Date().toISOString()
         });

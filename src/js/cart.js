@@ -88,6 +88,11 @@
       const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
       const originalTotal = items.reduce((sum, item) => sum + item.lineOriginal, 0);
       const totalSavings = Math.max(0, originalTotal - subtotal);
+      const feeMode = CFG.serviceFeeMode || "included_per_item";
+      const orderServiceFee = (totalItems > 0 && (feeMode === "flat_per_order" || feeMode === "both"))
+        ? Number(CFG.defaultServiceFeePerOrder || 0)
+        : 0;
+      const grandTotal = subtotal + orderServiceFee;
 
       return {
         items,
@@ -95,8 +100,10 @@
         subtotal,
         originalTotal,
         totalSavings,
-        serviceFeeIncluded: true,
-        grandTotal: subtotal
+        serviceFeeMode: feeMode,
+        serviceFeeIncluded: orderServiceFee === 0,
+        orderServiceFee,
+        grandTotal
       };
     }
 
