@@ -1,0 +1,202 @@
+/* ============================================================
+   DIBELIIN LEBIH MURAH - DESIGN SYSTEM & STYLING
+   Palet: Biru Keputihan Profesional (Ice Blue & Frost Glass)
+   Standar: UI/UX Pro Max Mobile First Architecture
+   ============================================================ */
+
+:root {
+  --bg-main: #F0F6FC;
+  --bg-gradient: linear-gradient(180deg, #F0F6FC 0%, #E8F2FD 40%, #F5F9FF 100%);
+  --glass-surface: rgba(255, 255, 255, 0.88);
+  --glass-surface-elevated: rgba(255, 255, 255, 0.96);
+  --glass-border: rgba(226, 232, 240, 0.85);
+  --glass-border-accent: rgba(14, 165, 233, 0.25);
+  --glass-blur: 20px;
+  --primary-blue: #0284C7;
+  --primary-blue-dark: #0369A1;
+  --primary-blue-light: #E0F2FE;
+  --accent-cyan: #0EA5E9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --shadow-sm: 0 2px 8px -2px rgba(2, 132, 199, 0.06);
+  --shadow-md: 0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 8px 10px -6px rgba(2, 132, 199, 0.04);
+  --shadow-lg: 0 20px 35px -10px rgba(2, 132, 199, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Base Body Styles */
+body {
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+/* Ambient Subtle Blue Atmosphere Glow */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 15% 10%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(56, 189, 248, 0.07) 0%, transparent 60%);
+}
+
+/* Mobile Application Shell Frame */
+.app-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  z-index: 10;
+  background: rgba(248, 250, 252, 0.6);
+  box-shadow: 0 0 50px rgba(2, 132, 199, 0.08);
+}
+
+@media (min-width: 640px) {
+  .app-container {
+    border-left: 1px solid rgba(226, 232, 240, 0.8);
+    border-right: 1px solid rgba(226, 232, 240, 0.8);
+  }
+}
+
+/* Frost Glass Card (Biru Keputihan) */
+.frost-glass {
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.25s var(--spring), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.frost-glass-elevated {
+  background: var(--glass-surface-elevated);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border-accent);
+  box-shadow: var(--shadow-lg);
+}
+
+.frost-glass:hover {
+  border-color: rgba(14, 165, 233, 0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Frost Pill Button */
+.frost-pill {
+  background: rgba(241, 245, 249, 0.85);
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.frost-pill:hover {
+  background: #E0F2FE;
+  color: var(--primary-blue);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.frost-pill.active {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.4);
+}
+
+/* Step Views with Animation */
+.step-view {
+  animation: fadeInStep 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInStep {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Product Card Interactions */
+.product-card {
+  transition: transform 0.22s var(--spring), box-shadow 0.22s ease;
+}
+
+.product-card:active {
+  transform: scale(0.98);
+}
+
+/* Dynamic Island Floating Bar (Mobile Bottom) */
+.floating-bottom-island {
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 40;
+  padding: 0 16px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+.island-content {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.5), 0 0 25px rgba(2, 132, 199, 0.3);
+}
+
+/* Bottom Sheet */
+.bottom-sheet-overlay {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.25s ease;
+}
+
+.bottom-sheet-content {
+  background: #FFFFFF;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  box-shadow: 0 -15px 40px rgba(15, 23, 42, 0.18);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Smooth Touch Scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.touch-scroll::-webkit-scrollbar {
+  display: none;
+}
