@@ -1056,13 +1056,7 @@
     setupReveal();
   }
 
-  function brandMediaDecoration(brand, item) {
-    if (brand.id === "fore" && item.isBestSeller) {
-      return `<span class="fore-popular-pill">★ Most Popular</span>`;
-    }
-    if (brand.id === "kenangan") {
-      return `<img src="src/assets/brands/kenangan-official.webp" alt="" class="kenangan-heart-stamp" loading="lazy" />`;
-    }
+  function brandMediaDecoration() {
     return "";
   }
 
@@ -1446,14 +1440,24 @@
         savings: Number(r.customer_savings || 0),
         itemsCount: Number(r.items_count || 0),
         adminNotes: r.admin_notes || "",
-        items: (r.items || []).map(it => ({
-          id: it.menu_item_id || "",
-          name: it.item_name,
-          quantity: Number(it.quantity || 1),
-          unitPrice: Number(it.unit_selling_price || 0),
-          selections: it.selections || [],
-          notes: it.notes || ""
-        }))
+        items: (r.items || []).map(it => {
+          const catalogItem = STORE.getItem(r.brand_id, it.id || it.menu_item_id);
+          const resolvedName = it.name || it.item_name || (catalogItem && catalogItem.name) || "Menu Pesanan";
+          const resolvedQty = Math.max(1, Number(it.quantity || 1));
+          const resolvedUnit = Number(it.unitPrice || it.unit_selling_price || (catalogItem && catalogItem.priceDiscount) || 0);
+          const resolvedOrig = Number(it.unitOriginalPrice || it.unit_original_price || (catalogItem && catalogItem.priceOriginal) || resolvedUnit);
+          return {
+            id: it.id || it.menu_item_id || "",
+            name: resolvedName,
+            item_name: resolvedName,
+            quantity: resolvedQty,
+            unitPrice: resolvedUnit,
+            unitOriginalPrice: resolvedOrig,
+            lineTotal: Number(it.lineTotalSelling || it.line_total_selling || (resolvedUnit * resolvedQty)),
+            selections: Array.isArray(it.selections) ? it.selections : [],
+            notes: it.notes || it.item_notes || ""
+          };
+        })
       };
       orderCodes.push(code);
     });
@@ -1521,14 +1525,27 @@
         ? new Date(ord.date).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
         : "Baru saja";
 
-      const itemsPreview = (ord.items || []).slice(0, 3).map(it => `
-        <div class="history-item-line">
-          <span><strong>${it.quantity}x</strong> ${U.esc(it.name || it.item_name)}</span>
-          ${it.unitPrice ? `<span>${U.rp(it.unitPrice * it.quantity)}</span>` : ""}
-        </div>
-      `).join("");
+      const itemsPreview = (ord.items || []).slice(0, 4).map(it => {
+        const iName = it.name || it.item_name || "Menu Pesanan";
+        const iQty = Math.max(1, Number(it.quantity || 1));
+        const iUnit = Number(it.unitPrice || it.unit_selling_price || 0);
+        const iLine = Number(it.lineTotal || it.line_total_selling || (iUnit * iQty));
+        const optSummary = Array.isArray(it.selections) && it.selections.length
+          ? formatCartOptions({ selections: it.selections })
+          : "";
+        return `
+          <div class="history-item-card">
+            <div class="history-item-line">
+              <span class="history-item-title"><span class="history-qty-pill">${iQty}x</span> ${U.esc(iName)}</span>
+              <strong class="history-item-price">${iLine > 0 ? U.rp(iLine) : ""}</strong>
+            </div>
+            ${optSummary ? `<div class="history-item-opts">${U.esc(optSummary)}</div>` : ""}
+            ${it.notes ? `<div class="history-item-note">"${U.esc(it.notes)}"</div>` : ""}
+          </div>
+        `;
+      }).join("");
 
-      const extraCount = Math.max(0, (ord.items || []).length - 3);
+      const extraCount = Math.max(0, (ord.items || []).length - 4);
 
       return `
         <article class="history-card">
@@ -2379,19 +2396,45 @@
 
   function renderTrackerResult(container, data) {
     const meta = statusMeta(data.status);
-    const itemsHtml = (data.items || []).map(it => `
-      <div class="success-row">
-        <span>${it.quantity}x ${U.esc(it.item_name)}</span>
-        <strong>${U.rp(it.line_total_selling)}</strong>
-      </div>
-    `).join("");
+    const itemsList = Array.isArray(data.items) ? data.items : [];
+    const itemsHtml = itemsList.map(it => {
+      const catalogItem = STORE.getItem(data.brand_id, it.id || it.menu_item_id);
+      const itemName = it.item_name || it.name || (catalogItem && catalogItem.name) || "Menu Pesanan";
+      const qty = Math.max(1, Number(it.quantity || 1));
+      const unitPrice = Number(it.unit_selling_price || it.unitPrice || (catalogItem && catalogItem.priceDiscount) || 0);
+      const lineTotal = Number(it.line_total_selling || it.lineTotalSelling || (unitPrice * qty));
+      const optSummary = Array.isArray(it.selections) && it.selections.length
+        ? formatCartOptions({ selections: it.selections })
+        : "";
+      const itemNotes = it.item_notes || it.notes || "";
+
+      return `
+        <div class="tracker-item-card">
+          <div class="tracker-item-main">
+            <span class="tracker-item-qty">${qty}x</span>
+            <div class="tracker-item-info">
+              <strong class="tracker-item-name">${U.esc(itemName)}</strong>
+              ${unitPrice > 0 ? `<span class="tracker-item-unit">@ ${U.rp(unitPrice)} / item</span>` : ""}
+              ${optSummary ? `<span class="tracker-item-opts">${U.esc(optSummary)}</span>` : ""}
+              ${itemNotes ? `<span class="tracker-item-note">Catatan: "${U.esc(itemNotes)}"</span>` : ""}
+            </div>
+            <strong class="tracker-item-subtotal">${lineTotal > 0 ? U.rp(lineTotal) : "-"}</strong>
+          </div>
+        </div>
+      `;
+    }).join("");
 
     const waAdminLink = `https://wa.me/${U.normalizePhone(CFG.adminWhatsApp)}?text=${encodeURIComponent(`Halo Admin Dibeliin, saya ingin menanyakan status pesanan #${data.order_code} (${data.brand_name} - ${data.outlet_name}).`)}`;
+    const savingsVal = Number(data.customer_savings || 0);
+    const serviceFeeVal = Number(data.order_service_fee || 0);
 
     container.innerHTML = `
       <div class="tracker-result">
         <div class="tracker-head">
-          <span class="tracker-code">#${U.esc(data.order_code)}</span>
+          <div>
+            <span class="tracker-code">#${U.esc(data.order_code)}</span>
+            ${data.created_at ? `<div style="font-size:10.5px;color:var(--muted);margin-top:2px">${new Date(data.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>` : ""}
+          </div>
           <span class="status-pill ${meta.cls}">${U.esc(meta.label)}</span>
         </div>
 
@@ -2412,16 +2455,36 @@
           </div>
         ` : ""}
 
-        <div class="success-row"><span>Pemesan</span><strong>${U.esc(data.customer_name || "-")}</strong></div>
-        <div class="success-row"><span>Outlet</span><strong>${U.esc(data.brand_name)} • ${U.esc(data.outlet_name)}</strong></div>
-        <div class="success-row"><span>Metode</span><strong>${data.order_mode === "delivery" ? "Kirim Driver" : "Ambil Sendiri (Pickup)"}</strong></div>
-        ${itemsHtml ? `<div style="margin:8px 0;padding-top:8px;border-top:1px dashed var(--border)">${itemsHtml}</div>` : ""}
-        <div class="success-row" style="padding-top:6px;border-top:1px solid var(--border)"><span>Total Pembayaran</span><strong>${U.rp(data.final_paid_total)}</strong></div>
-        ${data.admin_notes ? `<p style="margin-top:8px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-size:12px"><strong>Catatan Admin:</strong> ${U.esc(data.admin_notes)}</p>` : ""}
+        <div class="tracker-meta-box">
+          <div class="success-row"><span>Pemesan</span><strong>${U.esc(data.customer_name || "-")}</strong></div>
+          <div class="success-row"><span>Brand &amp; Outlet</span><strong>${U.esc(data.brand_name)} • ${U.esc(data.outlet_name)}</strong></div>
+          <div class="success-row"><span>Metode Pesanan</span><strong>${data.order_mode === "delivery" ? "Kirim Driver (Delivery)" : "Ambil Sendiri (Pickup)"}</strong></div>
+          ${data.pickup_time ? `<div class="success-row"><span>Estimasi Waktu</span><strong>${U.esc(data.pickup_time)}</strong></div>` : ""}
+          ${data.order_mode === "delivery" && data.delivery_address ? `<div class="success-row"><span>Alamat Kirim</span><strong>${U.esc(data.delivery_address)}</strong></div>` : ""}
+        </div>
 
-        <a href="${U.esc(waAdminLink)}" target="_blank" rel="noopener" class="btn-wa btn-full" style="margin-top:12px;min-height:42px;font-size:12.5px;text-decoration:none">
-          ${ICON.brand("whatsapp", "w-4 h-4")} Tanya Admin via WhatsApp
-        </a>
+        <div class="tracker-items-section">
+          <div class="tracker-items-header">
+            <span>Rincian Produk Dipesan</span>
+            <span>${data.items_count || itemsList.length} Item</span>
+          </div>
+          ${itemsHtml || `<div style="font-size:12px;color:var(--body);padding:6px 0">${data.items_count || 1} item pesanan</div>`}
+        </div>
+
+        <div class="tracker-total-box">
+          ${serviceFeeVal > 0 ? `<div class="success-row"><span>Biaya Jasa Order</span><strong>${U.rp(serviceFeeVal)}</strong></div>` : ""}
+          ${savingsVal > 0 ? `<div class="success-row" style="color:var(--success)"><span>Total Hemat Promo</span><strong style="color:var(--success)">-${U.rp(savingsVal)}</strong></div>` : ""}
+          <div class="success-row is-grand"><span>Total Pembayaran</span><strong>${U.rp(data.final_paid_total)}</strong></div>
+        </div>
+
+        ${data.admin_notes ? `<div class="tracker-admin-note"><strong>Catatan Admin:</strong> ${U.esc(data.admin_notes)}</div>` : ""}
+
+        <div class="tracker-wa-footer">
+          <a href="${U.esc(waAdminLink)}" target="_blank" rel="noopener" class="btn-wa tracker-wa-btn">
+            ${ICON.brand("whatsapp", "w-4 h-4")}
+            <span>Tanya Admin via WhatsApp</span>
+          </a>
+        </div>
       </div>
     `;
   }

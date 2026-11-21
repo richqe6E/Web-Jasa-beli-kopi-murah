@@ -118,26 +118,31 @@
         const items = payload.menuItems
           .filter(it => it.brand_id === b.id && it.is_available !== false)
           .sort((a, c) => (a.sort_order || 0) - (c.sort_order || 0))
-          .map(it => ({
-            id: it.id,
-            brandId: it.brand_id,
-            name: it.name,
-            category: it.category,
-            type: it.type || "drink",
-            description: it.description || "",
-            info: it.info || "",
-            image: it.image_url || "src/assets/products/iced-coffee.webp",
-            priceOriginal: Number(it.price_original || 0),
-            priceDiscount: Number(it.price_discount || 0),
-            priceCost: Number(it.price_cost || 0),
-            serviceFeeUnit: Number(it.service_fee_unit || 0),
-            isBestSeller: !!it.is_best_seller,
-            isAvailable: it.is_available !== false,
-            rating: it.rating || "4.8",
-            sold: it.sold_label || "1k+",
-            soldCount: Number(it.sold_count || 0),
-            optionGroups: Array.isArray(it.option_groups) && it.option_groups.length ? it.option_groups : []
-          }));
+          .map(it => {
+            const rawItem = {
+              id: it.id,
+              brandId: it.brand_id,
+              name: it.name,
+              category: it.category,
+              type: it.type || "drink",
+              description: it.description || "",
+              info: it.info || "",
+              image: it.image_url || "src/assets/products/iced-coffee.webp",
+              priceOriginal: Number(it.price_original || 0),
+              priceDiscount: Number(it.price_discount || 0),
+              priceCost: Number(it.price_cost || 0),
+              serviceFeeUnit: Number(it.service_fee_unit || 0),
+              isBestSeller: !!it.is_best_seller,
+              isAvailable: it.is_available !== false,
+              rating: it.rating || "4.8",
+              sold: it.sold_label || "1k+",
+              soldCount: Number(it.sold_count || 0),
+              optionGroups: Array.isArray(it.option_groups) && it.option_groups.length ? it.option_groups : []
+            };
+            return typeof window.DLM_HYDRATE_ITEM === "function"
+              ? window.DLM_HYDRATE_ITEM(rawItem)
+              : rawItem;
+          });
 
         const finalItems = items.length >= (localBrand.items ? localBrand.items.length : 0)
           ? items
@@ -205,9 +210,9 @@
     try {
       const [settingsRows, brands, outlets, menuItems] = await Promise.all([
         request("/rest/v1/app_settings?select=*&id=eq.1"),
-        request("/rest/v1/brands?select=*&order=sort_order.asc"),
-        request("/rest/v1/outlets?select=*&order=sort_order.asc"),
-        request("/rest/v1/menu_items?select=*&order=sort_order.asc")
+        request("/rest/v1/brands?select=*&order=sort_order.asc&limit=50"),
+        request("/rest/v1/outlets?select=*&order=sort_order.asc&limit=200"),
+        request("/rest/v1/menu_items?select=*&order=sort_order.asc&limit=1000")
       ]);
 
       const payload = {
@@ -302,10 +307,10 @@
   async function fetchAdminDataset() {
     const [settingsRows, brands, outlets, menuItems, orders] = await Promise.all([
       request("/rest/v1/app_settings?select=*&id=eq.1", { useAuth: true }),
-      request("/rest/v1/brands?select=*&order=sort_order.asc", { useAuth: true }),
-      request("/rest/v1/outlets?select=*&order=sort_order.asc", { useAuth: true }),
-      request("/rest/v1/menu_items?select=*&order=brand_id.asc,sort_order.asc", { useAuth: true }),
-      request("/rest/v1/orders?select=*,order_items(*)&order=created_at.desc", { useAuth: true })
+      request("/rest/v1/brands?select=*&order=sort_order.asc&limit=50", { useAuth: true }),
+      request("/rest/v1/outlets?select=*&order=sort_order.asc&limit=200", { useAuth: true }),
+      request("/rest/v1/menu_items?select=*&order=brand_id.asc,sort_order.asc&limit=1000", { useAuth: true }),
+      request("/rest/v1/orders?select=*,order_items(*)&order=created_at.desc&limit=500", { useAuth: true })
     ]);
 
     return {

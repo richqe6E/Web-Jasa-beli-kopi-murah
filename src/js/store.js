@@ -112,6 +112,9 @@
       state.selectedBrandId = outlet.brandId;
       saveBrand();
     }
+    state.activeCategory = "Semua";
+    state.priceFilter = "all";
+    state.searchQuery = "";
     saveOutlet();
   }
 

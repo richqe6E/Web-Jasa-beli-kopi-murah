@@ -57,7 +57,7 @@
     cartSummary.items.forEach((item, index) => {
       lines.push(`${index + 1}. ${item.name}`);
       const grouped = groupSelections(item.selections);
-      ["Suhu", "Ukuran", "Tingkat Gula", "Porsi Es", "Pilihan Susu", "Topping", "Tambahan"].forEach(label => {
+      Object.keys(grouped).forEach(label => {
         const line = optionLine(label, grouped[label]);
         if (line) lines.push(`   ${line}`);
       });

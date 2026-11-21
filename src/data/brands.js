@@ -6022,10 +6022,11 @@
     return Object.assign({}, item, {
       isAvailable: item.isAvailable !== false,
       soldCount,
-      optionGroups
+      optionGroups: Array.isArray(item.optionGroups) && item.optionGroups.length ? item.optionGroups : optionGroups
     });
   }
 
+  window.DLM_HYDRATE_ITEM = hydrateItem;
   window.DLM_BRANDS = RAW_BRANDS.map(brand => Object.assign({}, brand, {
     items: (brand.items || []).map(hydrateItem)
   }));
