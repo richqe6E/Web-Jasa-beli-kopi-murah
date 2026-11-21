@@ -137,12 +137,13 @@
         const itemCats = items.map(it => it.category).filter(Boolean);
         const mergedCats = ["Semua"].concat(Array.from(new Set(baseCats.concat(itemCats).filter(c => c !== "Semua"))));
 
+        const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || b.logo_url || "";
         return {
           id: b.id,
           name: b.name,
           shortName: b.short_name || b.name,
           monogram: b.monogram || b.name.charAt(0),
-          logo: b.logo_url || "",
+          logo: lockedLogo,
           tagline: b.tagline || "",
           description: b.description || "",
           promoBadge: b.promo_badge || "Promo Spesial",
@@ -235,6 +236,13 @@
     return request("/rest/v1/rpc/get_order_status", {
       method: "POST",
       body: { p_order_code: orderCode }
+    });
+  }
+
+  async function fetchCustomerOrders(deviceId) {
+    return request("/rest/v1/rpc/get_customer_orders", {
+      method: "POST",
+      body: { p_device_id: deviceId }
     });
   }
 
@@ -406,6 +414,7 @@
     syncCatalog,
     submitCustomerOrder,
     trackOrder,
+    fetchCustomerOrders,
     fetchAdminDataset,
     reconcileOrder,
     deleteOrder,

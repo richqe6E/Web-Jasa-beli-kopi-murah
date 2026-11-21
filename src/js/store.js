@@ -1,17 +1,20 @@
 /* ============================================================
-   STATE STORE
+   STATE STORE (ISOLATED PER CUSTOMER DEVICE CACHE)
+   Routes: outlet (Pilih Brand & Lokasi Outlet) | menu | cart | checkout | history
    ============================================================ */
 (function () {
   "use strict";
 
   const CFG = window.DLM_CONFIG;
   const U = window.DLM_UTIL;
-  const ROUTES = ["brand", "outlet", "menu", "cart", "checkout"];
+  const ROUTES = ["outlet", "menu", "cart", "checkout", "history"];
 
   const state = {
-    selectedBrandId: null,
+    deviceId: U.getDeviceId(),
+    selectedBrandId: "tomoro",
     selectedOutletId: null,
     activeCategory: "Semua",
+    priceFilter: "all", // "all" | "under15k" | "disc40" | "bestseller"
     searchQuery: "",
     outletQuery: "",
     outletArea: "Semua Area",
@@ -27,19 +30,24 @@
   };
 
   function load() {
-    const brandId = U.storage.get(CFG.storageKeys.brand, null);
+    const brandId = U.storage.get(CFG.storageKeys.brand, "tomoro");
     const outletId = U.storage.get(CFG.storageKeys.outlet, null);
     const customer = U.storage.get(CFG.storageKeys.customer, null);
 
     if (brandId && window.DLM_BRANDS.some(b => b.id === brandId)) {
       state.selectedBrandId = brandId;
+    } else if (window.DLM_BRANDS.length) {
+      state.selectedBrandId = window.DLM_BRANDS[0].id;
     }
+
     if (outletId) {
       const outlet = window.DLM_OUTLETS.find(o => o.id === outletId);
-      if (outlet && (!state.selectedBrandId || outlet.brandId === state.selectedBrandId)) {
+      if (outlet) {
         state.selectedOutletId = outlet.id;
+        state.selectedBrandId = outlet.brandId;
       }
     }
+
     if (customer && typeof customer === "object") {
       state.customer = Object.assign({}, state.customer, customer);
     }
@@ -58,7 +66,7 @@
   }
 
   function getBrand(id) {
-    return window.DLM_BRANDS.find(b => b.id === (id || state.selectedBrandId)) || null;
+    return window.DLM_BRANDS.find(b => b.id === (id || state.selectedBrandId)) || window.DLM_BRANDS[0] || null;
   }
 
   function getOutlet(id) {
@@ -88,6 +96,7 @@
       if (!outlet || outlet.brandId !== brandId) state.selectedOutletId = null;
     }
     state.activeCategory = "Semua";
+    state.priceFilter = "all";
     state.searchQuery = "";
     state.outletQuery = "";
     state.outletArea = "Semua Area";
@@ -113,11 +122,13 @@
 
   function getRoute() {
     const raw = (location.hash || "").replace(/^#\/?/, "").split("?")[0];
-    return ROUTES.includes(raw) ? raw : "brand";
+    if (raw === "brand" || raw === "") return "outlet";
+    return ROUTES.includes(raw) ? raw : "outlet";
   }
 
   function navigate(route, replace) {
-    const target = ROUTES.includes(route) ? route : "brand";
+    const normalized = route === "brand" ? "outlet" : route;
+    const target = ROUTES.includes(normalized) ? normalized : "outlet";
     const hash = "#/" + target;
     if (replace) {
       history.replaceState(null, "", hash);
@@ -127,31 +138,36 @@
   }
 
   function stepIndex(route) {
-    return Math.max(0, ROUTES.indexOf(route || getRoute()));
+    const r = route || getRoute();
+    if (r === "outlet") return 0;
+    if (r === "menu") return 1;
+    if (r === "cart") return 2;
+    if (r === "checkout") return 3;
+    if (r === "history") return 4;
+    return 0;
   }
 
   function prevRoute(route) {
-    const index = stepIndex(route);
-    return index > 0 ? ROUTES[index - 1] : "brand";
+    const r = route || getRoute();
+    if (r === "checkout") return "cart";
+    if (r === "cart") return state.selectedOutletId ? "menu" : "outlet";
+    if (r === "menu") return "outlet";
+    return "outlet";
   }
 
   function canEnter(route) {
-    if (route === "brand") return true;
-    if (!state.selectedBrandId) return false;
-    if (route === "outlet") return true;
-    if (!state.selectedOutletId) return false;
+    if (route === "checkout" && (!state.selectedOutletId || !state.selectedBrandId)) return false;
     return true;
   }
 
   function resetFlow() {
-    state.selectedBrandId = null;
     state.selectedOutletId = null;
     state.activeCategory = "Semua";
+    state.priceFilter = "all";
     state.searchQuery = "";
     state.outletQuery = "";
     state.outletArea = "Semua Area";
     state.sort = "popular";
-    saveBrand();
     saveOutlet();
   }
 

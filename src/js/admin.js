@@ -953,28 +953,34 @@
       <section class="panel-card">
         <div class="panel-head">
           <div>
-            <p class="panel-eyebrow">Identitas Brand</p>
-            <h2 class="panel-title">Daftar Brand & Logo Emblem</h2>
-            <p class="panel-sub">Unggah logo resmi (SVG/PNG/WebP) ke Supabase Storage atau ubah badge promo masing-masing brand.</p>
+            <p class="panel-eyebrow">Identitas Brand (Logo Resmi Terkunci)</p>
+            <h2 class="panel-title">Daftar Brand & Logo Emblem Resmi</h2>
+            <p class="panel-sub">Logo resmi Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa dikunci secara permanen agar tetap rapi dan tidak tertimpa foto lain. Anda tetap dapat mengubah badge promo & tagline.</p>
           </div>
         </div>
 
         <div class="kpi-grid">
-          ${(state.dataset.brands || []).map(b => `
+          ${(state.dataset.brands || []).map(b => {
+            const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || b.logo_url || `src/assets/brands/${b.id}.svg`;
+            return `
             <div class="kpi-card">
               <div style="display:flex;align-items:center;gap:12px">
-                <img src="${U.esc(b.logo_url || `src/assets/brands/${b.id}.svg`)}" alt="${U.esc(b.name)}" style="width:46px;height:46px;border-radius:12px;object-fit:cover;border:1px solid var(--border)">
+                <img src="${U.esc(lockedLogo)}" alt="${U.esc(b.name)}" style="width:48px;height:48px;border-radius:12px;object-fit:contain;background:#fff;padding:3px;border:1px solid var(--border)">
                 <div>
-                  <strong>${U.esc(b.name)}</strong>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <strong>${U.esc(b.name)}</strong>
+                    <span class="compress-badge" style="font-size:10px;padding:2px 6px">${ICON.icon("lock", "w-3 h-3", 2.2)} Resmi</span>
+                  </div>
                   <div style="font-size:11.5px;color:var(--primary);font-weight:700">${U.esc(b.promo_badge)}</div>
                 </div>
               </div>
               <p style="font-size:12px;color:var(--body)">${U.esc(b.tagline)}</p>
               <div style="margin-top:auto;padding-top:8px;display:flex;gap:8px">
-                <button type="button" class="btn btn-soft btn-xs" data-action="edit-brand" data-id="${U.esc(b.id)}">Ubah Brand / Upload Logo</button>
+                <button type="button" class="btn btn-soft btn-xs" data-action="edit-brand" data-id="${U.esc(b.id)}">Ubah Promo & Tagline</button>
               </div>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
       </section>
     `;
@@ -1428,6 +1434,7 @@
   function openBrandModal(brandId) {
     const b = (state.dataset.brands || []).find(x => x.id === brandId);
     if (!b) return;
+    const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || b.logo_url || `src/assets/brands/${b.id}.svg`;
     const root = $("#admin-modal-root");
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
@@ -1454,17 +1461,14 @@
               <input type="text" id="bf-tagline" class="input" value="${U.esc(b.tagline)}" required>
             </div>
             <div class="field" style="grid-column:1 / -1">
-              <label class="field-label" for="bf-logo">Path / URL Logo Brand (SVG utuh / PNG otomatis WebP 512px)</label>
-              <div style="display:flex;gap:8px">
-                <input type="text" id="bf-logo" class="input" value="${U.esc(b.logo_url)}">
-                <label class="btn btn-soft btn-xs" style="cursor:pointer">
-                  ${ICON.icon("upload", "w-3.5 h-3.5", 2)} Upload Logo
-                  <input type="file" id="bf-logo-file" accept="image/*" style="display:none">
-                </label>
-              </div>
+              <label class="field-label">Logo Resmi Brand (Terkunci Permanen)</label>
+              <input type="hidden" id="bf-logo" value="${U.esc(lockedLogo)}">
               <div class="upload-preview-row">
-                <img src="${U.esc(b.logo_url || `src/assets/brands/${b.id}.svg`)}" alt="Preview logo" class="upload-preview-thumb" id="bf-thumb">
-                <span id="bf-compress-status" style="font-size:12px;color:var(--muted)">File PNG/JPG akan dikompres ke WebP transparan; SVG dipertahankan sebagai vektor tajam.</span>
+                <img src="${U.esc(lockedLogo)}" alt="Logo resmi ${U.esc(b.name)}" class="upload-preview-thumb" style="object-fit:contain;background:#fff;padding:4px">
+                <span style="font-size:12px;color:var(--body)">
+                  <strong style="display:block;color:var(--primary)">${ICON.icon("lock", "w-3.5 h-3.5", 2.2)} Logo Resmi Permanen Aktif</strong>
+                  Logo brand ini dikunci ke aset resmi aplikasi agar tetap konsisten dan tidak berubah.
+                </span>
               </div>
             </div>
           </div>

@@ -90,8 +90,19 @@
     return `<img src="${esc(src)}" alt="${esc(alt)}" class="${cls}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.classList.add('is-hidden')">`;
   };
 
+  const getDeviceId = () => {
+    const key = (window.DLM_CONFIG && window.DLM_CONFIG.storageKeys && window.DLM_CONFIG.storageKeys.deviceId) || "dlm_device_id_v1";
+    let id = storage.get(key, null);
+    if (!id || typeof id !== "string" || id.length < 8) {
+      const rand = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+      id = `cust_${Date.now().toString(36)}_${rand}`;
+      storage.set(key, id);
+    }
+    return id;
+  };
+
   window.DLM_UTIL = {
     esc, rp, num, clamp, debounce, uid, formatDateID, formatTimeID,
-    storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag
+    storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag, getDeviceId
   };
 })();
