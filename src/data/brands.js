@@ -71,6 +71,12 @@
     if (cfg.milks && cfg.milks.length > 1) groups.push(milkGroup(cfg.milks));
     if (cfg.toppings && cfg.toppings.length) groups.push(toppingGroup(cfg.toppings));
 
+    const priceCost = cfg.priceCost != null ? cfg.priceCost : Math.max(4000, cfg.priceDiscount - 4500);
+    const serviceFeeUnit = cfg.serviceFeeUnit != null ? cfg.serviceFeeUnit : 2000;
+    const rawSold = String(cfg.sold || "1k+").toLowerCase();
+    const soldNum = parseFloat(rawSold.replace(/[^\d.]/g, "")) || 1;
+    const soldCount = Math.round(rawSold.includes("k") ? soldNum * 1000 : soldNum);
+
     return {
       id: cfg.id,
       brandId: cfg.brandId,
@@ -82,14 +88,24 @@
       image: cfg.image,
       priceOriginal: cfg.priceOriginal,
       priceDiscount: cfg.priceDiscount,
+      priceCost,
+      serviceFeeUnit,
       isBestSeller: !!cfg.isBestSeller,
+      isAvailable: cfg.isAvailable !== false,
       rating: cfg.rating || "4.8",
       sold: cfg.sold || "1k+",
+      soldCount,
       optionGroups: groups
     };
   }
 
   function food(cfg) {
+    const priceCost = cfg.priceCost != null ? cfg.priceCost : Math.max(4000, cfg.priceDiscount - 4000);
+    const serviceFeeUnit = cfg.serviceFeeUnit != null ? cfg.serviceFeeUnit : 2000;
+    const rawSold = String(cfg.sold || "500+").toLowerCase();
+    const soldNum = parseFloat(rawSold.replace(/[^\d.]/g, "")) || 1;
+    const soldCount = Math.round(rawSold.includes("k") ? soldNum * 1000 : soldNum);
+
     return {
       id: cfg.id,
       brandId: cfg.brandId,
@@ -101,9 +117,13 @@
       image: cfg.image,
       priceOriginal: cfg.priceOriginal,
       priceDiscount: cfg.priceDiscount,
+      priceCost,
+      serviceFeeUnit,
       isBestSeller: !!cfg.isBestSeller,
+      isAvailable: cfg.isAvailable !== false,
       rating: cfg.rating || "4.7",
       sold: cfg.sold || "500+",
+      soldCount,
       optionGroups: cfg.addons && cfg.addons.length ? [addonGroup(cfg.addons)] : []
     };
   }
@@ -120,7 +140,7 @@
       name: "Tomoro Coffee",
       shortName: "Tomoro",
       monogram: "T",
-      logo: "", // isi path logo resmi nanti, contoh: "src/assets/brands/tomoro.svg"
+      logo: "src/assets/brands/tomoro.svg",
       tagline: "Master coffee at accessible price",
       description: "Kopi susu favorit dengan racikan espresso dan gula aren pilihan.",
       promoBadge: "Diskon s/d 45%",
@@ -219,7 +239,7 @@
       name: "Fore Coffee",
       shortName: "Fore",
       monogram: "F",
-      logo: "",
+      logo: "src/assets/brands/fore.svg",
       tagline: "Grind the essentials",
       description: "Kopi artisan dengan karakter kuat dan bahan berkualitas.",
       promoBadge: "Diskon s/d 50%",
@@ -317,7 +337,7 @@
       name: "Kopi Kenangan",
       shortName: "Kenangan",
       monogram: "K",
-      logo: "",
+      logo: "src/assets/brands/kenangan.svg",
       tagline: "Kopi kenangan mantan & kisah manis",
       description: "Kopi susu gula aren legendaris dengan karakter bold dan harum.",
       promoBadge: "Diskon s/d 42%",
@@ -415,7 +435,7 @@
       name: "Janji Jiwa",
       shortName: "Janji Jiwa",
       monogram: "J",
-      logo: "",
+      logo: "src/assets/brands/janji-jiwa.svg",
       tagline: "Kopi dari hati & jiwa toast",
       description: "Kopi dari hati dengan racikan lokal dan camilan toast renyah.",
       promoBadge: "Diskon s/d 40%",
