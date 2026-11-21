@@ -144,7 +144,8 @@
               : rawItem;
           });
 
-        const finalItems = items.length >= (localBrand.items ? localBrand.items.length : 0)
+        const allBrandRows = payload.menuItems.filter(it => it.brand_id === b.id);
+        const finalItems = allBrandRows.length > 0
           ? items
           : (localBrand.items || items);
 

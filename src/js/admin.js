@@ -4,6 +4,7 @@
 (function () {
   "use strict";
 
+  const CFG = window.DLM_CONFIG || {};
   const U = window.DLM_UTIL;
   const ICON = window.DLM_ICONS;
   const SB = window.DLM_SUPABASE;
@@ -56,6 +57,9 @@
     document.addEventListener("input", handleInput);
     document.addEventListener("change", handleChange);
     document.addEventListener("submit", handleSubmit);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeAdminModal();
+    });
 
     const user = await SB.verifyAdminSession();
     state.user = user;
@@ -314,7 +318,7 @@
 
           <div class="field" style="margin-bottom:12px">
             <label class="field-label" for="login-email">Email Admin</label>
-            <input type="email" id="login-email" class="input" placeholder="neliagustina0858@gmail.com" required autocomplete="username">
+            <input type="email" id="login-email" class="input" placeholder="admin@dibeliin.id" required autocomplete="username">
           </div>
 
           <div class="field" style="margin-bottom:16px">
@@ -326,10 +330,7 @@
             ${ICON.icon("shield-check", "w-4 h-4", 2.2)} Masuk ke Dashboard
           </button>
 
-          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-            <button type="button" class="btn btn-soft btn-xs" data-action="fill-demo-login">
-              Isi Akun Admin Default
-            </button>
+          <div style="margin-top:14px;display:flex;justify-content:center;align-items:center">
             <a href="index.html" style="font-size:12.5px;font-weight:700">← Kembali ke Halaman Pelanggan</a>
           </div>
         </form>
@@ -458,7 +459,7 @@
                         <span class="bar-title">${U.esc(item.name)}</span>
                         <span class="bar-sub">• ${U.esc(item.brandName)}</span>
                       </div>
-                      <span class="bar-metric">${item.qtySold} cup</span>
+                      <span class="bar-metric">${item.qtySold} item</span>
                     </div>
                     <div class="bar-track" aria-hidden="true">
                       <div class="bar-fill" style="width:${pct}%"></div>
@@ -494,7 +495,7 @@
                         <span class="bar-title">${U.esc(out.name)}</span>
                         <span class="bar-sub">• ${U.esc(out.brandName)} (${U.esc(out.area)})</span>
                       </div>
-                      <span class="bar-metric">${out.ordersCount} order (${out.cupsCount} cup)</span>
+                      <span class="bar-metric">${out.ordersCount} order (${out.cupsCount} item)</span>
                     </div>
                     <div class="bar-track" aria-hidden="true">
                       <div class="bar-fill is-emerald" style="width:${pct}%"></div>
@@ -537,7 +538,7 @@
                 <tr>
                   <td><strong>${U.esc(b.name)}</strong></td>
                   <td class="mono">${b.ordersCount} transaksi</td>
-                  <td class="mono">${b.cupsCount} cup</td>
+                  <td class="mono">${b.cupsCount} item</td>
                   <td class="mono"><strong>${U.rp(b.revenue)}</strong></td>
                   <td class="mono">${U.rp(b.cost)}</td>
                   <td class="mono">${U.rp(b.spreadProfit)}</td>
@@ -686,7 +687,7 @@
           <div class="field">
             <label class="field-label" for="rule-brand">Target Brand</label>
             <select id="rule-brand" class="select">
-              <option value="all">Semua Brand (36 Menu)</option>
+              <option value="all">Semua Brand (${(state.dataset.menuItems || []).length} Menu)</option>
               ${(state.dataset.brands || []).map(b => `<option value="${U.esc(b.id)}">${U.esc(b.name)}</option>`).join("")}
             </select>
           </div>
@@ -699,13 +700,13 @@
 
           <div class="field">
             <label class="field-label" for="rule-service-fee">Biaya Jasa per Item (Rp)</label>
-            <input type="number" id="rule-service-fee" class="input mono" value="${Number(settings.default_service_fee_per_item || 2000)}" min="0" step="500" required>
+            <input type="number" id="rule-service-fee" class="input mono" value="${Number(settings.default_service_fee_per_item || 2000)}" min="0" step="1" required>
             <span class="field-hint">Keuntungan dari komponen biaya jasa</span>
           </div>
 
           <div class="field">
             <label class="field-label" for="rule-spread-margin">Target Untung Selisih Harga (Rp)</label>
-            <input type="number" id="rule-spread-margin" class="input mono" value="2500" min="0" step="500" required>
+            <input type="number" id="rule-spread-margin" class="input mono" value="2500" min="0" step="1" required>
             <span class="field-hint">Digunakan bila hitung ulang harga jual dicentang</span>
           </div>
 
@@ -924,12 +925,12 @@
 
           <div class="field">
             <label class="field-label" for="set-fee-item">Biaya Jasa Default per Item (Rp)</label>
-            <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 2000)}" min="0" step="500">
+            <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 2000)}" min="0" step="1">
           </div>
 
           <div class="field">
             <label class="field-label" for="set-fee-order">Biaya Jasa Flat per Transaksi (Rp)</label>
-            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order || 0)}" min="0" step="500">
+            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order || 0)}" min="0" step="1">
           </div>
 
           <div class="field">
@@ -1002,7 +1003,7 @@
 
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
-        <form id="reconcile-form" class="admin-modal" data-order-id="${order.id}">
+        <form id="reconcile-form" class="admin-modal" role="dialog" aria-modal="true" data-order-id="${order.id}">
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Rekonsiliasi Checkout WhatsApp</div>
@@ -1024,19 +1025,19 @@
 
             <div class="field">
               <label class="field-label" for="rec-final-paid">Nominal Akhir Deal WA (Rp)</label>
-              <input type="number" id="rec-final-paid" class="input mono" value="${Number(order.final_paid_total || order.checkout_total || 0)}" min="0" step="500" required>
+              <input type="number" id="rec-final-paid" class="input mono" value="${Number(order.final_paid_total || order.checkout_total || 0)}" min="0" step="1" required>
               <span class="field-hint">Tagihan awal checkout: ${U.rp(order.checkout_total)}</span>
             </div>
 
             <div class="field">
               <label class="field-label" for="rec-cost">Total Modal Pembelian / HPP Aktual (Rp)</label>
-              <input type="number" id="rec-cost" class="input mono" value="${Number(order.total_cost_amount || 0)}" min="0" step="500" required>
+              <input type="number" id="rec-cost" class="input mono" value="${Number(order.total_cost_amount || 0)}" min="0" step="1" required>
               <span class="field-hint">Modal yang Anda bayarkan ke outlet/aplikasi</span>
             </div>
 
             <div class="field">
               <label class="field-label" for="rec-fee">Porsi Keuntungan Biaya Jasa (Rp)</label>
-              <input type="number" id="rec-fee" class="input mono" value="${Number(order.service_fee_profit || 0)}" min="0" step="500" required>
+              <input type="number" id="rec-fee" class="input mono" value="${Number(order.service_fee_profit || 0)}" min="0" step="1" required>
               <span class="field-hint">Sisanya dicatat sebagai Untung Selisih Harga</span>
             </div>
 
@@ -1064,7 +1065,7 @@
 
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
-        <form id="manual-order-form" class="admin-modal">
+        <form id="manual-order-form" class="admin-modal" role="dialog" aria-modal="true">
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Catat Transaksi</div>
@@ -1153,7 +1154,7 @@
     const root = $("#admin-modal-root");
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
-        <form id="menu-form" class="admin-modal" data-existing-id="${U.esc(existing ? existing.id : "")}">
+        <form id="menu-form" class="admin-modal" role="dialog" aria-modal="true" data-existing-id="${U.esc(existing ? existing.id : "")}">
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Katalog & Harga Menu</div>
@@ -1186,19 +1187,19 @@
             </div>
             <div class="field">
               <label class="field-label" for="mf-orig">Harga Normal Outlet (Rp)</label>
-              <input type="number" id="mf-orig" class="input mono" value="${Number(it.price_original)}" min="0" step="500" required>
+              <input type="number" id="mf-orig" class="input mono" value="${Number(it.price_original)}" min="0" step="1" required>
             </div>
             <div class="field">
               <label class="field-label" for="mf-cost">Modal Beli / HPP Admin (Rp)</label>
-              <input type="number" id="mf-cost" class="input mono" value="${Number(it.price_cost)}" min="0" step="500" required>
+              <input type="number" id="mf-cost" class="input mono" value="${Number(it.price_cost)}" min="0" step="1" required>
             </div>
             <div class="field">
               <label class="field-label" for="mf-sell">Harga Jual Pelanggan (Rp)</label>
-              <input type="number" id="mf-sell" class="input mono" value="${Number(it.price_discount)}" min="0" step="500" required>
+              <input type="number" id="mf-sell" class="input mono" value="${Number(it.price_discount)}" min="0" step="1" required>
             </div>
             <div class="field">
               <label class="field-label" for="mf-fee">Porsi Biaya Jasa / Cup (Rp)</label>
-              <input type="number" id="mf-fee" class="input mono" value="${Number(it.service_fee_unit)}" min="0" step="500" required>
+              <input type="number" id="mf-fee" class="input mono" value="${Number(it.service_fee_unit)}" min="0" step="1" required>
             </div>
             <div class="profit-preview-box" id="mf-profit-preview">
               <div class="profit-preview-item"><small>Diskon Pelanggan</small><strong id="pv-disc">0%</strong></div>
@@ -1382,7 +1383,7 @@
     const root = $("#admin-modal-root");
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
-        <form id="outlet-form" class="admin-modal" data-existing-id="${U.esc(existing ? existing.id : "")}">
+        <form id="outlet-form" class="admin-modal" role="dialog" aria-modal="true" data-existing-id="${U.esc(existing ? existing.id : "")}">
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Lokasi Cabang</div>
@@ -1438,7 +1439,7 @@
     const root = $("#admin-modal-root");
     root.innerHTML = `
       <div class="admin-modal-overlay" data-modal-backdrop>
-        <form id="brand-form" class="admin-modal" data-brand-id="${U.esc(b.id)}">
+        <form id="brand-form" class="admin-modal" role="dialog" aria-modal="true" data-brand-id="${U.esc(b.id)}">
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Pengaturan Brand</div>
@@ -1563,12 +1564,7 @@
     if (!actEl) return;
     const action = actEl.dataset.action;
 
-    if (action === "fill-demo-login") {
-      const em = $("#login-email");
-      const pw = $("#login-password");
-      if (em) em.value = "neliagustina0858@gmail.com";
-      if (pw) pw.value = "DibeliinAdmin2026!";
-    } else if (action === "logout") {
+    if (action === "logout") {
       await SB.signOut();
       state.user = null;
       render();

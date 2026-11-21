@@ -43,7 +43,7 @@
 
   const formatTimeID = (date) => {
     const d = date || new Date();
-    return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":") + " WIB";
+    return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":") + " WITA";
   };
 
   const storage = {
@@ -87,7 +87,7 @@
 
   const imageTag = (src, alt, className, eager) => {
     const cls = className || "";
-    return `<img src="${esc(src)}" alt="${esc(alt)}" class="${cls}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.classList.add('is-hidden')">`;
+    return `<img src="${esc(src)}" alt="${esc(alt)}" class="${cls}" width="400" height="400" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.classList.add('is-hidden')">`;
   };
 
   const getDeviceId = () => {

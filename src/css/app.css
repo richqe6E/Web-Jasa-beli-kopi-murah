@@ -93,7 +93,7 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow-x: hidden;
+  overflow-x: clip;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -242,12 +242,12 @@ a {
 .app-top {
   position: sticky;
   top: 0;
-  z-index: 30;
-  background: rgba(244, 248, 254, 0.88);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
+  z-index: 40;
+  background: rgba(244, 248, 254, 0.92);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
   border-bottom: 1px solid transparent;
-  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
 }
 
 .app-top.is-scrolled {
@@ -4646,17 +4646,11 @@ body.has-bottom-bar .app-main {
        8. Modern Aesthetic Order Tracker Pop-up Modal
    ------------------------------------------------------------ */
 
-/* 1. Smart Auto-Hide / Show Header */
-.app-top {
-  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.25s var(--ease),
-              box-shadow 0.25s var(--ease),
-              background 0.25s var(--ease);
-  will-change: transform;
-}
-
-.app-top.is-hidden-up {
-  transform: translateY(-108%);
+/* 1. Anti-Scroll Sticky Top Header (Always Pinned & Never Hides on Scroll) */
+.app-top.is-scrolled {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom-color: var(--border);
+  box-shadow: 0 10px 26px -20px rgba(8, 79, 153, 0.45);
 }
 
 /* 2. Balanced Floating Dock Bottom Bar (Not Cramped on Left) */
@@ -5320,165 +5314,111 @@ body.has-bottom-bar .app-main {
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.22);
 }
 
-/* 7. 4 Distinct Brand Menu UI Personalities (#/menu) */
-.brand-menu-banner {
+/* 7. Smooth Physics-Spring Brand Ad Carousel on #/menu (Brand themes moved to src/css/brand-themes.css) */
+.brand-ad-carousel {
   position: relative;
   margin-top: 10px;
   border-radius: 20px;
   overflow: hidden;
-  aspect-ratio: 16 / 7.2;
+  background: #0f172a;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 12px 26px -18px rgba(15, 23, 42, 0.45);
 }
 
-.brand-menu-banner img {
+.brand-ad-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.brand-ad-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.brand-ad-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  aspect-ratio: 16 / 7.2;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.brand-ad-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.01);
+  transition: transform 4.2s ease-out;
+  backface-visibility: hidden;
 }
 
-/* A. FORE COFFEE — Botanical Sage Mint & Most Popular Capsule */
-[data-brand-theme="fore"] {
-  --brand-primary: #006041;
-  --brand-soft: #e6f4ee;
-  --brand-line: #b7e0ce;
+.brand-ad-slide.is-active img {
+  transform: scale(1.045);
 }
 
-[data-brand-theme="fore"] .chip.is-active,
-[data-brand-theme="fore"] .circle-add-btn {
-  background: #006041;
-  border-color: #006041;
-  color: #ffffff;
-}
-
-[data-brand-theme="fore"] .filter-pill.is-active {
-  background: #e6f4ee;
-  border-color: #006041;
-  color: #006041;
-}
-
-[data-brand-theme="fore"] .must-try-media,
-[data-brand-theme="fore"] .menu-row-media {
-  background: #eff8f4;
-  border-radius: 16px;
-  border: 1px solid #d2ebe0;
-}
-
-[data-brand-theme="fore"] .must-try-media img,
-[data-brand-theme="fore"] .menu-row-media img {
-  object-fit: cover;
-  padding: 0;
-}
-
-/* B. TOMORO COFFEE — Vibrant Sunset Orange & Pure White Cup Canvas */
-[data-brand-theme="tomoro"] {
-  --brand-primary: #ff5a1f;
-  --brand-soft: #fff3ec;
-  --brand-line: #fed7aa;
-}
-
-[data-brand-theme="tomoro"] .chip.is-active,
-[data-brand-theme="tomoro"] .circle-add-btn {
-  background: #ff5a1f;
-  border-color: #ff5a1f;
-  color: #ffffff;
-}
-
-[data-brand-theme="tomoro"] .filter-pill.is-active {
-  background: #fff3ec;
-  border-color: #ff5a1f;
-  color: #c2410c;
-}
-
-[data-brand-theme="tomoro"] .must-try-media,
-[data-brand-theme="tomoro"] .menu-row-media {
-  background: #ffffff;
-  border: 1px solid #ffedd5;
-  border-radius: 16px;
-}
-
-[data-brand-theme="tomoro"] .must-try-media img,
-[data-brand-theme="tomoro"] .menu-row-media img {
-  object-fit: contain;
-  padding: 2px;
-}
-
-.tomoro-watermark {
+.brand-ad-bar {
   position: absolute;
-  top: 8px;
-  right: 12px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: rgba(255, 90, 31, 0.06);
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   pointer-events: none;
-  text-transform: uppercase;
 }
 
-/* C. KOPI KENANGAN — Warm Espresso & Clean White Cup Frame */
-[data-brand-theme="kenangan"] {
-  --brand-primary: #991b1b;
-  --brand-soft: #fef2f2;
-  --brand-line: #fecaca;
+.brand-ad-dots,
+.brand-ad-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: auto;
 }
 
-[data-brand-theme="kenangan"] .chip.is-active,
-[data-brand-theme="kenangan"] .circle-add-btn {
-  background: #991b1b;
-  border-color: #991b1b;
-  color: #ffffff;
+.brand-ad-dots {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.42);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
-[data-brand-theme="kenangan"] .filter-pill.is-active {
-  background: #fef2f2;
-  border-color: #991b1b;
-  color: #991b1b;
+.brand-ad-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+  transition: width 0.28s var(--ease), background 0.28s var(--ease);
 }
 
-[data-brand-theme="kenangan"] .must-try-media,
-[data-brand-theme="kenangan"] .menu-row-media {
+.brand-ad-dot.is-active {
+  width: 18px;
   background: #ffffff;
-  border: 1px solid #f3e8e8;
-  border-radius: 16px;
 }
 
-[data-brand-theme="kenangan"] .must-try-media img,
-[data-brand-theme="kenangan"] .menu-row-media img {
-  object-fit: contain;
-  padding: 2px;
-}
-
-/* D. JANJI JIWA — Bold Coral Pink & Pinky Promise Stamp */
-[data-brand-theme="janji-jiwa"] {
-  --brand-primary: #f43f5e;
-  --brand-soft: #fff1f2;
-  --brand-line: #fecdd3;
-}
-
-[data-brand-theme="janji-jiwa"] .chip.is-active,
-[data-brand-theme="janji-jiwa"] .circle-add-btn {
-  background: #f43f5e;
-  border-color: #f43f5e;
+.brand-ad-btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.42);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   color: #ffffff;
+  transition: transform 0.15s var(--ease), background 0.18s var(--ease);
 }
 
-[data-brand-theme="janji-jiwa"] .filter-pill.is-active {
-  background: #fff1f2;
-  border-color: #f43f5e;
-  color: #e11d48;
-}
-
-[data-brand-theme="janji-jiwa"] .must-try-media,
-[data-brand-theme="janji-jiwa"] .menu-row-media {
-  background: #ffffff;
-  border: 1px solid #ffe4e6;
-  border-radius: 18px;
-}
-
-[data-brand-theme="janji-jiwa"] .must-try-media img,
-[data-brand-theme="janji-jiwa"] .menu-row-media img {
-  object-fit: contain;
-  padding: 2px;
+.brand-ad-btn:active {
+  transform: scale(0.92);
 }
 
 /* 8. Modern Aesthetic Order Tracker Modal (Scrollable + Unclipped WA Button + Product Breakdown Cards) */

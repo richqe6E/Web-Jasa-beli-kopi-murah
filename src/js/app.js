@@ -44,6 +44,7 @@
   // Brand menu ad banner state (#/menu)
   let brandAdIndex = 0;
   let brandAdInterval = null;
+  let brandAdTouchStartX = 0;
 
   // Live merged history cache for current customer device
   let customerHistoryCache = null;
@@ -81,11 +82,16 @@
 
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.syncCatalog === "function") {
       window.DLM_SUPABASE.syncCatalog().then(res => {
-        if (res && res.ok) {
-          const r = STORE.getRoute();
-          if (r === "outlet" || r === "menu") {
-            renderRoute();
-          }
+        if (!res || !res.ok) return;
+        const r = STORE.getRoute();
+        const isOverlayOpen = document.body.classList.contains("modal-open") || document.body.classList.contains("sheet-open");
+        const activeTag = document.activeElement && document.activeElement.tagName;
+        const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA";
+        if (isOverlayOpen || isTyping) return;
+        if (r === "outlet") {
+          renderOutletList();
+        } else if (r === "menu") {
+          renderMenuGrid();
         }
       });
     }
@@ -94,23 +100,9 @@
   function handleScroll() {
     const topBar = $(".app-top");
     if (!topBar) return;
-
     const currentY = Math.max(0, window.scrollY || window.pageYOffset || 0);
-    const delta = currentY - lastScrollY;
-
     topBar.classList.toggle("is-scrolled", currentY > 8);
-
-    if (currentY < 32) {
-      topBar.classList.remove("is-hidden-up");
-    } else if (delta > 9 && currentY > 72) {
-      // Scrolling down -> hide header smoothly
-      topBar.classList.add("is-hidden-up");
-    } else if (delta < -7) {
-      // Scrolling up -> reveal header immediately
-      topBar.classList.remove("is-hidden-up");
-    }
-
-    lastScrollY = currentY;
+    topBar.classList.remove("is-hidden-up");
   }
 
   function setupReveal() {
@@ -126,12 +118,18 @@
           entry.target.classList.add("is-in");
           revealObserver.unobserve(entry.target);
         });
-      }, { threshold: 0.05, rootMargin: "0px 0px -3% 0px" });
+      }, { threshold: 0, rootMargin: "120px 0px 120px 0px" });
     }
+    const vh = window.innerHeight || 844;
     elements.forEach((el, index) => {
       if (el.classList.contains("is-in")) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < vh + 120) {
+        el.classList.add("is-in");
+        return;
+      }
       if (!el.style.getPropertyValue("--reveal-delay")) {
-        el.style.setProperty("--reveal-delay", `${Math.min(index, 8) * 30}ms`);
+        el.style.setProperty("--reveal-delay", `${Math.min(index, 6) * 24}ms`);
       }
       revealObserver.observe(el);
     });
@@ -314,7 +312,7 @@
       html = `
         <div class="bottom-bar-inner">
           <div class="bottom-total">
-            <small>Total Akhir (${summary.totalItems} Cup)</small>
+            <small>Total Akhir (${summary.totalItems} Item)</small>
             <strong>${U.rp(summary.grandTotal)}</strong>
           </div>
           <button type="button" class="btn-wa btn-bottom" data-action="submit-order">
@@ -552,10 +550,34 @@
     });
   }
 
+  function getBrandMenuAds(brand) {
+    const b = brand || STORE.getBrand();
+    if (!b || !Array.isArray(b.ads)) return [];
+    const landscapeAds = b.ads.filter(a => !a.isPortrait);
+    return landscapeAds.length ? landscapeAds : b.ads;
+  }
+
+  function setBrandAdSlide(index) {
+    const list = getBrandMenuAds();
+    if (!list.length) return;
+    brandAdIndex = ((index % list.length) + list.length) % list.length;
+
+    const track = $("#brand-ad-track");
+    if (track) {
+      track.style.transform = `translate3d(-${brandAdIndex * 100}%, 0, 0)`;
+    }
+    $$(".brand-ad-slide").forEach((el, idx) => {
+      el.classList.toggle("is-active", idx === brandAdIndex);
+    });
+    $$(".brand-ad-dot").forEach((dot, idx) => {
+      dot.classList.toggle("is-active", idx === brandAdIndex);
+    });
+  }
+
   function startBrandAdCarousel() {
     stopBrandAdCarousel();
-    const brand = STORE.getBrand();
-    if (!brand || !Array.isArray(brand.ads) || brand.ads.length <= 1) return;
+    const list = getBrandMenuAds();
+    if (list.length <= 1) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     brandAdInterval = setInterval(() => {
@@ -563,15 +585,7 @@
         stopBrandAdCarousel();
         return;
       }
-      const ads = (STORE.getBrand() && STORE.getBrand().ads) || [];
-      const landscapeAds = ads.filter(a => !a.isPortrait);
-      const list = landscapeAds.length ? landscapeAds : ads;
-      if (list.length <= 1) return;
-      brandAdIndex = (brandAdIndex + 1) % list.length;
-      const imgEl = $("#brand-menu-ad-img");
-      if (imgEl && list[brandAdIndex]) {
-        imgEl.src = list[brandAdIndex].image;
-      }
+      setBrandAdSlide(brandAdIndex + 1);
     }, 4200);
   }
 
@@ -580,6 +594,25 @@
       clearInterval(brandAdInterval);
       brandAdInterval = null;
     }
+  }
+
+  function bindBrandAdTouch() {
+    const carousel = $("#brand-ad-carousel");
+    if (!carousel) return;
+    carousel.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches[0]) {
+        brandAdTouchStartX = e.touches[0].clientX;
+        stopBrandAdCarousel();
+      }
+    }, { passive: true });
+    carousel.addEventListener("touchend", (e) => {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      const diff = e.changedTouches[0].clientX - brandAdTouchStartX;
+      if (Math.abs(diff) > 32) {
+        setBrandAdSlide(diff < 0 ? brandAdIndex + 1 : brandAdIndex - 1);
+      }
+      startBrandAdCarousel();
+    }, { passive: true });
   }
 
   /* ============================================================
@@ -879,15 +912,13 @@
       { id: "disc40", label: "Diskon ≥ 38%" }
     ];
 
-    const brandAds = Array.isArray(brand.ads) ? brand.ads : [];
-    const landscapeAds = brandAds.filter(a => !a.isPortrait);
-    const activeAds = landscapeAds.length ? landscapeAds : brandAds;
+    const activeAds = getBrandMenuAds(brand);
     brandAdIndex = 0;
 
     main.innerHTML = `
       <div data-brand-theme="${U.esc(brand.id)}">
         <!-- Floating Top Outlet Bar -->
-        <section class="top-outlet-pill reveal" style="border-color:${U.esc(brand.accentSoft)}">
+        <section class="top-outlet-pill" style="border-color:${U.esc(brand.accentSoft)}">
           <div class="top-outlet-left">
             <span class="top-outlet-logo">
               <img src="${U.esc(logoUrl)}" alt="${U.esc(brand.name)}" />
@@ -905,14 +936,35 @@
           </button>
         </section>
 
-        <!-- Brand-Specific Official Promo Banner -->
+        <!-- Brand-Specific Smooth Multi-Slide Promo Carousel -->
         ${activeAds.length ? `
-          <section class="brand-menu-banner reveal" aria-label="Promo ${U.esc(brand.name)}">
-            <img src="${U.esc(activeAds[0].image)}" alt="Promo ${U.esc(brand.name)}" id="brand-menu-ad-img" loading="eager" decoding="async" />
+          <section class="brand-ad-carousel" id="brand-ad-carousel" aria-label="Promo ${U.esc(brand.name)}">
+            <div class="brand-ad-viewport">
+              <div class="brand-ad-track" id="brand-ad-track" style="transform:translate3d(0,0,0)">
+                ${activeAds.map((ad, idx) => `
+                  <div class="brand-ad-slide ${idx === 0 ? "is-active" : ""}">
+                    <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="800" height="360" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+            ${activeAds.length > 1 ? `
+              <div class="brand-ad-bar">
+                <div class="brand-ad-dots" role="tablist" aria-label="Slide iklan ${U.esc(brand.name)}">
+                  ${activeAds.map((_, idx) => `
+                    <button type="button" class="brand-ad-dot ${idx === 0 ? "is-active" : ""}" data-action="brand-ad-dot" data-index="${idx}" aria-label="Promo ${idx + 1}"></button>
+                  `).join("")}
+                </div>
+                <div class="brand-ad-nav">
+                  <button type="button" class="brand-ad-btn" data-action="brand-ad-prev" aria-label="Promo sebelumnya">${ICON.icon("chevron-left", "w-3.5 h-3.5", 2.4)}</button>
+                  <button type="button" class="brand-ad-btn" data-action="brand-ad-next" aria-label="Promo selanjutnya">${ICON.icon("chevron-right", "w-3.5 h-3.5", 2.4)}</button>
+                </div>
+              </div>
+            ` : ""}
           </section>
         ` : ""}
 
-        <section class="menu-section reveal" style="margin-top:12px">
+        <section class="menu-section" style="margin-top:12px">
           <div class="search-field">
             ${ICON.icon("search", "w-4 h-4", 2.2)}
             <input type="search" id="menu-search" class="search-input" placeholder="Cari di ${U.esc(brand.name)} (${brand.items.length} menu resmi)..." value="${U.esc(STORE.state.searchQuery)}" autocomplete="off">
@@ -942,6 +994,7 @@
       </div>
     `;
 
+    bindBrandAdTouch();
     renderMenuGrid();
   }
 
@@ -1063,7 +1116,7 @@
   function mustTryCard(brand, item) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
     return `
-      <button type="button" class="must-try-card reveal" data-item-id="${U.esc(item.id)}">
+      <button type="button" class="must-try-card" data-item-id="${U.esc(item.id)}">
         <span class="must-try-media">
           ${U.imageTag(item.image, item.name, "product-img")}
           <span class="menu-row-badge">-${discount}%</span>
@@ -1089,7 +1142,7 @@
       : "";
 
     return `
-      <button type="button" class="menu-row-card reveal" data-item-id="${U.esc(item.id)}">
+      <button type="button" class="menu-row-card" data-item-id="${U.esc(item.id)}">
         ${watermark}
         <span class="menu-row-media">
           ${U.imageTag(item.image, item.name, "product-img")}
@@ -1703,6 +1756,15 @@
     } else if (action === "promo-select-brand") {
       const bId = el.dataset.brandId;
       if (bId) handleBrandClick(bId, true);
+    } else if (action === "brand-ad-dot") {
+      setBrandAdSlide(parseInt(el.dataset.index, 10) || 0);
+      startBrandAdCarousel();
+    } else if (action === "brand-ad-prev") {
+      setBrandAdSlide(brandAdIndex - 1);
+      startBrandAdCarousel();
+    } else if (action === "brand-ad-next") {
+      setBrandAdSlide(brandAdIndex + 1);
+      startBrandAdCarousel();
     } else if (action === "quick-mode") {
       const mode = el.dataset.mode === "delivery" ? "delivery" : "pickup";
       STORE.state.orderMode = mode;
