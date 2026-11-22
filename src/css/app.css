@@ -5057,13 +5057,18 @@ body.has-bottom-bar .app-main {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 11px;
   font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 /* Physics-Spring Official Ad Banner Carousel */
@@ -6732,6 +6737,10 @@ img.is-img-failed {
   padding: 12px 18px 16px;
   background: rgba(248, 251, 255, 0.92);
   border-top: 1px solid rgba(15, 23, 42, 0.07);
+}
+
+.terms-modal-foot.is-single-action {
+  grid-template-columns: 1fr;
 }
 
 /* I. KOPI KENANGAN BUNDLING BUILDER MODAL */

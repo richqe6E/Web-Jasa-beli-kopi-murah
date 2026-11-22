@@ -974,8 +974,8 @@
           <span class="outlet-loc-pill">
             ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}
           </span>
-          <button type="button" class="outlet-story-btn" data-action="open-splash-stories">
-            ${ICON.icon("sparkles", "w-3.5 h-3.5", 2.2)} Lihat Semua Iklan
+          <button type="button" class="outlet-story-btn" data-action="open-how-to-order">
+            ${ICON.icon("circle-help", "w-3.5 h-3.5", 2.2)} Cara Order
           </button>
         </div>
 
@@ -2150,6 +2150,8 @@
     if (action === "nav-tab") {
       const tab = el.dataset.tab || "outlet";
       STORE.navigate(tab);
+    } else if (action === "open-how-to-order") {
+      showHowToOrderModal();
     } else if (action === "open-splash-stories") {
       openIntroSplash(0);
     } else if (action === "close-splash") {
@@ -2858,6 +2860,60 @@
     document.body.classList.add("modal-open");
     setTimeout(() => {
       const btn = modalRoot.querySelector("[data-action='accept-terms-modal']");
+      if (btn) btn.focus({ preventScroll: true });
+    }, 80);
+  }
+
+  const HOW_TO_ORDER_STEPS = [
+    { title: "Pilih Brand", desc: "Pilih brand pilihan Anda." },
+    { title: "Pilih Outlet", desc: "Pilih outlet terbaik sesuai lokasi Anda." },
+    { title: "Pilih Menu & Rincian", desc: "Pilih menu beserta rincian ukuran, rasa, atau paketnya." },
+    { title: "Cek Keranjang", desc: "Periksa kembali daftar dan jumlah pesanan Anda." },
+    { title: "Isi Data & Ketentuan", desc: "Isi nama, nomor WA, metode pengambilan, lalu baca syarat & ketentuan." },
+    { title: "Kirim lewat WhatsApp", desc: "Lanjutkan kirim rincian pesanan lewat WA ke admin." },
+    { title: "Cek Stok & Kirim QRIS", desc: "Admin mengecek ketersediaan menu di outlet; jika tersedia, admin mengirim QRIS atau metode pembayaran lainnya." },
+    { title: "Bayar & Tunggu", desc: "Lakukan pembayaran, lalu tunggu pesanan selesai dibuatkan." }
+  ];
+
+  function showHowToOrderModal() {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const brandName = U.esc(CFG.appName || "Jasdor Neli");
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" data-modal-overlay>
+        <div class="modal-card terms-modal-card" role="dialog" aria-modal="true" aria-labelledby="how-to-order-title">
+          <div class="terms-modal-hero">
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup Cara Order">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+            <span class="terms-modal-badge">${ICON.icon("circle-help", "w-3.5 h-3.5", 2.2)} Panduan Singkat ${brandName}</span>
+            <h2 id="how-to-order-title" class="modal-title" style="color:#fff;margin-top:6px">Cara Order</h2>
+            <p style="font-size:12px;color:rgba(255,255,255,0.88);margin-top:4px">8 langkah mudah memesan kopi &amp; camilan favoritmu.</p>
+          </div>
+
+          <div class="terms-modal-body">
+            ${HOW_TO_ORDER_STEPS.map((step, idx) => `
+              <article class="terms-clause-card">
+                <span class="terms-clause-num">${idx + 1}</span>
+                <div class="terms-clause-copy">
+                  <strong>${U.esc(step.title)}</strong>
+                  <p>${U.esc(step.desc)}</p>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+
+          <div class="terms-modal-foot is-single-action">
+            <button type="button" class="btn-primary" data-action="close-modal">
+              ${ICON.icon("check", "w-4 h-4", 2.4)} Mengerti
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+    setTimeout(() => {
+      const btn = modalRoot.querySelector("[data-action='close-modal']");
       if (btn) btn.focus({ preventScroll: true });
     }, 80);
   }
