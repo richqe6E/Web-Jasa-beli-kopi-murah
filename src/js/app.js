@@ -40,10 +40,6 @@
   let promoSnapTimer = null;
   let touchStartX = 0;
 
-  // Intro motion splash state (#splash-root)
-  let splashTimeout = null;
-  let splashAutoCloseTimer = null;
-
   // PWA install prompt & update state
   let deferredInstallPrompt = null;
   let lastHiddenAt = 0;
@@ -468,7 +464,7 @@
   }
 
   /* ============================================================
-     1. INTRO MOTION VIDEO SPLASH (#splash-root)
+     1. INTRO MOTION 3D SPLASH (#splash-root -> window.DLM_SPLASH)
      ============================================================ */
 
   function maybeShowIntroSplash() {
@@ -482,119 +478,16 @@
     openIntroSplash();
   }
 
-  function clearSplashTimers() {
-    if (splashTimeout) {
-      clearTimeout(splashTimeout);
-      splashTimeout = null;
-    }
-    if (splashAutoCloseTimer) {
-      clearTimeout(splashAutoCloseTimer);
-      splashAutoCloseTimer = null;
-    }
-  }
-
   function openIntroSplash() {
-    const root = $("#splash-root");
-    if (!root) return;
-
-    clearSplashTimers();
-    const brandName = U.esc(CFG.appName || "JasDor RisGold");
-    const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    root.innerHTML = `
-      <div class="splash-overlay" id="splash-overlay" role="dialog" aria-modal="true" aria-label="Animasi Pembuka ${brandName}">
-        <div class="splash-motion-card">
-          <div class="splash-motion-head">
-            <div class="splash-motion-brand">
-              <img src="src/assets/app-icon-64.png" alt="" width="28" height="28" />
-              <span>${brandName}</span>
-            </div>
-            <button type="button" class="splash-motion-skip" data-action="close-splash">
-              Lewati ${ICON.icon("x", "w-3.5 h-3.5", 2.4)}
-            </button>
-          </div>
-
-          <div class="splash-motion-stage">
-            <video
-              id="splash-intro-video"
-              class="splash-motion-video"
-              src="src/assets/intro-motion.mp4"
-              poster="src/assets/intro-motion-poster.webp"
-              ${reducedMotion ? "" : "autoplay"}
-              muted
-              playsinline
-              preload="auto"
-            ></video>
-          </div>
-
-          <div class="splash-motion-progress" aria-hidden="true">
-            <div class="splash-motion-progress-fill" id="splash-motion-fill"></div>
-          </div>
-
-          <div class="splash-motion-foot">
-            <div class="splash-motion-copy">
-              <strong>${brandName}</strong>
-              <span>Order Kopi &amp; Camilan Resmi Lebih Hemat</span>
-            </div>
-            <button type="button" class="btn-primary btn-sm" data-action="close-splash" style="min-height:38px;padding:0 14px;border-radius:999px;white-space:nowrap">
-              Mulai Pesan ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const video = $("#splash-intro-video");
-    const fill = $("#splash-motion-fill");
-
-    if (reducedMotion) {
-      if (fill) fill.style.width = "100%";
-      splashAutoCloseTimer = setTimeout(closeIntroSplash, 2200);
-      return;
+    if (window.DLM_SPLASH && typeof window.DLM_SPLASH.open === "function") {
+      window.DLM_SPLASH.open();
     }
-
-    if (video) {
-      video.muted = true;
-      video.playsInline = true;
-      video.addEventListener("timeupdate", () => {
-        if (fill && video.duration > 0) {
-          fill.style.width = `${Math.min(100, (video.currentTime / video.duration) * 100).toFixed(1)}%`;
-        }
-      });
-      video.addEventListener("ended", () => {
-        if (fill) fill.style.width = "100%";
-        clearSplashTimers();
-        splashAutoCloseTimer = setTimeout(closeIntroSplash, 420);
-      });
-      video.addEventListener("error", () => {
-        clearSplashTimers();
-        splashAutoCloseTimer = setTimeout(closeIntroSplash, 1600);
-      });
-      const playPromise = video.play();
-      if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => {
-          clearSplashTimers();
-          splashAutoCloseTimer = setTimeout(closeIntroSplash, 2400);
-        });
-      }
-    }
-
-    splashTimeout = setTimeout(closeIntroSplash, 12500);
   }
 
   function closeIntroSplash() {
-    clearSplashTimers();
-    const video = $("#splash-intro-video");
-    if (video) {
-      try { video.pause(); } catch (e) { /* ignore */ }
+    if (window.DLM_SPLASH && typeof window.DLM_SPLASH.close === "function") {
+      window.DLM_SPLASH.close();
     }
-    const overlay = $("#splash-overlay");
-    if (!overlay) return;
-    overlay.classList.add("is-closing");
-    setTimeout(() => {
-      const root = $("#splash-root");
-      if (root) root.innerHTML = "";
-    }, 380);
   }
 
   /* ============================================================
