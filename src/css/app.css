@@ -5771,3 +5771,648 @@ body.has-bottom-bar .app-main {
   font-size: 14px;
   text-align: center;
 }
+
+/* ============================================================
+   28. V5.0 UPGRADE:
+       - Apple/macOS Liquid Glass Sticky Header & Floating Bottom Dock
+       - Clean 4:5 HD Intro Splash + Trust Vector Strip
+       - Textured Curved Wave Hero Stage + Ambient Footage + Sculpted Peek Ads (#/outlet)
+       - Compact Method Switch & Real GPS Location Bar
+       - Brand-Themed Sculpted Peek Ad Stage (#/menu) — Zero Text/Controls Over Poster
+   ============================================================ */
+
+/* A. LIQUID GLASS STICKY HEADER (.app-top) — Always Pinned Anti-Scroll */
+.app-top {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(240, 247, 255, 0.62) 100%
+  );
+  -webkit-backdrop-filter: blur(26px) saturate(195%);
+  backdrop-filter: blur(26px) saturate(195%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(11, 107, 203, 0.08),
+    0 8px 26px -18px rgba(8, 79, 153, 0.28);
+  transition: background 0.28s var(--ease), box-shadow 0.28s var(--ease), border-color 0.28s var(--ease);
+}
+
+.app-top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.92) 30%,
+    rgba(11, 107, 203, 0.16) 50%,
+    rgba(255, 255, 255, 0.92) 70%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+.app-top.is-scrolled {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(241, 247, 255, 0.68) 100%
+  );
+  border-bottom-color: rgba(203, 224, 248, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0 rgba(11, 107, 203, 0.12),
+    0 14px 32px -20px rgba(8, 79, 153, 0.45);
+}
+
+.app-header .track-btn,
+.app-header .cart-btn,
+.app-header .icon-btn {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(242, 248, 255, 0.66) 100%
+  );
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 14px -8px rgba(11, 107, 203, 0.35),
+    0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+/* B. FLOATING LIQUID GLASS BOTTOM NAVIGATION DOCK (.bottom-nav & .bottom-bar) */
+.app-main {
+  padding: 6px var(--pad) calc(108px + var(--safe-b));
+}
+
+body.has-bottom-bar .app-main {
+  padding-bottom: calc(188px + var(--safe-b));
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: calc(10px + var(--safe-b));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 48;
+  width: calc(100% - 20px);
+  max-width: calc(var(--shell) - 20px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.74) 0%,
+    rgba(238, 246, 255, 0.62) 100%
+  );
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+  backdrop-filter: blur(28px) saturate(210%);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px rgba(11, 107, 203, 0.08),
+    0 18px 42px -18px rgba(8, 45, 96, 0.34),
+    0 4px 14px -6px rgba(15, 23, 42, 0.14);
+}
+
+/* Specular Liquid Glass Edge Rim (adapted from glass.html) */
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.3px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.25) 35%,
+    rgba(11, 107, 203, 0.12) 65%,
+    rgba(255, 255, 255, 0.82) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.bottom-nav-item {
+  position: relative;
+  min-height: 52px;
+  border-radius: 22px;
+  color: #475569;
+  transition: background 0.24s var(--ease), color 0.22s var(--ease), transform 0.16s var(--ease), box-shadow 0.24s var(--ease);
+}
+
+.bottom-nav-item.is-active {
+  color: var(--primary);
+  font-weight: 800;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(224, 240, 255, 0.72) 100%
+  );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.98),
+    0 6px 16px -8px rgba(11, 107, 203, 0.42);
+}
+
+.bottom-nav-item.is-active::before {
+  display: none;
+}
+
+.bottom-bar {
+  bottom: calc(82px + var(--safe-b));
+  width: calc(100% - 20px);
+  max-width: calc(var(--shell) - 20px);
+  border-radius: 22px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(241, 248, 255, 0.72) 100%
+  );
+  -webkit-backdrop-filter: blur(26px) saturate(195%);
+  backdrop-filter: blur(26px) saturate(195%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 16px 34px -18px rgba(8, 52, 112, 0.35);
+}
+
+.toast-root {
+  bottom: calc(162px + var(--safe-b));
+}
+
+@media (min-width: 600px) {
+  .bottom-nav {
+    bottom: 34px;
+    border-radius: 28px;
+  }
+  .bottom-bar {
+    bottom: 106px;
+    border-radius: 22px;
+  }
+}
+
+/* C. CLEAN 4:5 HD INTRO SPLASH + TRUST VECTOR STRIP (#splash-root) */
+.splash-card {
+  max-width: 396px;
+  border-radius: 28px;
+  background: #ffffff;
+  color: var(--ink);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 32px 80px -18px rgba(4, 18, 44, 0.78);
+}
+
+.splash-stage {
+  position: relative;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  max-height: 60dvh;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.splash-slide {
+  transform: scale(1.02);
+}
+
+.splash-slide-bg {
+  filter: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+.splash-trust-strip {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, #f5faff 0%, #e7f2ff 100%);
+  border-top: 1px solid rgba(11, 107, 203, 0.12);
+}
+
+.splash-trust-vec {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(11, 107, 203, 0.2));
+}
+
+.splash-trust-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.splash-trust-copy strong {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.splash-trust-copy span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.25;
+}
+
+.splash-footer {
+  padding: 11px 16px 14px;
+  background: #ffffff;
+  border-top: 1px solid var(--border);
+}
+
+.splash-dot {
+  background: #cbd5e1;
+}
+
+.splash-dot.is-active {
+  width: 22px;
+  background: var(--primary);
+}
+
+/* D. TEXTURED CURVED WAVE HERO STAGE + AMBIENT FOOTAGE + SCULPTED PEEK ADS (#/outlet) */
+.outlet-hero-stage {
+  position: relative;
+  margin: -6px calc(var(--pad) * -1) 0;
+  padding: 14px 0 42px;
+  background: linear-gradient(155deg, #073d7a 0%, #0b6bcb 52%, #1982ef 100%);
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.hero-ambient-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-ambient-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(22px) saturate(165%);
+  transform: scale(1.16);
+  opacity: 0.36;
+  transition: opacity 0.45s ease;
+}
+
+.hero-ambient-img.is-fading {
+  opacity: 0.14;
+}
+
+.hero-ambient-tint {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(380px 220px at 18% 12%, rgba(56, 189, 248, 0.35) 0%, transparent 72%),
+    linear-gradient(165deg, rgba(7, 56, 114, 0.72) 0%, rgba(11, 107, 203, 0.68) 54%, rgba(8, 72, 146, 0.82) 100%);
+}
+
+.hero-texture-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: 0.42;
+}
+
+.outlet-hero-top {
+  padding: 0 var(--pad);
+  margin-bottom: 12px;
+}
+
+.ad-showcase-carousel {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.ad-showcase-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding: 8px 16px 6px;
+}
+
+.ad-showcase-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
+  min-width: 100%;
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.ad-showcase-slide {
+  position: relative;
+  flex: 0 0 228px;
+  width: 228px;
+  aspect-ratio: auto;
+  overflow: visible;
+  background: transparent;
+  cursor: pointer;
+  transform: scale(0.92);
+  opacity: 0.76;
+  transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+}
+
+.ad-showcase-slide.is-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ad-sculpted-frame {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 30px 12px 30px 12px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.58);
+  box-shadow:
+    0 20px 38px -16px rgba(5, 22, 58, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.ad-showcase-slide.is-active .ad-sculpted-frame {
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 22px 42px -14px rgba(4, 18, 52, 0.8),
+    0 0 0 3px rgba(255, 255, 255, 0.22);
+}
+
+.ad-showcase-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: none;
+  transition: transform 0.55s var(--ease);
+}
+
+.ad-showcase-slide.is-active .ad-showcase-img {
+  transform: scale(1.02);
+}
+
+.ad-floating-brand {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1.5px solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 18px -6px rgba(8, 28, 68, 0.55);
+}
+
+.ad-floating-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 999px;
+}
+
+.ad-showcase-bar-external {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px var(--pad) 0;
+}
+
+.hero-wave-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 30px;
+  z-index: 3;
+  display: block;
+  pointer-events: none;
+}
+
+/* E. COMPACT PICKUP / DELIVERY CARD & REAL GPS BAR */
+.method-hub-card.is-compact {
+  margin-top: -18px;
+  padding: 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 26px -16px rgba(11, 107, 203, 0.35);
+}
+
+.gps-loc-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--primary-line);
+  background: linear-gradient(135deg, #f4f9ff 0%, #e9f3ff 100%);
+  font-size: 11.5px;
+  color: var(--primary-ink);
+}
+
+.gps-loc-bar.is-granted {
+  border-color: #a7f3d0;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  color: #065f46;
+}
+
+.gps-loc-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.gps-pulse-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+}
+
+.gps-loc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-line);
+  background: #ffffff;
+  color: var(--primary-strong);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.15s var(--ease), background 0.18s var(--ease);
+}
+
+.gps-loc-btn.is-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 6px 14px -6px rgba(11, 107, 203, 0.65);
+}
+
+.gps-loc-btn:active {
+  transform: scale(0.95);
+}
+
+.gps-loc-status {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* F. BRAND-THEMED SCULPTED PEEK AD STAGE (#/menu) — 100% UNOBSTRUCTED POSTERS */
+.brand-ad-stage {
+  position: relative;
+  margin-top: 12px;
+  padding: 14px 0 11px;
+  border-radius: 28px 14px 28px 14px;
+  overflow: hidden;
+  background: var(--brand-stage-bg, linear-gradient(145deg, #084f99 0%, #0b6bcb 100%));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 16px 32px -18px rgba(15, 23, 42, 0.45);
+}
+
+.brand-ad-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.brand-ad-ambient img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(22px) saturate(160%);
+  transform: scale(1.18);
+  opacity: 0.34;
+}
+
+.brand-ad-ambient-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--brand-stage-bg, linear-gradient(145deg, #084f99 0%, #0b6bcb 100%));
+  opacity: 0.68;
+}
+
+.brand-ad-texture {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 14px 14px;
+  opacity: 0.45;
+}
+
+.brand-ad-viewport {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  overflow: hidden;
+  padding: 2px 14px 4px;
+}
+
+.brand-ad-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  min-width: 100%;
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.brand-ad-slide {
+  flex: 0 0 212px;
+  width: 212px;
+  aspect-ratio: auto;
+  overflow: visible;
+  background: transparent;
+  transform: scale(0.92);
+  opacity: 0.78;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.42s ease;
+}
+
+.brand-ad-slide.is-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.brand-ad-frame {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 24px 10px 24px 10px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 16px 30px -14px rgba(15, 23, 42, 0.65);
+}
+
+.brand-ad-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: none;
+  transition: transform 0.55s var(--ease);
+}
+
+.brand-ad-slide.is-active .brand-ad-frame img {
+  transform: scale(1.02);
+}
+
+.brand-ad-bar-external {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px 0;
+}
+
+.brand-ad-bar-external .brand-ad-dots {
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.brand-ad-bar-external .brand-ad-btn {
+  background: rgba(15, 23, 42, 0.28);
+}

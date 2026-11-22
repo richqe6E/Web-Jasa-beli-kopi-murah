@@ -1,5 +1,5 @@
 /* ============================================================
-   KATALOG RESMI BRAND: JANJI JIWA (104 MENU, 8 IKLAN)
+   KATALOG RESMI BRAND: JANJI JIWA (104 MENU, 6 IKLAN V5 HD)
    File modular per brand agar mudah dikelola & ditelusuri.
    ============================================================ */
 (function () {
@@ -47,60 +47,46 @@
   ],
   "ads": [
     {
-      "id": "janji-jiwa-ad-01-ultimate-mix-holiday-set",
+      "id": "janji-jiwa-v5-01",
       "brandId": "janji-jiwa",
-      "filename": "01_Ultimate_Mix_Holiday_Set",
-      "image": "src/assets/ads/janji-jiwa/01-ultimate-mix-holiday-set.webp",
-      "isPortrait": false
+      "title": "Blooming Holiday Series",
+      "image": "src/assets/ads/janji-jiwa/v5/01-blooming-holiday.webp",
+      "isPortrait": true
     },
     {
-      "id": "janji-jiwa-ad-02-jiwa-loyalty-card",
+      "id": "janji-jiwa-v5-02",
       "brandId": "janji-jiwa",
-      "filename": "02_Jiwa_Loyalty_Card",
-      "image": "src/assets/ads/janji-jiwa/02-jiwa-loyalty-card.webp",
-      "isPortrait": false
+      "title": "Ube Series",
+      "image": "src/assets/ads/janji-jiwa/v5/02-ube-series.webp",
+      "isPortrait": true
     },
     {
-      "id": "janji-jiwa-ad-03-twist-of-japan-toast-drink",
+      "id": "janji-jiwa-v5-03",
       "brandId": "janji-jiwa",
-      "filename": "03_Twist_Of_Japan_Toast_Drink",
-      "image": "src/assets/ads/janji-jiwa/03-twist-of-japan-toast-drink.webp",
-      "isPortrait": false
+      "title": "Ube Matcha Detail",
+      "image": "src/assets/ads/janji-jiwa/v5/03-ube-matcha.webp",
+      "isPortrait": true
     },
     {
-      "id": "janji-jiwa-ad-04-double-twist-of-japan",
+      "id": "janji-jiwa-v5-04",
       "brandId": "janji-jiwa",
-      "filename": "04_Double_Twist_Of_Japan",
-      "image": "src/assets/ads/janji-jiwa/04-double-twist-of-japan.webp",
-      "isPortrait": false
+      "title": "Kiddos Pick 15K",
+      "image": "src/assets/ads/janji-jiwa/v5/04-kiddos-pick.webp",
+      "isPortrait": true
     },
     {
-      "id": "janji-jiwa-ad-05-1-toast-1-drink-30k",
+      "id": "janji-jiwa-v5-05",
       "brandId": "janji-jiwa",
-      "filename": "05_1_Toast_1_Drink_30K",
-      "image": "src/assets/ads/janji-jiwa/05-1-toast-1-drink-30k.webp",
-      "isPortrait": false
+      "title": "International Coffee Day 16K",
+      "image": "src/assets/ads/janji-jiwa/v5/05-coffee-day.webp",
+      "isPortrait": true
     },
     {
-      "id": "janji-jiwa-ad-06-enjoy-15-percent-off",
+      "id": "janji-jiwa-v5-06",
       "brandId": "janji-jiwa",
-      "filename": "06_Enjoy_15_Percent_Off",
-      "image": "src/assets/ads/janji-jiwa/06-enjoy-15-percent-off.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "janji-jiwa-ad-07-enjoy-20-percent-off",
-      "brandId": "janji-jiwa",
-      "filename": "07_Enjoy_20_Percent_Off",
-      "image": "src/assets/ads/janji-jiwa/07-enjoy-20-percent-off.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "janji-jiwa-ad-08-free-delivery-via-jiwa-plus",
-      "brandId": "janji-jiwa",
-      "filename": "08_Free_Delivery_Via_Jiwa_Plus",
-      "image": "src/assets/ads/janji-jiwa/08-free-delivery-via-jiwa-plus.webp",
-      "isPortrait": false
+      "title": "Taste of Thai",
+      "image": "src/assets/ads/janji-jiwa/v5/06-taste-of-thai.webp",
+      "isPortrait": true
     }
   ],
   "items": [

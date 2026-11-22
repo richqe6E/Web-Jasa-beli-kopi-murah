@@ -1,5 +1,5 @@
 /* ============================================================
-   KATALOG RESMI BRAND: FORE COFFEE (80 MENU, 5 IKLAN)
+   KATALOG RESMI BRAND: FORE COFFEE (80 MENU, 4 IKLAN V5 HD)
    File modular per brand agar mudah dikelola & ditelusuri.
    ============================================================ */
 (function () {
@@ -41,39 +41,32 @@
   ],
   "ads": [
     {
-      "id": "fore-ad-01-salt-bread-new",
+      "id": "fore-v5-01",
       "brandId": "fore",
-      "filename": "01_Salt_Bread_New",
-      "image": "src/assets/ads/fore/01-salt-bread-new.webp",
-      "isPortrait": false
+      "title": "Salt Bread Series",
+      "image": "src/assets/ads/fore/v5/01-salt-bread-meet.webp",
+      "isPortrait": true
     },
     {
-      "id": "fore-ad-02-salt-bread-combo-36k",
+      "id": "fore-v5-02",
       "brandId": "fore",
-      "filename": "02_Salt_Bread_Combo_36K",
-      "image": "src/assets/ads/fore/02-salt-bread-combo-36k.webp",
-      "isPortrait": false
+      "title": "Salt Bread Irresistible Bite",
+      "image": "src/assets/ads/fore/v5/02-salt-bread-bite.webp",
+      "isPortrait": true
     },
     {
-      "id": "fore-ad-03-bundle-junior-and-me-49k",
+      "id": "fore-v5-03",
       "brandId": "fore",
-      "filename": "03_Bundle_Junior_and_Me_49K",
-      "image": "src/assets/ads/fore/03-bundle-junior-and-me-49k.webp",
-      "isPortrait": false
+      "title": "Salt Bread Combo 36K",
+      "image": "src/assets/ads/fore/v5/03-salt-bread-combo.webp",
+      "isPortrait": true
     },
     {
-      "id": "fore-ad-04-hampers-foreveryone",
+      "id": "fore-v5-04",
       "brandId": "fore",
-      "filename": "04_Hampers_FOREveryone",
-      "image": "src/assets/ads/fore/04-hampers-foreveryone.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "fore-ad-05-setiap-fore-punya-cerita",
-      "brandId": "fore",
-      "filename": "05_Setiap_Fore_Punya_Cerita",
-      "image": "src/assets/ads/fore/05-setiap-fore-punya-cerita.webp",
-      "isPortrait": false
+      "title": "Bundle Junior & Me",
+      "image": "src/assets/ads/fore/v5/04-bundle-junior-and-me.webp",
+      "isPortrait": true
     }
   ],
   "items": [

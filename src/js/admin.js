@@ -1377,6 +1377,8 @@
       address: "",
       hours: "08:00 - 22:00",
       distance: "1.5 km",
+      latitude: "",
+      longitude: "",
       is_open: true
     };
 
@@ -1414,6 +1416,14 @@
             <div class="field" style="grid-column:1 / -1">
               <label class="field-label" for="of-address">Alamat Lengkap</label>
               <input type="text" id="of-address" class="input" value="${U.esc(o.address)}" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="of-lat">Latitude GPS (Opsional)</label>
+              <input type="number" id="of-lat" class="input mono" step="any" placeholder="-0.50353" value="${o.latitude != null ? U.esc(o.latitude) : ""}">
+            </div>
+            <div class="field">
+              <label class="field-label" for="of-lng">Longitude GPS (Opsional)</label>
+              <input type="number" id="of-lng" class="input mono" step="any" placeholder="117.15492" value="${o.longitude != null ? U.esc(o.longitude) : ""}">
             </div>
             <div class="field">
               <label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer">
@@ -1915,6 +1925,11 @@
       const name = $("#of-name").value.trim();
       const slug = existingId || `${brandId}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
+      const latRaw = $("#of-lat") ? $("#of-lat").value.trim() : "";
+      const lngRaw = $("#of-lng") ? $("#of-lng").value.trim() : "";
+      const latitude = latRaw !== "" && !Number.isNaN(Number(latRaw)) ? Number(latRaw) : null;
+      const longitude = lngRaw !== "" && !Number.isNaN(Number(lngRaw)) ? Number(lngRaw) : null;
+
       try {
         await SB.upsertOutlet({
           id: slug,
@@ -1923,7 +1938,9 @@
           area: $("#of-area").value.trim(),
           address: $("#of-address").value.trim(),
           hours: $("#of-hours").value.trim(),
-          distance: "1.5 km",
+          distance: "GPS",
+          latitude,
+          longitude,
           maps_query: `${name}, Samarinda`,
           is_open: $("#of-open").checked,
           is_active: true,

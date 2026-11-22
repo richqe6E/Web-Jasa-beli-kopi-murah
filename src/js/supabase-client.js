@@ -184,20 +184,31 @@
     }
 
     if (Array.isArray(payload.outlets) && payload.outlets.length) {
+      const localOutletMap = {};
+      (window.DLM_OUTLETS || []).forEach(lo => {
+        localOutletMap[lo.id] = lo;
+      });
       const mappedOutlets = payload.outlets
         .filter(o => o.is_active !== false)
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-        .map(o => ({
-          id: o.id,
-          brandId: o.brand_id,
-          name: o.name,
-          area: o.area,
-          address: o.address,
-          hours: o.hours || "08:00 - 22:00",
-          distance: o.distance || "1.0 km",
-          isOpen: o.is_open !== false,
-          mapsQuery: o.maps_query || `${o.name}, ${o.address}, Samarinda`
-        }));
+        .map(o => {
+          const loc = localOutletMap[o.id] || {};
+          const lat = o.latitude != null ? Number(o.latitude) : (typeof loc.lat === "number" ? loc.lat : null);
+          const lng = o.longitude != null ? Number(o.longitude) : (typeof loc.lng === "number" ? loc.lng : null);
+          return {
+            id: o.id,
+            brandId: o.brand_id,
+            name: o.name,
+            area: o.area,
+            address: o.address,
+            hours: o.hours || "08:00 - 22:00",
+            lat,
+            lng,
+            distance: null,
+            isOpen: o.is_open !== false,
+            mapsQuery: o.maps_query || `${o.name}, ${o.address}, Samarinda`
+          };
+        });
 
       if (mappedOutlets.length) {
         window.DLM_OUTLETS = mappedOutlets;

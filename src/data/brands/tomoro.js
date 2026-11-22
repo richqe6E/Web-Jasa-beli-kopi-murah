@@ -1,5 +1,5 @@
 /* ============================================================
-   KATALOG RESMI BRAND: TOMORO COFFEE (63 MENU, 10 IKLAN)
+   KATALOG RESMI BRAND: TOMORO COFFEE (63 MENU, 6 IKLAN V5 HD)
    File modular per brand agar mudah dikelola & ditelusuri.
    ============================================================ */
 (function () {
@@ -39,74 +39,46 @@
   ],
   "ads": [
     {
-      "id": "tomoro-ad-01-mont-blanc-series-poster",
+      "id": "tomoro-v5-01",
       "brandId": "tomoro",
-      "filename": "01_Mont_Blanc_Series_Poster",
-      "image": "src/assets/ads/tomoro/01-mont-blanc-series-poster.webp",
+      "title": "Mont Blanc Series",
+      "image": "src/assets/ads/tomoro/v5/01-mont-blanc-poster.webp",
       "isPortrait": true
     },
     {
-      "id": "tomoro-ad-02-limited-offers-saturday-deal",
+      "id": "tomoro-v5-02",
       "brandId": "tomoro",
-      "filename": "02_Limited_Offers_Saturday_Deal",
-      "image": "src/assets/ads/tomoro/02-limited-offers-saturday-deal.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "tomoro-ad-03-for-you-master-soe-americano",
-      "brandId": "tomoro",
-      "filename": "03_For_You_Master_SOE_Americano",
-      "image": "src/assets/ads/tomoro/03-for-you-master-soe-americano.webp",
+      "title": "Leveled Up Chocolate",
+      "image": "src/assets/ads/tomoro/v5/02-mont-blanc-leveled-up.webp",
       "isPortrait": true
     },
     {
-      "id": "tomoro-ad-04-for-you-master-soe-latte",
+      "id": "tomoro-v5-03",
       "brandId": "tomoro",
-      "filename": "04_For_You_Master_SOE_Latte",
-      "image": "src/assets/ads/tomoro/04-for-you-master-soe-latte.webp",
+      "title": "Triple Dubai Pistachio",
+      "image": "src/assets/ads/tomoro/v5/03-triple-pistachio-choco.webp",
       "isPortrait": true
     },
     {
-      "id": "tomoro-ad-05-for-you-master-soe-breve-latte",
+      "id": "tomoro-v5-04",
       "brandId": "tomoro",
-      "filename": "05_For_You_Master_SOE_Breve_Latte",
-      "image": "src/assets/ads/tomoro/05-for-you-master-soe-breve-latte.webp",
+      "title": "Triple Pistachio Latte",
+      "image": "src/assets/ads/tomoro/v5/04-triple-pistachio-latte.webp",
       "isPortrait": true
     },
     {
-      "id": "tomoro-ad-06-highlight-mont-blanc-expedition",
+      "id": "tomoro-v5-05",
       "brandId": "tomoro",
-      "filename": "06_Highlight_Mont_Blanc_Expedition",
-      "image": "src/assets/ads/tomoro/06-highlight-mont-blanc-expedition.webp",
-      "isPortrait": false
+      "title": "Crunchy Kunafa Pistachio",
+      "image": "src/assets/ads/tomoro/v5/05-triple-pistachio-kunafa.webp",
+      "isPortrait": true
     },
     {
-      "id": "tomoro-ad-07-highlight-1-minute-tomoro-coffee",
+      "id": "tomoro-v5-06",
       "brandId": "tomoro",
-      "filename": "07_Highlight_1_Minute_Tomoro_Coffee",
-      "image": "src/assets/ads/tomoro/07-highlight-1-minute-tomoro-coffee.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "tomoro-ad-08-banner-mont-blanc-series",
-      "brandId": "tomoro",
-      "filename": "08_Banner_Mont_Blanc_Series",
-      "image": "src/assets/ads/tomoro/08-banner-mont-blanc-series.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "tomoro-ad-09-banner-monthly-promo-daily-duo-bundle",
-      "brandId": "tomoro",
-      "filename": "09_Banner_Monthly_Promo_Daily_Duo_Bundle",
-      "image": "src/assets/ads/tomoro/09-banner-monthly-promo-daily-duo-bundle.webp",
-      "isPortrait": false
-    },
-    {
-      "id": "tomoro-ad-10-banner-glow-in-the-dark-sticker-bundle",
-      "brandId": "tomoro",
-      "filename": "10_Banner_Glow_In_The_Dark_Sticker_Bundle",
-      "image": "src/assets/ads/tomoro/10-banner-glow-in-the-dark-sticker-bundle.webp",
-      "isPortrait": false
+      "title": "Mont Blanc Lifestyle",
+      "image": "src/assets/ads/tomoro/v5/06-mont-blanc-lifestyle.webp",
+      "isPortrait": true
     }
   ],
   "items": [

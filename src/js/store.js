@@ -20,6 +20,12 @@
     outletArea: "Semua Area",
     sort: "popular",
     orderMode: "pickup",
+    userLocation: {
+      lat: null,
+      lng: null,
+      accuracy: null,
+      status: "idle" // "idle" | "loading" | "granted" | "denied" | "unsupported"
+    },
     customer: {
       name: "",
       phone: "",
@@ -118,6 +124,20 @@
     saveOutlet();
   }
 
+  function setUserLocation(patch) {
+    state.userLocation = Object.assign({}, state.userLocation, patch || {});
+  }
+
+  function getOutletDistanceKm(outlet) {
+    if (!outlet) return null;
+    const loc = state.userLocation;
+    if (!loc || loc.status !== "granted" || typeof loc.lat !== "number" || typeof loc.lng !== "number") {
+      return null;
+    }
+    if (typeof outlet.lat !== "number" || typeof outlet.lng !== "number") return null;
+    return U.haversineKm(loc.lat, loc.lng, outlet.lat, outlet.lng);
+  }
+
   function updateCustomer(patch) {
     state.customer = Object.assign({}, state.customer, patch || {});
     saveCustomer();
@@ -178,7 +198,8 @@
 
   window.DLM_STORE = {
     state, ROUTES, load, getBrand, getOutlet, getBrandOutlets, getBrandAreas,
-    getItem, setBrand, setOutlet, updateCustomer, getRoute, navigate,
+    getItem, setBrand, setOutlet, setUserLocation, getOutletDistanceKm,
+    updateCustomer, getRoute, navigate,
     stepIndex, prevRoute, canEnter, resetFlow, saveCustomer
   };
 })();

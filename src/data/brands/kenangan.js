@@ -1,5 +1,5 @@
 /* ============================================================
-   KATALOG RESMI BRAND: KOPI KENANGAN (80 MENU, 6 IKLAN)
+   KATALOG RESMI BRAND: KOPI KENANGAN (80 MENU, 6 IKLAN V5 HD)
    File modular per brand agar mudah dikelola & ditelusuri.
    ============================================================ */
 (function () {
@@ -33,46 +33,46 @@
   ],
   "ads": [
     {
-      "id": "kenangan-ad-01-purple-cloud-series-haechan",
+      "id": "kenangan-v5-01",
       "brandId": "kenangan",
-      "filename": "01_Purple_Cloud_Series_Haechan",
-      "image": "src/assets/ads/kenangan/01-purple-cloud-series-haechan.webp",
-      "isPortrait": false
+      "title": "Purple Cloud Series",
+      "image": "src/assets/ads/kenangan/v5/01-purple-cloud-haechan.webp",
+      "isPortrait": true
     },
     {
-      "id": "kenangan-ad-02-2-kopi-kenangan-mantan-29rb",
+      "id": "kenangan-v5-02",
       "brandId": "kenangan",
-      "filename": "02_2_Kopi_Kenangan_Mantan_29RB",
-      "image": "src/assets/ads/kenangan/02-2-kopi-kenangan-mantan-29rb.webp",
-      "isPortrait": false
+      "title": "Purple Cloud Beli 2 Diskon 25%",
+      "image": "src/assets/ads/kenangan/v5/02-purple-cloud-beli2.webp",
+      "isPortrait": true
     },
     {
-      "id": "kenangan-ad-03-everyday-double-cashback-70-percent",
+      "id": "kenangan-v5-03",
       "brandId": "kenangan",
-      "filename": "03_Everyday_Double_Cashback_70_Percent",
-      "image": "src/assets/ads/kenangan/03-everyday-double-cashback-70-percent.webp",
-      "isPortrait": false
+      "title": "Secret Recipe Black Aren",
+      "image": "src/assets/ads/kenangan/v5/03-kopi-susu-black-aren.webp",
+      "isPortrait": true
     },
     {
-      "id": "kenangan-ad-04-delivery-aplikasi-diskon-35-25",
+      "id": "kenangan-v5-04",
       "brandId": "kenangan",
-      "filename": "04_Delivery_Aplikasi_Diskon_35_25",
-      "image": "src/assets/ads/kenangan/04-delivery-aplikasi-diskon-35-25.webp",
-      "isPortrait": false
+      "title": "Secret Recipe Spanish Latte",
+      "image": "src/assets/ads/kenangan/v5/04-spanish-latte.webp",
+      "isPortrait": true
     },
     {
-      "id": "kenangan-ad-05-ajak-teman-buy-1-get-1",
+      "id": "kenangan-v5-05",
       "brandId": "kenangan",
-      "filename": "05_Ajak_Teman_Buy_1_Get_1",
-      "image": "src/assets/ads/kenangan/05-ajak-teman-buy-1-get-1.webp",
-      "isPortrait": false
+      "title": "Peanut Butter Panini",
+      "image": "src/assets/ads/kenangan/v5/05-peanut-butter-panini.webp",
+      "isPortrait": true
     },
     {
-      "id": "kenangan-ad-06-promo-romantis-roti-23rb",
+      "id": "kenangan-v5-06",
       "brandId": "kenangan",
-      "filename": "06_Promo_Romantis_Roti_23RB",
-      "image": "src/assets/ads/kenangan/06-promo-romantis-roti-23rb.webp",
-      "isPortrait": false
+      "title": "Taro Cloud Latte",
+      "image": "src/assets/ads/kenangan/v5/06-taro-cloud-latte.webp",
+      "isPortrait": true
     }
   ],
   "items": [

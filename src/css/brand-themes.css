@@ -12,6 +12,7 @@
   --brand-primary: #006041;
   --brand-soft: #e6f4ee;
   --brand-line: #b7e0ce;
+  --brand-stage-bg: linear-gradient(145deg, #064e3b 0%, #006041 55%, #0d7a56 100%);
 }
 
 [data-brand-theme="fore"] .chip.is-active,
@@ -45,6 +46,7 @@
   --brand-primary: #ff5a1f;
   --brand-soft: #fff3ec;
   --brand-line: #fed7aa;
+  --brand-stage-bg: linear-gradient(145deg, #9a3412 0%, #ea580c 55%, #ff7a3d 100%);
 }
 
 [data-brand-theme="tomoro"] .chip.is-active,
@@ -90,6 +92,7 @@
   --brand-primary: #991b1b;
   --brand-soft: #fef2f2;
   --brand-line: #fecaca;
+  --brand-stage-bg: linear-gradient(145deg, #5c1010 0%, #881337 55%, #b91c1c 100%);
 }
 
 [data-brand-theme="kenangan"] .chip.is-active,
@@ -123,6 +126,7 @@
   --brand-primary: #f43f5e;
   --brand-soft: #fff1f2;
   --brand-line: #fecdd3;
+  --brand-stage-bg: linear-gradient(145deg, #9f1239 0%, #e11d48 55%, #fb7185 100%);
 }
 
 [data-brand-theme="janji-jiwa"] .chip.is-active,

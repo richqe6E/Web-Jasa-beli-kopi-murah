@@ -46,18 +46,14 @@ window.DLM_CONFIG = {
     "janji-jiwa": "src/assets/brands/janji-jiwa-wordmark.webp"
   },
 
-  // Intro Splash Promo Stories saat pertama kali website dibuka
+  // Intro Splash Promo Stories saat pertama kali website dibuka (V5 HD 4:5 Clean Posters)
   splashPromos: [
     {
       id: "splash-tomoro-montblanc",
       brandId: "tomoro",
       brandName: "Tomoro Coffee",
       logo: "src/assets/brands/tomoro-official.webp",
-      badge: "SPESIAL TOMORO • DISKON S/D 45%",
-      title: "Mont Blanc Series & Master S.O.E.",
-      subtitle: "Cokelat spesial Pipiltin Cocoa & 100% Arabica lebih hemat lewat Dibeliin Lebih Murah.",
-      image: "src/assets/ads/tomoro/01-mont-blanc-series-poster.webp",
-      secondaryImage: "src/assets/ads/tomoro/08-banner-mont-blanc-series.webp",
+      image: "src/assets/ads/tomoro/v5/01-mont-blanc-poster.webp",
       accent: "#FF5A1F"
     },
     {
@@ -65,11 +61,7 @@ window.DLM_CONFIG = {
       brandId: "kenangan",
       brandName: "Kopi Kenangan",
       logo: "src/assets/brands/kenangan-official.webp",
-      badge: "NEW PURPLE CLOUD • HEMAT 42%",
-      title: "Purple Cloud Series & 2 Mantan 29RB",
-      subtitle: "Taro Cloud Matcha, Taro Cloud Latte & Kopi Kenangan Mantan harga spesial setiap hari.",
-      image: "src/assets/ads/kenangan/01-purple-cloud-series-haechan.webp",
-      secondaryImage: "src/assets/ads/kenangan/02-2-kopi-kenangan-mantan-29rb.webp",
+      image: "src/assets/ads/kenangan/v5/01-purple-cloud-haechan.webp",
       accent: "#991B1B"
     },
     {
@@ -77,106 +69,90 @@ window.DLM_CONFIG = {
       brandId: "fore",
       brandName: "Fore Coffee",
       logo: "src/assets/brands/fore-emblem.webp",
-      badge: "FORE COFFEE • HEMAT S/D 50%",
-      title: "New Salt Bread Combo & Kopi Dari Tani",
-      subtitle: "Salt Bread hangat gurih berpadu Butterscotch Sea Salt Latte favoritmu di Samarinda.",
-      image: "src/assets/ads/fore/02-salt-bread-combo-36k.webp",
-      secondaryImage: "src/assets/ads/fore/03-bundle-junior-and-me-49k.webp",
+      image: "src/assets/ads/fore/v5/01-salt-bread-meet.webp",
       accent: "#006041"
     },
     {
-      id: "splash-janjijiwa-japan",
+      id: "splash-janjijiwa-blooming",
       brandId: "janji-jiwa",
       brandName: "Janji Jiwa",
       logo: "src/assets/brands/janji-jiwa-official.webp",
-      badge: "JANJI JIWA • PROMO COMBO 30K",
-      title: "1 Jiwa Toast + 1 Drink & Twist of Japan",
-      subtitle: "Nikmati Borneo Latte, Crispy Chicken Mentai Toast, hingga Ultimate Holiday Set.",
-      image: "src/assets/ads/janji-jiwa/05-1-toast-1-drink-30k.webp",
-      secondaryImage: "src/assets/ads/janji-jiwa/03-twist-of-japan-toast-drink.webp",
+      image: "src/assets/ads/janji-jiwa/v5/01-blooming-holiday.webp",
       accent: "#E11D48"
     }
   ],
 
-  // Slider Kartu Iklan Resmi pada Halaman Utama Outlet (#/outlet)
+  // Slider Kartu Iklan Resmi HD 4:5 pada Halaman Utama Outlet (#/outlet)
   promoSlides: [
     {
       id: "ad-tomoro-1",
       brandId: "tomoro",
       brandName: "Tomoro Coffee",
-      badge: "TOMORO • MONT BLANC SERIES",
-      title: "Mocha & Choco Mont Blanc by Pipiltin",
-      subtitle: "Promo mulai Rp 18.500 sudah termasuk biaya jasa",
-      image: "src/assets/ads/tomoro/08-banner-mont-blanc-series.webp"
+      title: "Tomoro Mont Blanc Series",
+      image: "src/assets/ads/tomoro/v5/01-mont-blanc-poster.webp",
+      accent: "#FF5A1F"
     },
     {
       id: "ad-kenangan-1",
       brandId: "kenangan",
       brandName: "Kopi Kenangan",
-      badge: "KOPI KENANGAN • PURPLE CLOUD",
-      title: "New Purple Cloud Series x NCT Haechan",
-      subtitle: "Taro Cloud Matcha & Latte diskon spesial setiap hari",
-      image: "src/assets/ads/kenangan/01-purple-cloud-series-haechan.webp"
+      title: "Kopi Kenangan Purple Cloud Series",
+      image: "src/assets/ads/kenangan/v5/01-purple-cloud-haechan.webp",
+      accent: "#991B1B"
     },
     {
       id: "ad-fore-1",
       brandId: "fore",
       brandName: "Fore Coffee",
-      badge: "FORE COFFEE • SALT BREAD COMBO",
-      title: "Deliciously Buttery Salt Bread + Kopi Fore",
-      subtitle: "Tersedia di seluruh cabang Fore Coffee Samarinda",
-      image: "src/assets/ads/fore/02-salt-bread-combo-36k.webp"
+      title: "Fore Coffee Salt Bread Series",
+      image: "src/assets/ads/fore/v5/01-salt-bread-meet.webp",
+      accent: "#006041"
     },
     {
       id: "ad-janji-1",
       brandId: "janji-jiwa",
       brandName: "Janji Jiwa",
-      badge: "JANJI JIWA • COMBO HEMAT",
-      title: "1 Jiwa Toast + 1 Drink Mulai 30K",
-      subtitle: "Paduan roti panggang renyah & kopi susu dari hati",
-      image: "src/assets/ads/janji-jiwa/05-1-toast-1-drink-30k.webp"
-    },
-    {
-      id: "ad-kenangan-2",
-      brandId: "kenangan",
-      brandName: "Kopi Kenangan",
-      badge: "KOPI KENANGAN • DUO MANTAN",
-      title: "2 Kopi Kenangan Mantan Lebih Hemat",
-      subtitle: "Pesan bareng teman lebih murah tanpa minimal order",
-      image: "src/assets/ads/kenangan/02-2-kopi-kenangan-mantan-29rb.webp"
+      title: "Janji Jiwa Blooming Holiday Series",
+      image: "src/assets/ads/janji-jiwa/v5/01-blooming-holiday.webp",
+      accent: "#E11D48"
     },
     {
       id: "ad-tomoro-2",
       brandId: "tomoro",
       brandName: "Tomoro Coffee",
-      badge: "TOMORO • DAILY DUO BUNDLE",
-      title: "Daily Duo Bundle: Kopi + Pastry Hangat",
-      subtitle: "Aren Latte + Croissant / Danish harga spesial",
-      image: "src/assets/ads/tomoro/09-banner-monthly-promo-daily-duo-bundle.webp"
+      title: "Tomoro Triple Pistachio Series",
+      image: "src/assets/ads/tomoro/v5/03-triple-pistachio-choco.webp",
+      accent: "#FF5A1F"
+    },
+    {
+      id: "ad-kenangan-2",
+      brandId: "kenangan",
+      brandName: "Kopi Kenangan",
+      title: "Kopi Kenangan Secret Recipe Black Aren",
+      image: "src/assets/ads/kenangan/v5/03-kopi-susu-black-aren.webp",
+      accent: "#991B1B"
     },
     {
       id: "ad-fore-2",
       brandId: "fore",
       brandName: "Fore Coffee",
-      badge: "FORE • BUNDLE JUNIOR & ME",
-      title: "Fore Junior & Kopi Dari Tani Favorit",
-      subtitle: "Butterscotch Milk Crumble + Kopi Dari Tani",
-      image: "src/assets/ads/fore/03-bundle-junior-and-me-49k.webp"
+      title: "Fore Coffee Salt Bread Irresistible Bite",
+      image: "src/assets/ads/fore/v5/02-salt-bread-bite.webp",
+      accent: "#006041"
     },
     {
       id: "ad-janji-2",
       brandId: "janji-jiwa",
       brandName: "Janji Jiwa",
-      badge: "JANJI JIWA x CHEF RAY JANSON",
-      title: "A Twist of Japan: Menchi Katsu & Goma Toast",
-      subtitle: "Edisi kolaborasi spesial + 1 minuman segar",
-      image: "src/assets/ads/janji-jiwa/03-twist-of-japan-toast-drink.webp"
+      title: "Janji Jiwa Ube Series",
+      image: "src/assets/ads/janji-jiwa/v5/02-ube-series.webp",
+      accent: "#E11D48"
     }
   ],
 
   storageKeys: {
     deviceId: "dlm_device_id_v1",
-    splashSeen: "dlm_splash_seen_session_v4",
+    splashSeen: "dlm_splash_seen_session_v5",
     brand: "dlm_brand_v6",
     outlet: "dlm_outlet_v6",
     customer: "dlm_customer_v6",

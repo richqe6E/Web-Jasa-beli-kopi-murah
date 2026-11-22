@@ -64,6 +64,7 @@
   function init() {
     renderRoute();
     maybeShowIntroSplash();
+    initAutoGeolocation();
 
     window.addEventListener("hashchange", renderRoute);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -407,20 +408,17 @@
           <div class="splash-stage">
             ${promos.map((p, idx) => `
               <article class="splash-slide ${idx === splashIndex ? "is-active" : ""}" data-splash-slide="${idx}" style="--splash-accent:${U.esc(p.accent || "#0B6BCB")}">
-                <img src="${U.esc(p.image)}" alt="${U.esc(p.title)}" class="splash-slide-bg" loading="${idx === 0 ? "eager" : "lazy"}" />
-                <div class="splash-slide-shade"></div>
-                <div class="splash-slide-content">
-                  ${p.secondaryImage ? `
-                    <div class="splash-secondary-banner">
-                      <img src="${U.esc(p.secondaryImage)}" alt="${U.esc(p.brandName)}" loading="lazy" />
-                    </div>
-                  ` : ""}
-                  <span class="splash-badge">${ICON.icon("sparkles", "w-3 h-3", 2.2)} ${U.esc(p.badge)}</span>
-                  <h2 class="splash-title">${U.esc(p.title)}</h2>
-                  <p class="splash-sub">${U.esc(p.subtitle)}</p>
-                </div>
+                <img src="${U.esc(p.image)}" alt="${U.esc(p.brandName)}" class="splash-slide-bg" width="720" height="900" loading="${idx === 0 ? "eager" : "lazy"}" />
               </article>
             `).join("")}
+          </div>
+
+          <div class="splash-trust-strip">
+            <img src="src/assets/vectors/trust-promo-badge.svg" alt="" class="splash-trust-vec" width="38" height="38" />
+            <div class="splash-trust-copy">
+              <strong>Jasa Order Terpercaya</strong>
+              <span>Dapatkan Harga Promo Setiap Saat</span>
+            </div>
           </div>
 
           <div class="splash-footer">
@@ -539,22 +537,38 @@
     promoSlideIndex = ((index % slides.length) + slides.length) % slides.length;
 
     const track = $("#ad-showcase-track");
-    if (track) {
-      track.style.transform = `translate3d(-${promoSlideIndex * 100}%, 0, 0)`;
+    const viewport = $("#ad-showcase-viewport");
+    const slideEls = $$(".ad-showcase-slide");
+    if (track && viewport && slideEls[promoSlideIndex]) {
+      const targetEl = slideEls[promoSlideIndex];
+      const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      const centered = targetEl.offsetLeft - (viewport.clientWidth - targetEl.offsetWidth) / 2;
+      const offset = U.clamp(centered, 0, maxOffset);
+      track.style.transform = `translate3d(-${offset}px, 0, 0)`;
     }
-    $$(".ad-showcase-slide").forEach((el, idx) => {
+    slideEls.forEach((el, idx) => {
       el.classList.toggle("is-active", idx === promoSlideIndex);
     });
     $$(".promo-dot").forEach((dot, idx) => {
       dot.classList.toggle("is-active", idx === promoSlideIndex);
     });
+
+    const activeSlide = slides[promoSlideIndex];
+    const ambientImg = $("#hero-ambient-img");
+    if (ambientImg && activeSlide && ambientImg.dataset.currentSrc !== activeSlide.image) {
+      ambientImg.dataset.currentSrc = activeSlide.image;
+      ambientImg.classList.add("is-fading");
+      setTimeout(() => {
+        ambientImg.src = activeSlide.image;
+        ambientImg.classList.remove("is-fading");
+      }, 150);
+    }
   }
 
   function getBrandMenuAds(brand) {
     const b = brand || STORE.getBrand();
     if (!b || !Array.isArray(b.ads)) return [];
-    const landscapeAds = b.ads.filter(a => !a.isPortrait);
-    return landscapeAds.length ? landscapeAds : b.ads;
+    return b.ads;
   }
 
   function setBrandAdSlide(index) {
@@ -563,15 +577,28 @@
     brandAdIndex = ((index % list.length) + list.length) % list.length;
 
     const track = $("#brand-ad-track");
-    if (track) {
-      track.style.transform = `translate3d(-${brandAdIndex * 100}%, 0, 0)`;
+    const viewport = $("#brand-ad-viewport");
+    const slideEls = $$(".brand-ad-slide");
+    if (track && viewport && slideEls[brandAdIndex]) {
+      const targetEl = slideEls[brandAdIndex];
+      const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      const centered = targetEl.offsetLeft - (viewport.clientWidth - targetEl.offsetWidth) / 2;
+      const offset = U.clamp(centered, 0, maxOffset);
+      track.style.transform = `translate3d(-${offset}px, 0, 0)`;
     }
-    $$(".brand-ad-slide").forEach((el, idx) => {
+    slideEls.forEach((el, idx) => {
       el.classList.toggle("is-active", idx === brandAdIndex);
     });
     $$(".brand-ad-dot").forEach((dot, idx) => {
       dot.classList.toggle("is-active", idx === brandAdIndex);
     });
+
+    const activeAd = list[brandAdIndex];
+    const menuAmbient = $("#menu-ad-ambient-img");
+    if (menuAmbient && activeAd && menuAmbient.dataset.currentSrc !== activeAd.image) {
+      menuAmbient.dataset.currentSrc = activeAd.image;
+      menuAmbient.src = activeAd.image;
+    }
   }
 
   function startBrandAdCarousel() {
@@ -616,6 +643,111 @@
   }
 
   /* ============================================================
+     REAL GPS GEOLOCATION (HAVERSINE NEAREST OUTLET)
+     ============================================================ */
+
+  function initAutoGeolocation() {
+    if (!("geolocation" in navigator)) {
+      STORE.setUserLocation({ status: "unsupported" });
+      return;
+    }
+    if (navigator.permissions && typeof navigator.permissions.query === "function") {
+      navigator.permissions.query({ name: "geolocation" }).then(perm => {
+        if (perm && perm.state === "granted") {
+          requestUserLocation(false);
+        }
+      }).catch(() => { /* ignore */ });
+    }
+  }
+
+  function requestUserLocation(showFeedback) {
+    if (!("geolocation" in navigator)) {
+      STORE.setUserLocation({ status: "unsupported" });
+      if (showFeedback) toast("Browser ini belum mendukung deteksi GPS.", "error");
+      if (STORE.getRoute() === "outlet") renderLocationBar();
+      return;
+    }
+
+    STORE.setUserLocation({ status: "loading" });
+    if (STORE.getRoute() === "outlet") renderLocationBar();
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        STORE.setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy || 0),
+          status: "granted"
+        });
+        if (showFeedback) toast("Lokasi GPS terdeteksi! Outlet diurutkan dari yang terdekat.");
+        if (STORE.getRoute() === "outlet") {
+          renderLocationBar();
+          renderOutletList();
+        }
+      },
+      () => {
+        STORE.setUserLocation({ status: "denied" });
+        if (showFeedback) toast("Izin lokasi belum diaktifkan. Kamu tetap bisa memilih outlet per area.", "error");
+        if (STORE.getRoute() === "outlet") {
+          renderLocationBar();
+          renderOutletList();
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 120000 }
+    );
+  }
+
+  function renderLocationBar() {
+    const bar = $("#gps-loc-bar");
+    if (!bar) return;
+    const loc = STORE.state.userLocation || { status: "idle" };
+
+    if (loc.status === "granted") {
+      bar.className = "gps-loc-bar is-granted";
+      bar.innerHTML = `
+        <span class="gps-loc-left">
+          <span class="gps-pulse-dot"></span>
+          <span><strong>GPS Aktif</strong> • Diurutkan dari outlet terdekatmu</span>
+        </span>
+        <button type="button" class="gps-loc-btn" data-action="detect-location">
+          ${ICON.icon("refresh-cw", "w-3 h-3", 2.3)} Perbarui
+        </button>
+      `;
+    } else if (loc.status === "loading") {
+      bar.className = "gps-loc-bar is-loading";
+      bar.innerHTML = `
+        <span class="gps-loc-left">
+          ${ICON.icon("navigation", "w-3.5 h-3.5", 2.2)}
+          <span>Mendeteksi lokasi GPS kamu...</span>
+        </span>
+        <span class="gps-loc-status">Memuat</span>
+      `;
+    } else if (loc.status === "denied") {
+      bar.className = "gps-loc-bar is-idle";
+      bar.innerHTML = `
+        <span class="gps-loc-left">
+          ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.2)}
+          <span>GPS belum diizinkan • Urutan standar area</span>
+        </span>
+        <button type="button" class="gps-loc-btn" data-action="detect-location">
+          Coba Lagi
+        </button>
+      `;
+    } else {
+      bar.className = "gps-loc-bar is-idle";
+      bar.innerHTML = `
+        <span class="gps-loc-left">
+          ${ICON.icon("navigation", "w-3.5 h-3.5", 2.2)}
+          <span>Aktifkan GPS untuk saran <strong>outlet terdekat</strong></span>
+        </span>
+        <button type="button" class="gps-loc-btn is-primary" data-action="detect-location">
+          Deteksi Lokasi
+        </button>
+      `;
+    }
+  }
+
+  /* ============================================================
      TAB 1 — PILIH BRAND & LOKASI OUTLET (#/outlet)
      ============================================================ */
 
@@ -629,10 +761,16 @@
 
     const areas = STORE.getBrandAreas(selectedBrand.id);
     const delivery = STORE.state.orderMode === "delivery";
+    const initialSlide = slides[promoSlideIndex] || slides[0];
 
     main.innerHTML = `
-      <!-- Organic Curved Wave Hero Stage + Physics-Spring Official Ad Carousel -->
-      <section class="outlet-hero-stage reveal" aria-label="Promo & Iklan Kopi Samarinda">
+      <!-- Organic Textured Curved Hero Stage + Ambient Footage + Sculpted Peek Ad Showcase -->
+      <section class="outlet-hero-stage" aria-label="Promo & Iklan Kopi Samarinda">
+        <div class="hero-ambient-layer" aria-hidden="true">
+          ${initialSlide ? `<img src="${U.esc(initialSlide.image)}" alt="" id="hero-ambient-img" data-current-src="${U.esc(initialSlide.image)}" class="hero-ambient-img" />` : ""}
+          <div class="hero-ambient-tint"></div>
+          <div class="hero-texture-grid"></div>
+        </div>
         <span class="outlet-hero-orb orb-1" aria-hidden="true"></span>
         <span class="outlet-hero-orb orb-2" aria-hidden="true"></span>
 
@@ -646,22 +784,26 @@
         </div>
 
         <div class="ad-showcase-carousel" id="ad-showcase-carousel">
-          <div class="ad-showcase-viewport">
-            <div class="ad-showcase-track" id="ad-showcase-track" style="transform:translate3d(-${promoSlideIndex * 100}%,0,0)">
-              ${slides.map((slide, idx) => `
-                <article class="ad-showcase-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}" style="cursor:pointer">
-                  <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" loading="${idx === 0 ? "eager" : "lazy"}" decoding="async" />
-                  <div class="ad-showcase-overlay">
-                    <span class="ad-showcase-tag">${U.esc(slide.badge)}</span>
-                    <h2 class="ad-showcase-title">${U.esc(slide.title)}</h2>
-                    <p class="ad-showcase-sub">${U.esc(slide.subtitle)}</p>
-                  </div>
-                </article>
-              `).join("")}
+          <div class="ad-showcase-viewport" id="ad-showcase-viewport">
+            <div class="ad-showcase-track" id="ad-showcase-track">
+              ${slides.map((slide, idx) => {
+                const bObj = STORE.getBrand(slide.brandId);
+                const bLogo = getLockedBrandLogo(bObj);
+                return `
+                  <article class="ad-showcase-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}">
+                    <div class="ad-sculpted-frame">
+                      <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" width="720" height="900" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                    </div>
+                    <span class="ad-floating-brand" aria-hidden="true">
+                      <img src="${U.esc(bLogo)}" alt="" width="24" height="24" />
+                    </span>
+                  </article>
+                `;
+              }).join("")}
             </div>
           </div>
 
-          <div class="ad-showcase-bar">
+          <div class="ad-showcase-bar-external">
             <div class="promo-dots" role="tablist" aria-label="Slide iklan resmi">
               ${slides.map((slide, idx) => `
                 <button type="button" class="promo-dot ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-dot" data-index="${idx}" aria-label="Iklan ${idx + 1}: ${U.esc(slide.title)}"></button>
@@ -673,38 +815,34 @@
             </div>
           </div>
         </div>
+
+        <svg class="hero-wave-bottom" viewBox="0 0 480 34" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,12 C110,36 220,-6 350,20 C410,32 452,22 480,10 L480,34 L0,34 Z" fill="var(--bg)"></path>
+        </svg>
       </section>
 
-      <!-- Modern Pickup vs Delivery Dual-Method Selector Card -->
-      <section class="method-hub-card reveal" aria-label="Metode Pesanan">
+      <!-- Compact Modern Pickup vs Delivery Switch Card (No redundant info strip) -->
+      <section class="method-hub-card is-compact" aria-label="Metode Pesanan">
         <div class="method-hub-switch" role="group" aria-label="Pilih metode pengambilan">
           <button type="button" class="method-option-btn ${delivery ? "" : "is-active"}" data-action="quick-mode" data-mode="pickup" aria-pressed="${delivery ? "false" : "true"}">
             <span class="method-option-icon">${ICON.icon("store", "w-4 h-4", 2.2)}</span>
             <span class="method-option-copy">
               <strong>Pickup Outlet</strong>
-              <small>Ambil tanpa antre</small>
+              <small>Ambil sendiri</small>
             </span>
           </button>
           <button type="button" class="method-option-btn ${delivery ? "is-active" : ""}" data-action="quick-mode" data-mode="delivery" aria-pressed="${delivery ? "true" : "false"}">
             <span class="method-option-icon">${ICON.icon("truck", "w-4 h-4", 2.2)}</span>
             <span class="method-option-copy">
               <strong>Delivery Kurir</strong>
-              <small>Kirim ke alamatmu</small>
+              <small>Kirim driver</small>
             </span>
           </button>
-        </div>
-
-        <div class="method-info-strip" id="method-info-strip">
-          <span class="method-info-left">
-            ${ICON.icon(delivery ? "truck" : "clock", "w-4 h-4", 2.2)}
-            <span id="service-mode-label">${delivery ? "Dikirim via GoSend / Grab Instant ke titik lokasimu" : "Pesanan disiapkan barista, langsung ambil di kasir outlet"}</span>
-          </span>
-          <span class="method-info-badge" id="service-mode-badge">${delivery ? "Kurir Instant" : "10–15 Menit"}</span>
         </div>
       </section>
 
       <!-- Step 1: Pilih Brand Kopi Resmi -->
-      <section class="section reveal" id="brand-section" style="margin-top:18px">
+      <section class="section reveal" id="brand-section" style="margin-top:16px">
         <div class="section-head compact">
           <div>
             <p class="eyebrow">Langkah 1 • Katalog Resmi</p>
@@ -722,10 +860,12 @@
         <div class="section-head compact">
           <div>
             <p class="eyebrow">Langkah 2 • ${U.esc(selectedBrand.name)}</p>
-            <h2 class="section-title" id="outlet-section-title">Pilih Lokasi & Nama Outlet</h2>
+            <h2 class="section-title" id="outlet-section-title">Pilih Lokasi &amp; Nama Outlet</h2>
           </div>
           <span class="section-count" id="outlet-count">${STORE.getBrandOutlets(selectedBrand.id).length} cabang</span>
         </div>
+
+        <div id="gps-loc-bar" class="gps-loc-bar is-idle"></div>
 
         <div class="search-field">
           ${ICON.icon("search", "w-4 h-4", 2.2)}
@@ -742,25 +882,18 @@
       <footer class="app-footer reveal">
         <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
         <p>Jasa order minuman &amp; makanan resmi • ${CFG.city}, ${CFG.region}</p>
-        <div class="footer-links" style="flex-wrap:wrap">
+        <div class="footer-links">
           <button type="button" class="footer-link" data-action="open-splash-stories">
             ${ICON.icon("sparkles", "w-3.5 h-3.5", 2)} Poster Promo
           </button>
-          <button type="button" class="footer-link" data-action="nav-tab" data-tab="history">
-            ${ICON.icon("receipt", "w-3.5 h-3.5", 2)} Riwayat Saya
-          </button>
-          <a href="lisensi.html" class="footer-link">
-            ${ICON.icon("shield-check", "w-3.5 h-3.5", 2)} Lisensi Aset
-          </a>
-          <a href="admin.html" class="footer-link">
-            ${ICON.icon("layout-dashboard", "w-3.5 h-3.5", 2)} Panel Admin
-          </a>
         </div>
       </footer>
     `;
 
     bindCarouselTouch();
+    renderLocationBar();
     renderOutletList();
+    requestAnimationFrame(() => setPromoSlide(promoSlideIndex));
   }
 
   function bindCarouselTouch() {
@@ -833,17 +966,36 @@
     }
 
     const logoUrl = getLockedBrandLogo(brand);
+    const hasGps = STORE.state.userLocation && STORE.state.userLocation.status === "granted";
 
-    listEl.innerHTML = outlets.map((outlet, idx) => {
+    const enriched = outlets.map((outlet, origIdx) => ({
+      outlet,
+      origIdx,
+      distKm: STORE.getOutletDistanceKm(outlet)
+    }));
+
+    if (hasGps) {
+      enriched.sort((a, b) => {
+        if (a.distKm == null && b.distKm == null) return a.origIdx - b.origIdx;
+        if (a.distKm == null) return 1;
+        if (b.distKm == null) return -1;
+        return a.distKm - b.distKm;
+      });
+    }
+
+    listEl.innerHTML = enriched.map(({ outlet, distKm }, idx) => {
       const isOpen = outlet.isOpen !== false;
       const isSelected = STORE.state.selectedOutletId === outlet.id;
-      const isNearest = idx === 0 && !query && STORE.state.outletArea === "Semua Area";
+      const isNearest = hasGps && distKm != null && idx === 0 && !query && STORE.state.outletArea === "Semua Area";
+      const distText = hasGps && distKm != null
+        ? `${U.formatDistanceKm(distKm)}${isNearest ? " • Terdekat" : ""} • ${outlet.area}`
+        : `${outlet.area}`;
       return `
         <button type="button" class="outlet-card-v2 ${isSelected ? "is-selected" : ""} ${isOpen ? "" : "is-closed"}" data-outlet-id="${U.esc(outlet.id)}" data-outlet-open="${isOpen ? "true" : "false"}" aria-disabled="${isOpen ? "false" : "true"}">
           <div class="outlet-v2-top">
             <span class="distance-pill ${isNearest ? "is-nearest" : ""}">
               ${ICON.icon("map-pin", "w-3 h-3", 2.3)}
-              ${U.esc(outlet.distance)}${isNearest ? " • Terdekat" : ""} • ${U.esc(outlet.area)}
+              ${U.esc(distText)}
             </span>
             ${isOpen
               ? `<span class="open-badge"><span class="open-pulse-dot"></span> Buka</span>`
@@ -936,20 +1088,27 @@
           </button>
         </section>
 
-        <!-- Brand-Specific Smooth Multi-Slide Promo Carousel -->
+        <!-- Brand-Specific Unique Sculpted Peek Promo Stage (Zero Text & Zero Controls Over Poster) -->
         ${activeAds.length ? `
-          <section class="brand-ad-carousel" id="brand-ad-carousel" aria-label="Promo ${U.esc(brand.name)}">
-            <div class="brand-ad-viewport">
-              <div class="brand-ad-track" id="brand-ad-track" style="transform:translate3d(0,0,0)">
+          <section class="brand-ad-stage" id="brand-ad-carousel" aria-label="Promo ${U.esc(brand.name)}">
+            <div class="brand-ad-ambient" aria-hidden="true">
+              <img src="${U.esc(activeAds[0].image)}" alt="" id="menu-ad-ambient-img" data-current-src="${U.esc(activeAds[0].image)}" />
+              <div class="brand-ad-ambient-tint"></div>
+              <div class="brand-ad-texture"></div>
+            </div>
+            <div class="brand-ad-viewport" id="brand-ad-viewport">
+              <div class="brand-ad-track" id="brand-ad-track">
                 ${activeAds.map((ad, idx) => `
                   <div class="brand-ad-slide ${idx === 0 ? "is-active" : ""}">
-                    <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="800" height="360" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                    <div class="brand-ad-frame">
+                      <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="720" height="900" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                    </div>
                   </div>
                 `).join("")}
               </div>
             </div>
             ${activeAds.length > 1 ? `
-              <div class="brand-ad-bar">
+              <div class="brand-ad-bar-external">
                 <div class="brand-ad-dots" role="tablist" aria-label="Slide iklan ${U.esc(brand.name)}">
                   ${activeAds.map((_, idx) => `
                     <button type="button" class="brand-ad-dot ${idx === 0 ? "is-active" : ""}" data-action="brand-ad-dot" data-index="${idx}" aria-label="Promo ${idx + 1}"></button>
@@ -996,6 +1155,7 @@
 
     bindBrandAdTouch();
     renderMenuGrid();
+    requestAnimationFrame(() => setBrandAdSlide(0));
   }
 
   function sortItems(items, sort) {
@@ -1765,6 +1925,8 @@
     } else if (action === "brand-ad-next") {
       setBrandAdSlide(brandAdIndex + 1);
       startBrandAdCarousel();
+    } else if (action === "detect-location") {
+      requestUserLocation(true);
     } else if (action === "quick-mode") {
       const mode = el.dataset.mode === "delivery" ? "delivery" : "pickup";
       STORE.state.orderMode = mode;
@@ -1773,16 +1935,6 @@
         btn.classList.toggle("is-active", active);
         btn.setAttribute("aria-pressed", active ? "true" : "false");
       });
-      const lbl = $("#service-mode-label");
-      const bdg = $("#service-mode-badge");
-      if (lbl) {
-        lbl.textContent = mode === "delivery"
-          ? "Dikirim via GoSend / Grab Instant ke titik lokasimu"
-          : "Pesanan disiapkan barista, langsung ambil di kasir outlet";
-      }
-      if (bdg) {
-        bdg.textContent = mode === "delivery" ? "Kurir Instant" : "10–15 Menit";
-      }
     } else if (action === "reset-menu-filter") {
       STORE.state.activeCategory = "Semua";
       STORE.state.priceFilter = "all";
@@ -1874,6 +2026,11 @@
         }
         const eyebrowEl = $("#outlet-section .eyebrow");
         if (eyebrowEl && brand) eyebrowEl.textContent = `Langkah 2 • ${brand.name}`;
+        const matchingIdx = getPromoSlides().findIndex(s => s.brandId === brandId);
+        if (matchingIdx >= 0) {
+          setPromoSlide(matchingIdx);
+          startPromoCarousel();
+        }
         renderOutletList();
         if (scrollToOutlets) {
           const outSec = $("#outlet-section");
