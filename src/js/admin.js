@@ -292,7 +292,7 @@
             ${ICON.icon("calculator", "w-4 h-4", 2.2)} Menu & Aturan Keuntungan (${(state.dataset.menuItems || []).length})
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "outlets" ? "is-active" : ""}" data-tab="outlets">
-            ${ICON.icon("store", "w-4 h-4", 2.2)} Outlet Samarinda (${(state.dataset.outlets || []).length})
+            ${ICON.icon("store", "w-4 h-4", 2.2)} Outlet (${(state.dataset.outlets || []).length})
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "settings" ? "is-active" : ""}" data-tab="settings">
             ${ICON.icon("settings", "w-4 h-4", 2.2)} Pengaturan & Brand
@@ -482,8 +482,8 @@
           <div class="panel-head">
             <div>
               <p class="panel-eyebrow">Analitik Lokasi</p>
-              <h3 class="panel-title">Outlet Terbaik & Teramai di Samarinda</h3>
-              <p class="panel-sub">Cabang outlet yang paling sering dipilih pelanggan saat melakukan checkout.</p>
+              <h3 class="panel-title">Outlet Terbaik &amp; Teramai</h3>
+              <p class="panel-sub">Cabang outlet di Samarinda, Balikpapan &amp; Tenggarong yang paling sering dipilih pelanggan.</p>
             </div>
           </div>
           ${m.topOutlets.length ? `
@@ -680,49 +680,62 @@
       <section class="panel-card" style="background:linear-gradient(145deg,#ffffff 35%,#eef6ff 100%);border-color:var(--primary-line)">
         <div class="panel-head">
           <div>
-            <p class="panel-eyebrow">Aturan Nominal Keuntungan (Profit & Margin Engine)</p>
-            <h2 class="panel-title">Kalkulator Masal Selisih Harga, Modal HPP & Biaya Jasa</h2>
-            <p class="panel-sub">Atur patokan modal pembelian promo (% dari harga normal outlet), nominal biaya jasa per cup, dan target keuntungan selisih harga.</p>
+            <p class="panel-eyebrow">Skema Aktif Opsi 3 (Partner Reseller)</p>
+            <h2 class="panel-title">Aturan Laba Reseller &amp; Biaya Jasa Bertingkat</h2>
+            <p class="panel-sub">
+              <strong>Kopi Kenangan:</strong> 1 item fee Rp 500; ≥ 2 item fee Rp 1.000 (Reguler/Food) / Rp 1.500 (Large) •
+              <strong>Janji Jiwa:</strong> fee Rp 1.000/item •
+              <strong>Fore Coffee:</strong> harga dibulatkan Rp 500, fee dasar Rp 500 (Reguler/Deli) / Rp 1.000 (1L &amp; Large) •
+              <strong>Checkout:</strong> Biaya jasa Rp 1.000 (1 item) / GRATIS Rp 0 (≥ 2 item).
+            </p>
           </div>
+          <button type="button" class="btn btn-primary btn-xs" data-action="sync-reseller-hpp">
+            ${ICON.icon("refresh-cw", "w-3.5 h-3.5", 2.2)} Terapkan HPP Reseller Opsi 3
+          </button>
         </div>
 
-        <form id="bulk-profit-form" class="form-grid" style="align-items:end">
-          <div class="field">
-            <label class="field-label" for="rule-brand">Target Brand</label>
-            <select id="rule-brand" class="select">
-              <option value="all">Semua Brand (${(state.dataset.menuItems || []).length} Menu)</option>
-              ${(state.dataset.brands || []).map(b => `<option value="${U.esc(b.id)}">${U.esc(b.name)}</option>`).join("")}
-            </select>
-          </div>
+        <details style="margin-top:4px">
+          <summary style="font-size:12px;font-weight:700;color:var(--primary-strong);cursor:pointer;user-select:none">
+            Buka Kalkulator Masal Persentase (Mode Lanjutan / Override)
+          </summary>
+          <form id="bulk-profit-form" class="form-grid" style="align-items:end;margin-top:12px">
+            <div class="field">
+              <label class="field-label" for="rule-brand">Target Brand</label>
+              <select id="rule-brand" class="select">
+                <option value="all">Semua Brand (${(state.dataset.menuItems || []).length} Menu)</option>
+                ${(state.dataset.brands || []).map(b => `<option value="${U.esc(b.id)}">${U.esc(b.name)}</option>`).join("")}
+              </select>
+            </div>
 
-          <div class="field">
-            <label class="field-label" for="rule-cost-ratio">Modal Pembelian / HPP (% Harga Normal)</label>
-            <input type="number" id="rule-cost-ratio" class="input mono" value="${Number(settings.default_cost_ratio_percent || 55)}" min="10" max="95" step="1" required>
-            <span class="field-hint">Misal 55% dari harga normal Rp 20.000 = Modal Rp 11.000</span>
-          </div>
+            <div class="field">
+              <label class="field-label" for="rule-cost-ratio">Modal Pembelian / HPP (% Harga Normal)</label>
+              <input type="number" id="rule-cost-ratio" class="input mono" value="${Number(settings.default_cost_ratio_percent || 70)}" min="10" max="95" step="1" required>
+              <span class="field-hint">Hati-hati: menimpa HPP reseller dengan persentase tetap</span>
+            </div>
 
-          <div class="field">
-            <label class="field-label" for="rule-service-fee">Biaya Jasa per Item (Rp)</label>
-            <input type="number" id="rule-service-fee" class="input mono" value="${Number(settings.default_service_fee_per_item || 2000)}" min="0" step="1" required>
-            <span class="field-hint">Keuntungan dari komponen biaya jasa</span>
-          </div>
+            <div class="field">
+              <label class="field-label" for="rule-service-fee">Biaya Jasa per Item (Rp)</label>
+              <input type="number" id="rule-service-fee" class="input mono" value="${Number(settings.default_service_fee_per_item || 0)}" min="0" step="1" required>
+              <span class="field-hint">Default 0 karena memakai biaya jasa checkout bertingkat</span>
+            </div>
 
-          <div class="field">
-            <label class="field-label" for="rule-spread-margin">Target Untung Selisih Harga (Rp)</label>
-            <input type="number" id="rule-spread-margin" class="input mono" value="2500" min="0" step="1" required>
-            <span class="field-hint">Digunakan bila hitung ulang harga jual dicentang</span>
-          </div>
+            <div class="field">
+              <label class="field-label" for="rule-spread-margin">Target Untung Selisih Harga (Rp)</label>
+              <input type="number" id="rule-spread-margin" class="input mono" value="500" min="0" step="1" required>
+              <span class="field-hint">Digunakan bila hitung ulang harga jual dicentang</span>
+            </div>
 
-          <div class="field">
-            <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;margin-bottom:8px">
-              <input type="checkbox" id="rule-recalc-selling">
-              <span>Hitung ulang Harga Jual Promo otomatis</span>
-            </label>
-            <button type="submit" class="btn btn-primary" style="width:100%">
-              ${ICON.icon("calculator", "w-4 h-4", 2.2)} Terapkan Aturan Keuntungan
-            </button>
-          </div>
-        </form>
+            <div class="field">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;margin-bottom:8px">
+                <input type="checkbox" id="rule-recalc-selling">
+                <span>Hitung ulang Harga Jual Promo otomatis</span>
+              </label>
+              <button type="submit" class="btn btn-soft" style="width:100%">
+                ${ICON.icon("calculator", "w-4 h-4", 2.2)} Terapkan Persentase Manual
+              </button>
+            </div>
+          </form>
+        </details>
       </section>
 
       <section class="panel-card">
@@ -813,7 +826,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 4 — SAMARINDA OUTLETS MANAGEMENT
+     TAB 4 — MULTI-CITY OUTLETS MANAGEMENT
      ------------------------------------------------------------ */
 
   function renderOutletsTab() {
@@ -825,14 +838,17 @@
       <section class="panel-card">
         <div class="panel-head">
           <div>
-            <p class="panel-eyebrow">Lokasi Cabang</p>
-            <h2 class="panel-title">Manajemen Outlet Samarinda</h2>
-            <p class="panel-sub">Aktifkan/nonaktifkan status buka outlet secara real-time atau tambahkan cabang baru.</p>
+            <p class="panel-eyebrow">Lokasi Cabang Multi-Kota</p>
+            <h2 class="panel-title">Manajemen Outlet (Samarinda, Balikpapan &amp; Tenggarong)</h2>
+            <p class="panel-sub">Kelola cabang resmi, koordinat GPS, dan jam operasional WITA. Catatan: Tomoro Coffee berstatus Coming Soon (0 cabang aktif).</p>
           </div>
           <div class="toolbar-row">
             <select id="admin-outlet-brand" class="select" style="width:auto;min-height:38px" aria-label="Filter brand outlet">
-              <option value="all" ${state.outletBrandFilter === "all" ? "selected" : ""}>Semua Brand</option>
-              ${(state.dataset.brands || []).map(b => `<option value="${U.esc(b.id)}" ${state.outletBrandFilter === b.id ? "selected" : ""}>${U.esc(b.name)}</option>`).join("")}
+              <option value="all" ${state.outletBrandFilter === "all" ? "selected" : ""}>Semua Brand (${(state.dataset.outlets || []).length})</option>
+              ${(state.dataset.brands || []).map(b => {
+                const cnt = (state.dataset.outlets || []).filter(o => o.brand_id === b.id).length;
+                return `<option value="${U.esc(b.id)}" ${state.outletBrandFilter === b.id ? "selected" : ""}>${U.esc(b.name)}${cnt === 0 ? " (Coming Soon)" : ` (${cnt})`}</option>`;
+              }).join("")}
             </select>
             <button type="button" class="btn btn-primary btn-xs" data-action="open-outlet-modal">
               ${ICON.icon("plus", "w-3.5 h-3.5", 2.4)} Tambah Outlet
@@ -846,25 +862,38 @@
               <tr>
                 <th>Nama Outlet</th>
                 <th>Brand</th>
-                <th>Area</th>
-                <th>Alamat</th>
+                <th>Kota / Area</th>
+                <th>Alamat &amp; GPS</th>
                 <th>Jam Operasional</th>
-                <th>Status</th>
+                <th>Status (Manual &amp; WITA)</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              ${outlets.map(o => `
+              ${outlets.length ? outlets.map(o => {
+                const wita = U.getOutletOpenStatus({ hours: o.hours, isOpen: o.is_open !== false });
+                const hasGps = o.latitude != null && o.longitude != null;
+                return `
                 <tr>
                   <td><strong>${U.esc(o.name)}</strong></td>
                   <td><strong>${U.esc(o.brand_id.toUpperCase())}</strong></td>
                   <td>${U.esc(o.area)}</td>
-                  <td style="font-size:12px;color:var(--body)">${U.esc(o.address)}</td>
+                  <td style="font-size:12px;color:var(--body)">
+                    <div>${U.esc(o.address)}</div>
+                    <small class="mono" style="color:${hasGps ? "var(--success)" : "var(--muted)"}">
+                      ${hasGps ? `GPS: ${Number(o.latitude).toFixed(4)}, ${Number(o.longitude).toFixed(4)}` : "GPS belum diisi"}
+                    </small>
+                  </td>
                   <td class="mono" style="font-size:12px">${U.esc(o.hours)}</td>
                   <td>
-                    <button type="button" class="status-badge ${o.is_open !== false ? "completed" : "cancelled"}" data-action="toggle-outlet-open" data-id="${U.esc(o.id)}" style="border:0">
-                      ${o.is_open !== false ? "Buka" : "Tutup"}
-                    </button>
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">
+                      <button type="button" class="status-badge ${o.is_open !== false ? "completed" : "cancelled"}" data-action="toggle-outlet-open" data-id="${U.esc(o.id)}" style="border:0">
+                        ${o.is_open !== false ? "Aktif (Buka)" : "Nonaktif (Tutup)"}
+                      </button>
+                      <small style="font-size:10.5px;font-weight:700;color:${wita.isOpen ? "var(--success)" : "var(--danger)"}">
+                        ${wita.reason === "manual" ? "Ditutup manual admin" : (wita.is24h ? "WITA: Buka 24 Jam" : (wita.isOpen ? "WITA: Sedang Buka" : "WITA: Tutup (Jam Toko)"))}
+                      </small>
+                    </div>
                   </td>
                   <td>
                     <div style="display:flex;gap:6px">
@@ -873,7 +902,8 @@
                     </div>
                   </td>
                 </tr>
-              `).join("")}
+              `;
+              }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Belum ada outlet aktif untuk brand ini (Coming Soon).</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -914,26 +944,26 @@
 
           <div class="field">
             <label class="field-label" for="set-city">Kota Operasional</label>
-            <input type="text" id="set-city" class="input" value="${U.esc(s.city || "Samarinda")}" required>
+            <input type="text" id="set-city" class="input" value="${U.esc(s.city || "Samarinda, Balikpapan & Tenggarong")}" required>
           </div>
 
           <div class="field">
             <label class="field-label" for="set-fee-mode">Mode Perhitungan Biaya Jasa</label>
             <select id="set-fee-mode" class="select">
+              <option value="flat_per_order" ${s.service_fee_mode === "flat_per_order" || !s.service_fee_mode ? "selected" : ""}>Biaya Jasa Bertingkat (1 item Rp 1.000 • ≥2 item GRATIS)</option>
               <option value="included_per_item" ${s.service_fee_mode === "included_per_item" ? "selected" : ""}>Termasuk di Harga Jual per Item</option>
-              <option value="flat_per_order" ${s.service_fee_mode === "flat_per_order" ? "selected" : ""}>Biaya Jasa Flat per Transaksi Checkout</option>
-              <option value="both" ${s.service_fee_mode === "both" ? "selected" : ""}>Gabungan (Per Item + Flat per Order)</option>
+              <option value="both" ${s.service_fee_mode === "both" ? "selected" : ""}>Gabungan (Per Item + Bertingkat Order)</option>
             </select>
           </div>
 
           <div class="field">
             <label class="field-label" for="set-fee-item">Biaya Jasa Default per Item (Rp)</label>
-            <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 2000)}" min="0" step="1">
+            <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 0)}" min="0" step="1">
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-fee-order">Biaya Jasa Flat per Transaksi (Rp)</label>
-            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order || 0)}" min="0" step="1">
+            <label class="field-label" for="set-fee-order">Biaya Jasa Order 1 Item (Rp)</label>
+            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order != null ? s.default_service_fee_per_order : 1000)}" min="0" step="1">
           </div>
 
           <div class="field">
@@ -1093,7 +1123,7 @@
               </select>
             </div>
             <div class="field">
-              <label class="field-label" for="man-outlet">Outlet Samarinda</label>
+              <label class="field-label" for="man-outlet">Outlet Resmi</label>
               <select id="man-outlet" class="select">
                 ${outlets.map(o => `<option value="${U.esc(o.id)}">${U.esc(o.name)} (${U.esc(o.area)})</option>`).join("")}
               </select>
@@ -1139,17 +1169,17 @@
     const brands = state.dataset.brands || [];
     const it = existing || {
       id: "",
-      brand_id: brands[0] ? brands[0].id : "tomoro",
+      brand_id: brands.some(b => b.id === "kenangan") ? "kenangan" : (brands[0] ? brands[0].id : "kenangan"),
       name: "",
-      category: "Signature",
+      category: "Coffee",
       type: "drink",
       description: "",
-      info: "Disajikan segar • 16 oz",
-      image_url: "src/assets/products/iced-coffee.webp",
+      info: "Disajikan segar sesuai standar outlet resmi",
+      image_url: "src/assets/menus/kenangan/kenangan-kopi-kenangan-mantan.webp",
       price_original: 22000,
-      price_cost: 10000,
-      price_discount: 14500,
-      service_fee_unit: 2000,
+      price_cost: 14500,
+      price_discount: 15000,
+      service_fee_unit: 0,
       is_best_seller: false,
       is_available: true
     };
@@ -1283,90 +1313,36 @@
     }
   }
 
-  function buildDefaultOptionGroups(type) {
-    if (type === "food") {
-      return [
-        {
-          id: "addons",
-          label: "Tambahan",
-          helper: "Bisa lebih dari 1",
-          type: "multiple",
-          required: false,
-          max: 3,
-          options: [
-            { id: "extra-cheese", label: "Extra Keju", price: 4000, note: "" },
-            { id: "extra-butter", label: "Extra Butter", price: 3000, note: "" }
-          ]
-        }
-      ];
-    }
-    return [
-      {
-        id: "temp",
-        label: "Suhu",
-        helper: "Pilih 1",
-        type: "single",
-        required: true,
-        defaultOptionId: "iced",
-        options: [
-          { id: "iced", label: "Iced", price: 0, note: "Dingin" },
-          { id: "hot", label: "Hot", price: 0, note: "Panas" }
-        ]
-      },
-      {
-        id: "size",
-        label: "Ukuran",
-        helper: "Pilih 1",
-        type: "single",
-        required: true,
-        defaultOptionId: "regular",
-        options: [
-          { id: "regular", label: "Regular", price: 0, note: "16 oz" },
-          { id: "large", label: "Large", price: 3500, note: "22 oz" }
-        ]
-      },
-      {
-        id: "sugar",
-        label: "Tingkat Gula",
-        helper: "Pilih 1",
-        type: "single",
-        required: true,
-        defaultOptionId: "normal",
-        options: [
-          { id: "normal", label: "100%", price: 0, note: "Normal" },
-          { id: "less", label: "70%", price: 0, note: "Less sugar" },
-          { id: "half", label: "50%", price: 0, note: "Half sugar" },
-          { id: "none", label: "0%", price: 0, note: "No sugar" }
-        ]
-      },
-      {
-        id: "ice",
-        label: "Porsi Es",
-        helper: "Pilih 1",
-        type: "single",
-        required: true,
-        defaultOptionId: "normal",
-        dependsOn: { groupId: "temp", optionId: "iced" },
-        options: [
-          { id: "normal", label: "Normal", price: 0, note: "Es normal" },
-          { id: "less", label: "Less", price: 0, note: "Sedikit es" },
-          { id: "none", label: "No Ice", price: 0, note: "Tanpa es" }
-        ]
-      },
-      {
-        id: "toppings",
-        label: "Topping",
-        helper: "Bisa lebih dari 1",
-        type: "multiple",
-        required: false,
-        max: 3,
-        options: [
-          { id: "extra-shot", label: "Extra Espresso", price: 5000, note: "" },
-          { id: "grass-jelly", label: "Grass Jelly", price: 4000, note: "" },
-          { id: "cheese-foam", label: "Cheese Foam", price: 6000, note: "" }
-        ]
+  function buildDefaultOptionGroups(brandId, type, name, category) {
+    if (typeof window.DLM_HYDRATE_ITEM === "function") {
+      const hydrated = window.DLM_HYDRATE_ITEM({
+        brandId: brandId || "kenangan",
+        type: type || "drink",
+        name: name || "",
+        category: category || ""
+      });
+      if (hydrated && Array.isArray(hydrated.optionGroups)) {
+        return hydrated.optionGroups;
       }
-    ];
+    }
+    return [];
+  }
+
+  function computeResellerCostUnit(item) {
+    const sell = Number(item.price_discount || 0);
+    const cat = String(item.category || "").toLowerCase();
+    const name = String(item.name || "").toLowerCase();
+    if (item.brand_id === "kenangan") {
+      return Math.max(0, sell - 500);
+    }
+    if (item.brand_id === "janji-jiwa") {
+      return Math.max(0, sell - 1000);
+    }
+    if (item.brand_id === "fore") {
+      const is1L = name.includes("1l") || cat.includes("1l") || cat.includes("1 liter");
+      return Math.max(0, sell - (is1L ? 1000 : 500));
+    }
+    return Number(item.price_cost || sell);
   }
 
   function openOutletModal(outletId) {
@@ -1374,12 +1350,12 @@
     const brands = state.dataset.brands || [];
     const o = existing || {
       id: "",
-      brand_id: brands[0] ? brands[0].id : "tomoro",
+      brand_id: brands.some(b => b.id === "kenangan") ? "kenangan" : (brands[0] ? brands[0].id : "kenangan"),
       name: "",
-      area: "Samarinda Ulu",
+      area: "Samarinda",
       address: "",
       hours: "08:00 - 22:00",
-      distance: "1.5 km",
+      distance: "GPS",
       latitude: "",
       longitude: "",
       is_open: true
@@ -1391,7 +1367,7 @@
         <form id="outlet-form" class="admin-modal" role="dialog" aria-modal="true" data-existing-id="${U.esc(existing ? existing.id : "")}">
           <div class="admin-modal-head">
             <div>
-              <div class="panel-eyebrow">Lokasi Cabang</div>
+              <div class="panel-eyebrow">Lokasi Cabang Multi-Kota</div>
               <h3 class="panel-title">${existing ? "Edit Outlet" : "Tambah Outlet Baru"}</h3>
             </div>
             <button type="button" class="btn btn-outline btn-xs" data-action="close-admin-modal">Tutup</button>
@@ -1406,11 +1382,11 @@
             </div>
             <div class="field">
               <label class="field-label" for="of-name">Nama Outlet</label>
-              <input type="text" id="of-name" class="input" value="${U.esc(o.name)}" placeholder="Contoh: Big Mall Samarinda" required>
+              <input type="text" id="of-name" class="input" value="${U.esc(o.name)}" placeholder="Contoh: Big Mall Samarinda / E-Walk Balikpapan" required>
             </div>
             <div class="field">
-              <label class="field-label" for="of-area">Area Kecamatan</label>
-              <input type="text" id="of-area" class="input" value="${U.esc(o.area)}" placeholder="Samarinda Ulu" required>
+              <label class="field-label" for="of-area">Kota / Area</label>
+              <input type="text" id="of-area" class="input" value="${U.esc(o.area)}" placeholder="Samarinda / Balikpapan / Tenggarong" required>
             </div>
             <div class="field">
               <label class="field-label" for="of-hours">Jam Operasional</label>
@@ -1664,6 +1640,27 @@
       } catch (err) {
         toast(err.message, "error");
       }
+    } else if (action === "sync-reseller-hpp") {
+      const targetItems = (state.dataset.menuItems || []).filter(m =>
+        ["kenangan", "fore", "janji-jiwa"].includes(m.brand_id)
+      );
+      if (!targetItems.length) return;
+      if (!confirm(`Terapkan HPP Modal Reseller Opsi 3 & Biaya Jasa Rp 0/item pada ${targetItems.length} menu aktif (Kenangan, Fore, Janji Jiwa)?`)) return;
+      try {
+        const nowIso = new Date().toISOString();
+        const updates = targetItems.map(m => Object.assign({}, m, {
+          price_cost: computeResellerCostUnit(m),
+          service_fee_unit: 0,
+          updated_at: nowIso
+        }));
+        for (let i = 0; i < updates.length; i += 100) {
+          await SB.upsertMenuItem(updates.slice(i, i + 100));
+        }
+        toast(`HPP Reseller Opsi 3 berhasil diterapkan ke ${updates.length} menu!`);
+        await reloadData();
+      } catch (err) {
+        toast("Gagal menerapkan HPP Reseller: " + err.message, "error");
+      }
     } else if (action === "edit-brand") {
       openBrandModal(actEl.dataset.id);
     }
@@ -1909,7 +1906,7 @@
           is_available: $("#mf-avail").checked,
           option_groups: (existingObj && Array.isArray(existingObj.option_groups) && existingObj.option_groups.length)
             ? existingObj.option_groups
-            : buildDefaultOptionGroups($("#mf-type").value),
+            : buildDefaultOptionGroups(brandId, $("#mf-type").value, name, $("#mf-category").value.trim()),
           sort_order: existingObj ? existingObj.sort_order : 10,
           updated_at: new Date().toISOString()
         });
@@ -1933,6 +1930,7 @@
       const lngRaw = $("#of-lng") ? $("#of-lng").value.trim() : "";
       const latitude = latRaw !== "" && !Number.isNaN(Number(latRaw)) ? Number(latRaw) : null;
       const longitude = lngRaw !== "" && !Number.isNaN(Number(lngRaw)) ? Number(lngRaw) : null;
+      const addrVal = $("#of-address").value.trim();
 
       try {
         await SB.upsertOutlet({
@@ -1940,12 +1938,12 @@
           brand_id: brandId,
           name,
           area: $("#of-area").value.trim(),
-          address: $("#of-address").value.trim(),
+          address: addrVal,
           hours: $("#of-hours").value.trim(),
           distance: "GPS",
           latitude,
           longitude,
-          maps_query: `${name}, Samarinda`,
+          maps_query: `${name}, ${addrVal}`,
           is_open: $("#of-open").checked,
           is_active: true,
           sort_order: existingObj && existingObj.sort_order != null ? existingObj.sort_order : 10,

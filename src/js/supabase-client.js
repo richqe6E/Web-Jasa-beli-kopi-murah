@@ -370,12 +370,13 @@
     });
   }
 
-  async function upsertMenuItem(row) {
+  async function upsertMenuItem(rowOrRows) {
+    const body = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
     return request("/rest/v1/menu_items", {
       method: "POST",
       useAuth: true,
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: [row]
+      body
     });
   }
 
