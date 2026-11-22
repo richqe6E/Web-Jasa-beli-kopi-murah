@@ -1208,12 +1208,15 @@
     }
 
     listEl.innerHTML = enriched.map(({ outlet, distKm }, idx) => {
-      const isOpen = outlet.isOpen !== false;
+      const openStatus = U.getOutletOpenStatus(outlet);
+      const isOpen = openStatus.isOpen;
       const isSelected = STORE.state.selectedOutletId === outlet.id;
       const isNearest = hasGps && distKm != null && idx === 0 && !query && STORE.state.outletArea === "Semua Area";
       const distText = hasGps && distKm != null
         ? `${U.formatDistanceKm(distKm)}${isNearest ? " • Terdekat" : ""} • ${outlet.area}`
         : `${outlet.area}`;
+      const openLabel = openStatus.is24h ? "Buka 24 Jam" : "Buka";
+      const closedLabel = openStatus.reason === "closed_hours" ? "Tutup (Jam Operasional)" : "Tutup";
       return `
         <button type="button" class="outlet-card-v2 ${isSelected ? "is-selected" : ""} ${isOpen ? "" : "is-closed"}" data-outlet-id="${U.esc(outlet.id)}" data-outlet-open="${isOpen ? "true" : "false"}" aria-disabled="${isOpen ? "false" : "true"}">
           <div class="outlet-v2-top">
@@ -1222,8 +1225,8 @@
               ${U.esc(distText)}
             </span>
             ${isOpen
-              ? `<span class="open-badge"><span class="open-pulse-dot"></span> Buka</span>`
-              : `<span class="closed-badge">${ICON.icon("circle-alert", "w-3 h-3", 2.4)} Tutup</span>`}
+              ? `<span class="open-badge"><span class="open-pulse-dot"></span> ${openLabel}</span>`
+              : `<span class="closed-badge">${ICON.icon("circle-alert", "w-3 h-3", 2.4)} ${closedLabel}</span>`}
           </div>
           <div class="outlet-v2-main">
             <span class="outlet-v2-logo">

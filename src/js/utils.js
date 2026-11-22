@@ -247,9 +247,53 @@
     return totalScore;
   };
 
+  const getWitaMinutes = (nowDate) => {
+    const d = nowDate || new Date();
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Makassar",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(d);
+      const hh = parseInt((parts.find(p => p.type === "hour") || {}).value || "0", 10) % 24;
+      const mm = parseInt((parts.find(p => p.type === "minute") || {}).value || "0", 10);
+      return hh * 60 + mm;
+    } catch (e) {
+      const utcMin = d.getUTCHours() * 60 + d.getUTCMinutes();
+      return (utcMin + 8 * 60) % 1440;
+    }
+  };
+
+  const getOutletOpenStatus = (outlet, nowDate) => {
+    if (!outlet || outlet.isOpen === false) {
+      return { isOpen: false, is24h: false, reason: "manual" };
+    }
+    const hoursStr = String(outlet.hours || "").trim();
+    if (/24\s*jam|24h|24\s*hours/i.test(hoursStr)) {
+      return { isOpen: true, is24h: true, reason: "24h" };
+    }
+    const match = hoursStr.match(/(\d{1,2})[:.](\d{2})\s*(?:-|–|—|s\/d)\s*(\d{1,2})[:.](\d{2})/i);
+    if (!match) {
+      return { isOpen: true, is24h: false, reason: "default" };
+    }
+    const openMin = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+    const closeMin = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
+    const nowMin = getWitaMinutes(nowDate);
+    let isOpen = true;
+    if (closeMin === openMin) {
+      isOpen = true;
+    } else if (closeMin > openMin) {
+      isOpen = nowMin >= openMin && nowMin < closeMin;
+    } else {
+      isOpen = nowMin >= openMin || nowMin < closeMin;
+    }
+    return { isOpen, is24h: false, reason: isOpen ? "schedule" : "closed_hours" };
+  };
+
   window.DLM_UTIL = {
     esc, rp, num, clamp, debounce, uid, formatDateID, formatTimeID,
     storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag, getDeviceId,
-    haversineKm, formatDistanceKm, scoreOutletSearch
+    haversineKm, formatDistanceKm, scoreOutletSearch, getWitaMinutes, getOutletOpenStatus
   };
 })();
