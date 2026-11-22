@@ -1,20 +1,38 @@
 {
-  "name": "Dibeliin Lebih Murah",
-  "short_name": "Dibeliin",
-  "description": "Jasa order minuman & makanan dari Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa. Harga lebih ramah, pesanan rapi lewat WhatsApp.",
+  "name": "JasDor RisGold — Order Kopi & Camilan Resmi",
+  "short_name": "JasDor RisGold",
+  "description": "Jasa order minuman & makanan dari Kopi Kenangan, Fore Coffee, dan Janji Jiwa. Harga lebih ramah, pesanan rapi lewat WhatsApp.",
   "lang": "id",
-  "start_url": "./index.html#/brand",
+  "start_url": "./index.html#/outlet",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f4f8fe",
+  "background_color": "#18385e",
   "theme_color": "#0b6bcb",
   "icons": [
+    {
+      "src": "src/assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "src/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "src/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "src/assets/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

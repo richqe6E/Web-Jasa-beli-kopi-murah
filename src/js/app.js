@@ -40,9 +40,13 @@
   let promoSnapTimer = null;
   let touchStartX = 0;
 
-  // Intro promo story splash state (#splash-root)
-  let splashIndex = 0;
-  let splashInterval = null;
+  // Intro motion splash state (#splash-root)
+  let splashTimeout = null;
+  let splashAutoCloseTimer = null;
+
+  // PWA install prompt & update state
+  let deferredInstallPrompt = null;
+  let lastHiddenAt = 0;
 
   // Brand menu infinite-loop ad banner state (#/menu)
   let brandAdIndex = 0;
@@ -67,13 +71,83 @@
      ROUTER, SMART SCROLL HEADER & SHELL
      ============================================================ */
 
+  function isAppInstalled() {
+    try {
+      const standaloneMatch = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+      const iosStandalone = window.navigator && window.navigator.standalone === true;
+      return Boolean(standaloneMatch || iosStandalone);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function detectInstallEnv() {
+    const ua = navigator.userAgent || "";
+    const isInApp = /FBAN|FBAV|Instagram|Line|WhatsApp|TikTok|BytedanceWebview|wv\)/i.test(ua);
+    const isIOS = /iPad|iPhone|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(ua);
+    return { isInApp, isIOS, isAndroid };
+  }
+
+  function updateInstallButtonUI() {
+    const btn = $("#footer-install-btn");
+    if (!btn) return;
+    if (isAppInstalled()) {
+      btn.classList.add("is-installed");
+      btn.innerHTML = `${ICON.icon("circle-check", "w-3.5 h-3.5", 2.2)} <span>Aplikasi Terpasang</span>`;
+    } else {
+      btn.classList.remove("is-installed");
+      btn.innerHTML = `${ICON.icon("download", "w-3.5 h-3.5", 2.2)} <span>Download Aplikasi</span>`;
+    }
+  }
+
+  function setupPwaLifecycle() {
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      updateInstallButtonUI();
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      updateInstallButtonUI();
+      toast("Aplikasi berhasil dipasang di layar utama perangkat Anda.");
+    });
+
+    if (window.matchMedia) {
+      const mq = window.matchMedia("(display-mode: standalone)");
+      if (mq.addEventListener) mq.addEventListener("change", updateInstallButtonUI);
+    }
+
+    if ("serviceWorker" in navigator) {
+      let swRefreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (swRefreshing) return;
+        const route = STORE.getRoute();
+        const isBusy = route === "checkout" || document.body.classList.contains("modal-open") || document.body.classList.contains("sheet-open");
+        if (!isBusy) {
+          swRefreshing = true;
+          window.location.reload();
+        }
+      });
+
+      navigator.serviceWorker.register("sw.js").then(reg => {
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "hidden") {
+            lastHiddenAt = Date.now();
+          } else if (document.visibilityState === "visible" && Date.now() - lastHiddenAt > 300000) {
+            reg.update().catch(() => { /* ignore */ });
+          }
+        });
+      }).catch(() => { /* ignore */ });
+    }
+  }
+
   function init() {
     renderRoute();
     maybeShowIntroSplash();
     initAutoGeolocation();
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(() => { /* ignore */ });
-    }
+    setupPwaLifecycle();
 
     window.addEventListener("hashchange", renderRoute);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -102,7 +176,9 @@
         const r = STORE.getRoute();
         renderHeader(r);
         const footerBrand = $(".footer-brand");
-        if (footerBrand) footerBrand.innerHTML = `${ICON.icon("coffee", "w-4 h-4", 2)} ${U.esc(CFG.appName)}`;
+        if (footerBrand) {
+          footerBrand.innerHTML = `<img src="src/assets/app-icon-64.png" alt="" class="footer-brand-logo" width="18" height="18" /> <span>${U.esc(CFG.appName)}</span>`;
+        }
         const locPill = $(".outlet-loc-pill");
         if (locPill) locPill.innerHTML = `${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}, ${U.esc(CFG.region)}`;
         const isOverlayOpen = document.body.classList.contains("modal-open") || document.body.classList.contains("sheet-open");
@@ -243,17 +319,23 @@
       title = "Riwayat Transaksi";
     }
 
-    const left = showBack
-      ? `<button type="button" class="icon-btn header-back" data-action="back" aria-label="Kembali">${ICON.icon("chevron-left", "w-5 h-5", 2.4)}</button>`
-      : `<div class="logo-mark" aria-hidden="true">${ICON.icon("coffee", "w-5 h-5", 2)}</div>`;
-
-    header.innerHTML = `
-      <div class="header-left">
-        ${left}
+    const leftBlock = (route === "outlet" && !showBack)
+      ? `<div class="header-wordmark-wrap">
+          <img src="src/assets/header-wordmark.webp" alt="${U.esc(CFG.appName || "JasDor RisGold")}" class="header-wordmark-img" width="136" height="56" decoding="async" />
+          <h1 class="sr-only">${U.esc(title)}</h1>
+        </div>`
+      : `${showBack
+          ? `<button type="button" class="icon-btn header-back" data-action="back" aria-label="Kembali">${ICON.icon("chevron-left", "w-5 h-5", 2.4)}</button>`
+          : `<div class="logo-mark" aria-hidden="true"><img src="src/assets/app-icon-192.png" alt="" class="logo-mark-img" width="42" height="42" /></div>`
+        }
         <div class="header-copy">
           <span class="header-eyebrow">${U.esc(eyebrow)}</span>
           <h1 class="header-title">${U.esc(title)}</h1>
-        </div>
+        </div>`;
+
+    header.innerHTML = `
+      <div class="header-left">
+        ${leftBlock}
       </div>
       <div class="header-actions">
         <button type="button" class="track-btn" data-action="open-tracker" aria-label="Lacak status pesanan">
@@ -386,12 +468,8 @@
   }
 
   /* ============================================================
-     1. INTRO PROMO STORY SPLASH SHOWCASE (#splash-root)
+     1. INTRO MOTION VIDEO SPLASH (#splash-root)
      ============================================================ */
-
-  function getSplashPromos() {
-    return Array.isArray(CFG.splashPromos) && CFG.splashPromos.length ? CFG.splashPromos : [];
-  }
 
   function maybeShowIntroSplash() {
     try {
@@ -401,132 +479,122 @@
     } catch (e) {
       /* ignore */
     }
-    openIntroSplash(0);
+    openIntroSplash();
   }
 
-  function openIntroSplash(startIndex) {
-    const root = $("#splash-root");
-    const promos = getSplashPromos();
-    if (!root || !promos.length) return;
+  function clearSplashTimers() {
+    if (splashTimeout) {
+      clearTimeout(splashTimeout);
+      splashTimeout = null;
+    }
+    if (splashAutoCloseTimer) {
+      clearTimeout(splashAutoCloseTimer);
+      splashAutoCloseTimer = null;
+    }
+  }
 
-    stopIntroSplashTimer();
-    splashIndex = startIndex || 0;
+  function openIntroSplash() {
+    const root = $("#splash-root");
+    if (!root) return;
+
+    clearSplashTimers();
+    const brandName = U.esc(CFG.appName || "JasDor RisGold");
+    const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     root.innerHTML = `
-      <div class="splash-overlay" id="splash-overlay" role="dialog" aria-modal="true" aria-label="Highlight Promo Hari Ini">
-        <div class="splash-card">
-          <div class="splash-progress-row">
-            ${promos.map((p, idx) => `
-              <span class="splash-prog-seg ${idx < splashIndex ? "is-done" : ""} ${idx === splashIndex ? "is-active" : ""}" data-splash-seg="${idx}">
-                <span class="splash-prog-fill"></span>
-              </span>
-            `).join("")}
-          </div>
-
-          <div class="splash-top-bar">
-            <div class="splash-brand-pill" id="splash-brand-pill">
-              <img src="${U.esc(promos[splashIndex].logo)}" alt="" id="splash-brand-logo" />
-              <span id="splash-brand-name">${U.esc(promos[splashIndex].brandName)}</span>
+      <div class="splash-overlay" id="splash-overlay" role="dialog" aria-modal="true" aria-label="Animasi Pembuka ${brandName}">
+        <div class="splash-motion-card">
+          <div class="splash-motion-head">
+            <div class="splash-motion-brand">
+              <img src="src/assets/app-icon-64.png" alt="" width="28" height="28" />
+              <span>${brandName}</span>
             </div>
-            <button type="button" class="splash-skip-btn" data-action="close-splash">
+            <button type="button" class="splash-motion-skip" data-action="close-splash">
               Lewati ${ICON.icon("x", "w-3.5 h-3.5", 2.4)}
             </button>
           </div>
 
-          <div class="splash-stage">
-            ${promos.map((p, idx) => `
-              <article class="splash-slide ${idx === splashIndex ? "is-active" : ""}" data-splash-slide="${idx}" style="--splash-accent:${U.esc(p.accent || "#0B6BCB")}">
-                <img src="${U.esc(p.image)}" alt="${U.esc(p.brandName)}" class="splash-slide-bg" width="540" height="675" ${idx === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
-              </article>
-            `).join("")}
+          <div class="splash-motion-stage">
+            <video
+              id="splash-intro-video"
+              class="splash-motion-video"
+              src="src/assets/intro-motion.mp4"
+              poster="src/assets/intro-motion-poster.webp"
+              ${reducedMotion ? "" : "autoplay"}
+              muted
+              playsinline
+              preload="auto"
+            ></video>
           </div>
 
-          <div class="splash-trust-strip">
-            <img src="src/assets/vectors/trust-promo-badge.svg" alt="" class="splash-trust-vec" width="38" height="38" />
-            <div class="splash-trust-copy">
-              <strong>Jasa Order Terpercaya</strong>
-              <span>Dapatkan Harga Promo Setiap Saat</span>
-            </div>
+          <div class="splash-motion-progress" aria-hidden="true">
+            <div class="splash-motion-progress-fill" id="splash-motion-fill"></div>
           </div>
 
-          <div class="splash-footer">
-            <div class="splash-nav-dots">
-              ${promos.map((p, idx) => `
-                <button type="button" class="splash-dot ${idx === splashIndex ? "is-active" : ""}" data-action="splash-goto" data-index="${idx}" aria-label="Promo ${idx + 1}"></button>
-              `).join("")}
+          <div class="splash-motion-foot">
+            <div class="splash-motion-copy">
+              <strong>${brandName}</strong>
+              <span>Order Kopi &amp; Camilan Resmi Lebih Hemat</span>
             </div>
-            <button type="button" class="btn-primary btn-sm" id="splash-cta-btn" data-action="splash-pick-brand" data-brand-id="${U.esc(promos[splashIndex].brandId)}" style="min-height:40px;padding:0 14px;border-radius:999px">
-              Pilih Outlet ${U.esc(promos[splashIndex].brandName)} ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
+            <button type="button" class="btn-primary btn-sm" data-action="close-splash" style="min-height:38px;padding:0 14px;border-radius:999px;white-space:nowrap">
+              Mulai Pesan ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}
             </button>
           </div>
         </div>
       </div>
     `;
 
-    startIntroSplashTimer();
-  }
+    const video = $("#splash-intro-video");
+    const fill = $("#splash-motion-fill");
 
-  function setIntroSplashSlide(nextIndex) {
-    const promos = getSplashPromos();
-    const overlay = $("#splash-overlay");
-    if (!overlay || !promos.length) return;
-
-    if (nextIndex >= promos.length) {
-      closeIntroSplash();
+    if (reducedMotion) {
+      if (fill) fill.style.width = "100%";
+      splashAutoCloseTimer = setTimeout(closeIntroSplash, 2200);
       return;
     }
 
-    splashIndex = ((nextIndex % promos.length) + promos.length) % promos.length;
-    const current = promos[splashIndex];
-
-    $$("[data-splash-slide]", overlay).forEach((el, idx) => {
-      el.classList.toggle("is-active", idx === splashIndex);
-    });
-    $$("[data-splash-seg]", overlay).forEach((seg, idx) => {
-      seg.classList.remove("is-active", "is-done");
-      void seg.offsetWidth;
-      if (idx < splashIndex) seg.classList.add("is-done");
-      else if (idx === splashIndex) seg.classList.add("is-active");
-    });
-    $$(".splash-dot", overlay).forEach((dot, idx) => {
-      dot.classList.toggle("is-active", idx === splashIndex);
-    });
-
-    const bLogo = $("#splash-brand-logo");
-    const bName = $("#splash-brand-name");
-    const ctaBtn = $("#splash-cta-btn");
-    if (bLogo) bLogo.src = current.logo;
-    if (bName) bName.textContent = current.brandName;
-    if (ctaBtn) {
-      ctaBtn.dataset.brandId = current.brandId;
-      ctaBtn.innerHTML = `Pilih Outlet ${U.esc(current.brandName)} ${ICON.icon("arrow-right", "w-3.5 h-3.5", 2.4)}`;
+    if (video) {
+      video.muted = true;
+      video.playsInline = true;
+      video.addEventListener("timeupdate", () => {
+        if (fill && video.duration > 0) {
+          fill.style.width = `${Math.min(100, (video.currentTime / video.duration) * 100).toFixed(1)}%`;
+        }
+      });
+      video.addEventListener("ended", () => {
+        if (fill) fill.style.width = "100%";
+        clearSplashTimers();
+        splashAutoCloseTimer = setTimeout(closeIntroSplash, 420);
+      });
+      video.addEventListener("error", () => {
+        clearSplashTimers();
+        splashAutoCloseTimer = setTimeout(closeIntroSplash, 1600);
+      });
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          clearSplashTimers();
+          splashAutoCloseTimer = setTimeout(closeIntroSplash, 2400);
+        });
+      }
     }
-  }
 
-  function startIntroSplashTimer() {
-    stopIntroSplashTimer();
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    splashInterval = setInterval(() => {
-      setIntroSplashSlide(splashIndex + 1);
-    }, 3400);
-  }
-
-  function stopIntroSplashTimer() {
-    if (splashInterval) {
-      clearInterval(splashInterval);
-      splashInterval = null;
-    }
+    splashTimeout = setTimeout(closeIntroSplash, 12500);
   }
 
   function closeIntroSplash() {
-    stopIntroSplashTimer();
+    clearSplashTimers();
+    const video = $("#splash-intro-video");
+    if (video) {
+      try { video.pause(); } catch (e) { /* ignore */ }
+    }
     const overlay = $("#splash-overlay");
     if (!overlay) return;
     overlay.classList.add("is-closing");
     setTimeout(() => {
       const root = $("#splash-root");
       if (root) root.innerHTML = "";
-    }, 400);
+    }, 380);
   }
 
   /* ============================================================
@@ -1078,11 +1146,14 @@
       </section>
 
       <footer class="app-footer reveal">
-        <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
+        <div class="footer-brand">
+          <img src="src/assets/app-icon-64.png" alt="" class="footer-brand-logo" width="18" height="18" />
+          <span>${U.esc(CFG.appName)}</span>
+        </div>
         <p>Jasa order minuman &amp; makanan resmi • ${U.esc(CFG.city)}</p>
         <div class="footer-links">
-          <button type="button" class="footer-link" data-action="open-splash-stories">
-            ${ICON.icon("sparkles", "w-3.5 h-3.5", 2)} Poster Promo
+          <button type="button" class="footer-link footer-install-btn" id="footer-install-btn" data-action="install-pwa-app">
+            ${ICON.icon("download", "w-3.5 h-3.5", 2.2)} <span>Download Aplikasi</span>
           </button>
         </div>
       </footer>
@@ -1091,6 +1162,7 @@
     bindCarouselTouch();
     renderLocationBar();
     renderOutletList();
+    updateInstallButtonUI();
     requestAnimationFrame(() => setPromoSlide(promoSlideIndex, true));
   }
 
@@ -2152,17 +2224,10 @@
       STORE.navigate(tab);
     } else if (action === "open-how-to-order") {
       showHowToOrderModal();
-    } else if (action === "open-splash-stories") {
-      openIntroSplash(0);
+    } else if (action === "install-pwa-app") {
+      triggerPwaInstall();
     } else if (action === "close-splash") {
       closeIntroSplash();
-    } else if (action === "splash-goto") {
-      setIntroSplashSlide(parseInt(el.dataset.index, 10) || 0);
-      startIntroSplashTimer();
-    } else if (action === "splash-pick-brand") {
-      const bId = el.dataset.brandId;
-      closeIntroSplash();
-      if (bId) handleBrandClick(bId, true);
     } else if (action === "back") {
       STORE.navigate(STORE.prevRoute(STORE.getRoute()));
     } else if (action === "go-cart") {
@@ -2893,6 +2958,100 @@
 
           <div class="terms-modal-body">
             ${HOW_TO_ORDER_STEPS.map((step, idx) => `
+              <article class="terms-clause-card">
+                <span class="terms-clause-num">${idx + 1}</span>
+                <div class="terms-clause-copy">
+                  <strong>${U.esc(step.title)}</strong>
+                  <p>${U.esc(step.desc)}</p>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+
+          <div class="terms-modal-foot is-single-action">
+            <button type="button" class="btn-primary" data-action="close-modal">
+              ${ICON.icon("check", "w-4 h-4", 2.4)} Mengerti
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+    setTimeout(() => {
+      const btn = modalRoot.querySelector("[data-action='close-modal']");
+      if (btn) btn.focus({ preventScroll: true });
+    }, 80);
+  }
+
+  async function triggerPwaInstall() {
+    if (isAppInstalled()) {
+      toast("Aplikasi sudah terpasang di layar utama perangkat Anda.");
+      return;
+    }
+    if (deferredInstallPrompt) {
+      try {
+        await deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === "accepted") {
+          deferredInstallPrompt = null;
+          updateInstallButtonUI();
+        }
+        return;
+      } catch (e) {
+        /* fallback to guide modal */
+      }
+    }
+    showInstallGuideModal();
+  }
+
+  function showInstallGuideModal() {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const brandName = U.esc(CFG.appName || "JasDor RisGold");
+    const env = detectInstallEnv();
+
+    let subtitle = "Tambahkan ke layar utama HP agar lebih cepat saat pesan kopi & camilan.";
+    let steps = [];
+    if (env.isInApp) {
+      subtitle = "Anda membuka dari browser dalam aplikasi. Pindah sebentar ke Chrome/Safari untuk install.";
+      steps = [
+        { title: "Buka Menu Browser", desc: "Ketuk ikon titik tiga (⋮) atau ikon Bagikan di pojok kanan atas layar." },
+        { title: "Buka di Chrome / Safari", desc: "Pilih 'Buka di Browser' / 'Open in Chrome / Safari'." },
+        { title: "Pasang ke Layar Utama", desc: "Setelah terbuka di Chrome/Safari, tekan tombol Download Aplikasi lagi atau pilih 'Tambahkan ke layar utama'." }
+      ];
+    } else if (env.isIOS) {
+      subtitle = "Khusus iPhone & iPad (Safari), ikuti 3 langkah singkat berikut:";
+      steps = [
+        { title: "Ketuk Ikon Bagikan (Share)", desc: "Tekan ikon kotak dengan panah ke atas di bagian bawah atau atas Safari." },
+        { title: "Tambah ke Layar Utama", desc: "Gulir ke bawah lalu pilih 'Tambah ke Layar Utama' (Add to Home Screen)." },
+        { title: "Ketuk Tambah", desc: "Ikon JasDor RisGold langsung muncul di layar utama dan selalu terupdate otomatis." }
+      ];
+    } else {
+      steps = [
+        { title: "Buka Menu Browser (⋮)", desc: "Ketuk ikon titik tiga di pojok kanan atas Chrome/Edge." },
+        { title: "Pilih Install / Tambah ke Layar Utama", desc: "Ketuk 'Install aplikasi' atau 'Tambahkan ke layar utama'." },
+        { title: "Konfirmasi Pasang", desc: "Tekan 'Install' dan aplikasi langsung tersedia tanpa perlu download ulang saat ada menu baru." }
+      ];
+    }
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" data-modal-overlay>
+        <div class="modal-card terms-modal-card" role="dialog" aria-modal="true" aria-labelledby="install-modal-title">
+          <div class="terms-modal-hero">
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup Panduan Install">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+            <div style="display:flex;align-items:center;gap:12px">
+              <img src="src/assets/app-icon-192.png" alt="" width="48" height="48" style="border-radius:14px;border:1.5px solid rgba(255,255,255,0.45);box-shadow:0 8px 18px -6px rgba(0,0,0,0.4);flex-shrink:0" />
+              <div style="min-width:0">
+                <span class="terms-modal-badge">${ICON.icon("smartphone", "w-3.5 h-3.5", 2.2)} Shortcut Aplikasi</span>
+                <h2 id="install-modal-title" class="modal-title" style="color:#fff;margin-top:4px">Pasang ${brandName}</h2>
+              </div>
+            </div>
+            <p style="font-size:12px;color:rgba(255,255,255,0.88);margin-top:8px">${U.esc(subtitle)}</p>
+          </div>
+
+          <div class="terms-modal-body">
+            ${steps.map((step, idx) => `
               <article class="terms-clause-card">
                 <span class="terms-clause-num">${idx + 1}</span>
                 <div class="terms-clause-copy">

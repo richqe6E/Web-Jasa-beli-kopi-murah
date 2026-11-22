@@ -314,10 +314,32 @@ a {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
-  border-radius: 14px;
+  border-radius: 13px;
+  overflow: hidden;
   color: #fff;
-  background: linear-gradient(140deg, #1180e8, #0b6bcb 55%, #084f99);
-  box-shadow: 0 10px 20px -12px rgba(11, 107, 203, 0.9);
+  background: #18385e;
+  box-shadow: 0 8px 18px -10px rgba(24, 56, 94, 0.72);
+}
+
+.logo-mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.header-wordmark-wrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.header-wordmark-img {
+  height: 40px;
+  width: auto;
+  max-width: 164px;
+  object-fit: contain;
+  display: block;
 }
 
 .icon-btn {
@@ -3154,6 +3176,14 @@ body.modal-open {
   color: #166534;
 }
 
+.footer-brand-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+}
+
 .footer-links {
   display: flex;
   align-items: center;
@@ -3165,14 +3195,34 @@ body.modal-open {
 .footer-link {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
+  gap: 6px;
+  padding: 8px 15px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--body);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.footer-install-btn {
+  border-color: var(--primary-line);
+  background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+  color: var(--primary-strong);
+  box-shadow: 0 8px 18px -12px rgba(11, 107, 203, 0.55);
+}
+
+.footer-install-btn:active {
+  transform: scale(0.97);
+}
+
+.footer-install-btn.is-installed {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+  box-shadow: none;
 }
 
 /* ============================================================
@@ -6078,6 +6128,116 @@ body.has-bottom-bar .app-main {
 .splash-dot.is-active {
   width: 22px;
   background: var(--primary);
+}
+
+/* C2. MOTION PEMBUKA APLIKASI (Pengganti Iklan Splash Awal) */
+.splash-motion-card {
+  position: relative;
+  width: 100%;
+  max-width: 416px;
+  border-radius: 26px;
+  overflow: hidden;
+  background: #ffffff;
+  color: var(--ink);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 32px 80px -18px rgba(4, 18, 44, 0.72);
+  animation: modal-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.splash-motion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.splash-motion-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.splash-motion-brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+.splash-motion-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--body);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.splash-motion-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.splash-motion-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #fafafa;
+}
+
+.splash-motion-progress {
+  width: 100%;
+  height: 3px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.splash-motion-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #18385e 0%, #4e84bd 100%);
+  transition: width 0.16s linear;
+}
+
+.splash-motion-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  background: linear-gradient(135deg, #f6f9fe 0%, #edf4fc 100%);
+}
+
+.splash-motion-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.splash-motion-copy span {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
 }
 
 /* D. TEXTURED CURVED WAVE HERO STAGE + AMBIENT FOOTAGE + SCULPTED PEEK ADS (#/outlet) */

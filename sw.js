@@ -1,9 +1,9 @@
 /* ============================================================
-   DIBELIIN LEBIH MURAH — IMAGE & ASSET CACHE SERVICE WORKER (V5.1)
+   JASDOR RISGOLD — IMAGE & ASSET CACHE SERVICE WORKER (V6.2)
    Cache-First ONLY for static images/vectors in /src/assets/
-   Never caches Supabase API calls, HTML, or live price data.
+   Skips .mp4 Range streams, Supabase APIs, HTML, and JS/CSS so app updates apply immediately.
    ============================================================ */
-const ASSET_CACHE = "dlm-assets-v5-1";
+const ASSET_CACHE = "dlm-assets-v6-2";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -24,6 +24,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
+  if (req.headers.has("range")) return;
 
   let url;
   try {
@@ -32,9 +33,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Only intercept same-origin static assets under /src/assets/
+  // Only intercept same-origin static assets under /src/assets/ (skip MP4 video streaming)
   if (url.origin !== self.location.origin) return;
   if (!url.pathname.startsWith("/src/assets/")) return;
+  if (url.pathname.endsWith(".mp4")) return;
 
   // Strip transient retry query param for canonical cache lookup
   const cacheKey = new Request(url.origin + url.pathname, { method: "GET" });
