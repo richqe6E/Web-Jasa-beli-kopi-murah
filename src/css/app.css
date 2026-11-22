@@ -3306,11 +3306,8 @@ h3,
    23. MOTION
    ------------------------------------------------------------ */
 .reveal {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
-  transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+  opacity: 1;
+  transform: none;
 }
 
 .reveal.is-in {

@@ -1372,7 +1372,7 @@
 
     if (!summary.totalItems) {
       main.innerHTML = `
-        <section class="empty-state cart-empty reveal">
+        <section class="empty-state cart-empty">
           <div class="empty-icon">${ICON.icon("shopping-bag", "w-8 h-8", 1.8)}</div>
           <h2>Keranjang masih kosong</h2>
           <p>Pilih lokasi outlet dan menu kopi favoritmu dulu, lalu atur varian sesukamu.</p>
@@ -1386,7 +1386,7 @@
 
     main.innerHTML = `
       ${brand && outlet ? `
-        <section class="top-outlet-pill reveal">
+        <section class="top-outlet-pill">
           <div class="top-outlet-left">
             <span class="top-outlet-logo">
               <img src="${U.esc(getLockedBrandLogo(brand))}" alt="${U.esc(brand.name)}" />
@@ -1401,10 +1401,10 @@
         </section>
       ` : ""}
 
-      <section class="section reveal" style="margin-top:14px">
+      <section class="section" style="margin-top:14px">
         <div class="section-head compact">
           <div>
-            <p class="eyebrow">Daftar Cup</p>
+            <p class="eyebrow">Daftar Pesanan</p>
             <h2 class="section-title">Rincian Pesananmu</h2>
           </div>
           <span class="section-count">${summary.totalItems} item</span>
@@ -1423,7 +1423,7 @@
       </section>
 
       ${summary.totalSavings > 0 ? `
-        <div class="savings-delight-banner reveal">
+        <div class="savings-delight-banner">
           <img src="src/assets/icons/lineal-color/discount-tag.svg" alt="" loading="lazy" decoding="async" />
           <div>
             <strong>Hore! Kamu hemat ${U.rp(summary.totalSavings)}</strong>
@@ -1432,7 +1432,7 @@
         </div>
       ` : ""}
 
-      <section class="summary-card reveal">
+      <section class="summary-card">
         <div class="summary-row"><span>Subtotal Menu Promo</span><strong>${U.rp(summary.subtotal)}</strong></div>
         ${summary.orderServiceFee > 0 ? `<div class="summary-row"><span>Biaya jasa order</span><strong>${U.rp(summary.orderServiceFee)}</strong></div>` : ""}
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Total Hemat Promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
