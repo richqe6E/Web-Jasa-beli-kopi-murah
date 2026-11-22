@@ -32,18 +32,23 @@
   // Smart scroll direction state
   let lastScrollY = 0;
 
-  // Physics-spring promo carousel state (#/outlet)
+  // Physics-spring infinite-loop promo carousel state (#/outlet)
+  const LOOP_BUFFER = 2;
   let promoSlideIndex = 0;
+  let promoTrackIndex = LOOP_BUFFER;
   let promoInterval = null;
+  let promoSnapTimer = null;
   let touchStartX = 0;
 
   // Intro promo story splash state (#splash-root)
   let splashIndex = 0;
   let splashInterval = null;
 
-  // Brand menu ad banner state (#/menu)
+  // Brand menu infinite-loop ad banner state (#/menu)
   let brandAdIndex = 0;
+  let brandAdTrackIndex = LOOP_BUFFER;
   let brandAdInterval = null;
+  let brandAdSnapTimer = null;
   let brandAdTouchStartX = 0;
 
   // Live merged history cache for current customer device
@@ -72,6 +77,11 @@
 
     window.addEventListener("hashchange", renderRoute);
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", U.debounce(() => {
+      const r = STORE.getRoute();
+      if (r === "outlet") setPromoSlide(promoSlideIndex, true);
+      else if (r === "menu") setBrandAdSlide(brandAdIndex, true);
+    }, 140), { passive: true });
     handleScroll();
 
     CART.subscribe(summary => {
@@ -520,8 +530,46 @@
   }
 
   /* ============================================================
-     2. PHYSICS-SPRING PROMO CAROUSEL (#/outlet & #/menu)
+     2. SEAMLESS INFINITE-LOOP CAROUSEL (#/outlet & #/menu)
      ============================================================ */
+
+  function buildLoopSlides(list) {
+    const items = Array.isArray(list) ? list : [];
+    const n = items.length;
+    if (n <= 1) {
+      return { entries: items.map((item, i) => ({ item, realIndex: i, isClone: false })), buffer: 0 };
+    }
+    const entries = [];
+    for (let i = 0; i < LOOP_BUFFER; i++) {
+      const ri = ((n - LOOP_BUFFER + i) % n + n) % n;
+      entries.push({ item: items[ri], realIndex: ri, isClone: true });
+    }
+    for (let i = 0; i < n; i++) {
+      entries.push({ item: items[i], realIndex: i, isClone: false });
+    }
+    for (let i = 0; i < LOOP_BUFFER; i++) {
+      const ri = i % n;
+      entries.push({ item: items[ri], realIndex: ri, isClone: true });
+    }
+    return { entries, buffer: LOOP_BUFFER };
+  }
+
+  function applyLoopTrackPosition(track, viewport, slideEls, trackIdx, instant) {
+    if (!track || !viewport || !slideEls || !slideEls[trackIdx]) return;
+    if (instant) track.classList.add("is-instant");
+    slideEls.forEach((el, idx) => {
+      el.classList.toggle("is-active", idx === trackIdx);
+    });
+    const targetEl = slideEls[trackIdx];
+    const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
+    const centered = targetEl.offsetLeft - (viewport.clientWidth - targetEl.offsetWidth) / 2;
+    const offset = U.clamp(centered, 0, maxOffset);
+    track.style.transform = `translate3d(-${offset}px, 0, 0)`;
+    if (instant) {
+      void track.offsetWidth;
+      track.classList.remove("is-instant");
+    }
+  }
 
   function getPromoSlides() {
     return Array.isArray(CFG.promoSlides) && CFG.promoSlides.length ? CFG.promoSlides : [];
@@ -538,7 +586,7 @@
         stopPromoCarousel();
         return;
       }
-      setPromoSlide((promoSlideIndex + 1) % slides.length);
+      stepPromoSlide(1);
     }, 4000);
   }
 
@@ -549,38 +597,104 @@
     }
   }
 
-  function setPromoSlide(index) {
-    const slides = getPromoSlides();
-    if (!slides.length) return;
-    promoSlideIndex = ((index % slides.length) + slides.length) % slides.length;
-
-    const track = $("#ad-showcase-track");
-    const viewport = $("#ad-showcase-viewport");
-    const slideEls = $$(".ad-showcase-slide");
-    if (track && viewport && slideEls[promoSlideIndex]) {
-      const targetEl = slideEls[promoSlideIndex];
-      const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      const centered = targetEl.offsetLeft - (viewport.clientWidth - targetEl.offsetWidth) / 2;
-      const offset = U.clamp(centered, 0, maxOffset);
-      track.style.transform = `translate3d(-${offset}px, 0, 0)`;
-    }
-    slideEls.forEach((el, idx) => {
-      el.classList.toggle("is-active", idx === promoSlideIndex);
-    });
+  function updatePromoChrome(slides) {
     $$(".promo-dot").forEach((dot, idx) => {
       dot.classList.toggle("is-active", idx === promoSlideIndex);
     });
-
     const activeSlide = slides[promoSlideIndex];
     const ambientImg = $("#hero-ambient-img");
     if (ambientImg && activeSlide && ambientImg.dataset.currentSrc !== activeSlide.image) {
       ambientImg.dataset.currentSrc = activeSlide.image;
       ambientImg.classList.add("is-fading");
       setTimeout(() => {
-        ambientImg.src = activeSlide.image;
-        ambientImg.classList.remove("is-fading");
+        if (ambientImg && ambientImg.isConnected) {
+          ambientImg.src = activeSlide.image;
+          ambientImg.classList.remove("is-fading");
+        }
       }, 150);
     }
+  }
+
+  function snapPromoIfClone() {
+    const slides = getPromoSlides();
+    const n = slides.length;
+    if (n <= 1) return;
+    const buffer = LOOP_BUFFER;
+    if (promoTrackIndex < buffer || promoTrackIndex >= buffer + n) {
+      promoTrackIndex = buffer + promoSlideIndex;
+      const track = $("#ad-showcase-track");
+      const viewport = $("#ad-showcase-viewport");
+      const slideEls = $$(".ad-showcase-slide");
+      applyLoopTrackPosition(track, viewport, slideEls, promoTrackIndex, true);
+    }
+  }
+
+  function stepPromoSlide(delta) {
+    const slides = getPromoSlides();
+    const n = slides.length;
+    if (!n) return;
+    if (n === 1) {
+      setPromoSlide(0, true);
+      return;
+    }
+    if (promoSnapTimer) {
+      clearTimeout(promoSnapTimer);
+      promoSnapTimer = null;
+    }
+    const buffer = LOOP_BUFFER;
+    // If currently resting on a clone edge, silently normalize to canonical real slide BEFORE moving
+    snapPromoIfClone();
+
+    const step = delta >= 0 ? 1 : -1;
+    promoTrackIndex += step;
+    promoSlideIndex = ((promoTrackIndex - buffer) % n + n) % n;
+
+    const track = $("#ad-showcase-track");
+    const viewport = $("#ad-showcase-viewport");
+    const slideEls = $$(".ad-showcase-slide");
+    applyLoopTrackPosition(track, viewport, slideEls, promoTrackIndex, false);
+    updatePromoChrome(slides);
+
+    if (promoTrackIndex < buffer || promoTrackIndex >= buffer + n) {
+      promoSnapTimer = setTimeout(() => {
+        promoSnapTimer = null;
+        snapPromoIfClone();
+      }, 650);
+    }
+  }
+
+  function setPromoSlide(index, instant) {
+    const slides = getPromoSlides();
+    const n = slides.length;
+    if (!n) return;
+    if (promoSnapTimer) {
+      clearTimeout(promoSnapTimer);
+      promoSnapTimer = null;
+    }
+    const buffer = n > 1 ? LOOP_BUFFER : 0;
+    const targetLogical = ((index % n) + n) % n;
+
+    // Seamless forward/backward glide if jumping across the wrap boundary
+    if (!instant && n > 1) {
+      if (promoSlideIndex === n - 1 && targetLogical === 0) {
+        stepPromoSlide(1);
+        return;
+      }
+      if (promoSlideIndex === 0 && targetLogical === n - 1) {
+        stepPromoSlide(-1);
+        return;
+      }
+      snapPromoIfClone();
+    }
+
+    promoSlideIndex = targetLogical;
+    promoTrackIndex = buffer + targetLogical;
+
+    const track = $("#ad-showcase-track");
+    const viewport = $("#ad-showcase-viewport");
+    const slideEls = $$(".ad-showcase-slide");
+    applyLoopTrackPosition(track, viewport, slideEls, promoTrackIndex, !!instant);
+    updatePromoChrome(slides);
   }
 
   function getBrandMenuAds(brand) {
@@ -589,34 +703,96 @@
     return b.ads;
   }
 
-  function setBrandAdSlide(index) {
-    const list = getBrandMenuAds();
-    if (!list.length) return;
-    brandAdIndex = ((index % list.length) + list.length) % list.length;
-
-    const track = $("#brand-ad-track");
-    const viewport = $("#brand-ad-viewport");
-    const slideEls = $$(".brand-ad-slide");
-    if (track && viewport && slideEls[brandAdIndex]) {
-      const targetEl = slideEls[brandAdIndex];
-      const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      const centered = targetEl.offsetLeft - (viewport.clientWidth - targetEl.offsetWidth) / 2;
-      const offset = U.clamp(centered, 0, maxOffset);
-      track.style.transform = `translate3d(-${offset}px, 0, 0)`;
-    }
-    slideEls.forEach((el, idx) => {
-      el.classList.toggle("is-active", idx === brandAdIndex);
-    });
+  function updateBrandAdChrome(list) {
     $$(".brand-ad-dot").forEach((dot, idx) => {
       dot.classList.toggle("is-active", idx === brandAdIndex);
     });
-
     const activeAd = list[brandAdIndex];
     const menuAmbient = $("#menu-ad-ambient-img");
     if (menuAmbient && activeAd && menuAmbient.dataset.currentSrc !== activeAd.image) {
       menuAmbient.dataset.currentSrc = activeAd.image;
       menuAmbient.src = activeAd.image;
     }
+  }
+
+  function snapBrandAdIfClone() {
+    const list = getBrandMenuAds();
+    const n = list.length;
+    if (n <= 1) return;
+    const buffer = LOOP_BUFFER;
+    if (brandAdTrackIndex < buffer || brandAdTrackIndex >= buffer + n) {
+      brandAdTrackIndex = buffer + brandAdIndex;
+      const track = $("#brand-ad-track");
+      const viewport = $("#brand-ad-viewport");
+      const slideEls = $$(".brand-ad-slide");
+      applyLoopTrackPosition(track, viewport, slideEls, brandAdTrackIndex, true);
+    }
+  }
+
+  function stepBrandAdSlide(delta) {
+    const list = getBrandMenuAds();
+    const n = list.length;
+    if (!n) return;
+    if (n === 1) {
+      setBrandAdSlide(0, true);
+      return;
+    }
+    if (brandAdSnapTimer) {
+      clearTimeout(brandAdSnapTimer);
+      brandAdSnapTimer = null;
+    }
+    const buffer = LOOP_BUFFER;
+    snapBrandAdIfClone();
+
+    const step = delta >= 0 ? 1 : -1;
+    brandAdTrackIndex += step;
+    brandAdIndex = ((brandAdTrackIndex - buffer) % n + n) % n;
+
+    const track = $("#brand-ad-track");
+    const viewport = $("#brand-ad-viewport");
+    const slideEls = $$(".brand-ad-slide");
+    applyLoopTrackPosition(track, viewport, slideEls, brandAdTrackIndex, false);
+    updateBrandAdChrome(list);
+
+    if (brandAdTrackIndex < buffer || brandAdTrackIndex >= buffer + n) {
+      brandAdSnapTimer = setTimeout(() => {
+        brandAdSnapTimer = null;
+        snapBrandAdIfClone();
+      }, 650);
+    }
+  }
+
+  function setBrandAdSlide(index, instant) {
+    const list = getBrandMenuAds();
+    const n = list.length;
+    if (!n) return;
+    if (brandAdSnapTimer) {
+      clearTimeout(brandAdSnapTimer);
+      brandAdSnapTimer = null;
+    }
+    const buffer = n > 1 ? LOOP_BUFFER : 0;
+    const targetLogical = ((index % n) + n) % n;
+
+    if (!instant && n > 1) {
+      if (brandAdIndex === n - 1 && targetLogical === 0) {
+        stepBrandAdSlide(1);
+        return;
+      }
+      if (brandAdIndex === 0 && targetLogical === n - 1) {
+        stepBrandAdSlide(-1);
+        return;
+      }
+      snapBrandAdIfClone();
+    }
+
+    brandAdIndex = targetLogical;
+    brandAdTrackIndex = buffer + targetLogical;
+
+    const track = $("#brand-ad-track");
+    const viewport = $("#brand-ad-viewport");
+    const slideEls = $$(".brand-ad-slide");
+    applyLoopTrackPosition(track, viewport, slideEls, brandAdTrackIndex, !!instant);
+    updateBrandAdChrome(list);
   }
 
   function startBrandAdCarousel() {
@@ -630,7 +806,7 @@
         stopBrandAdCarousel();
         return;
       }
-      setBrandAdSlide(brandAdIndex + 1);
+      stepBrandAdSlide(1);
     }, 4200);
   }
 
@@ -654,7 +830,7 @@
       if (!e.changedTouches || !e.changedTouches[0]) return;
       const diff = e.changedTouches[0].clientX - brandAdTouchStartX;
       if (Math.abs(diff) > 32) {
-        setBrandAdSlide(diff < 0 ? brandAdIndex + 1 : brandAdIndex - 1);
+        stepBrandAdSlide(diff < 0 ? 1 : -1);
       }
       startBrandAdCarousel();
     }, { passive: true });
@@ -780,6 +956,8 @@
     const areas = STORE.getBrandAreas(selectedBrand.id);
     const delivery = STORE.state.orderMode === "delivery";
     const initialSlide = slides[promoSlideIndex] || slides[0];
+    const promoLoop = buildLoopSlides(slides);
+    promoTrackIndex = promoLoop.buffer + promoSlideIndex;
 
     main.innerHTML = `
       <!-- Organic Textured Curved Hero Stage + Ambient Footage + Sculpted Peek Ad Showcase -->
@@ -803,14 +981,16 @@
 
         <div class="ad-showcase-carousel" id="ad-showcase-carousel">
           <div class="ad-showcase-viewport" id="ad-showcase-viewport">
-            <div class="ad-showcase-track" id="ad-showcase-track">
-              ${slides.map((slide, idx) => {
+            <div class="ad-showcase-track is-instant" id="ad-showcase-track">
+              ${promoLoop.entries.map((entry, idx) => {
+                const slide = entry.item;
                 const bObj = STORE.getBrand(slide.brandId);
                 const bLogo = getLockedBrandLogo(bObj);
+                const isNearInitial = Math.abs(idx - promoTrackIndex) <= 2;
                 return `
-                  <article class="ad-showcase-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}">
+                  <article class="ad-showcase-slide ${idx === promoTrackIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}" data-real-index="${entry.realIndex}" ${entry.isClone ? 'data-clone="true" aria-hidden="true"' : ""}>
                     <div class="ad-sculpted-frame">
-                      <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" width="540" height="675" ${idx <= 1 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
+                      <img src="${U.esc(slide.image)}" alt="${entry.isClone ? "" : U.esc(slide.title)}" class="ad-showcase-img" width="540" height="675" ${isNearInitial ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
                     </div>
                     <span class="ad-floating-brand" aria-hidden="true">
                       <img src="${U.esc(bLogo)}" alt="" width="24" height="24" />
@@ -911,22 +1091,25 @@
     bindCarouselTouch();
     renderLocationBar();
     renderOutletList();
-    requestAnimationFrame(() => setPromoSlide(promoSlideIndex));
+    requestAnimationFrame(() => setPromoSlide(promoSlideIndex, true));
   }
 
   function bindCarouselTouch() {
     const carousel = $("#ad-showcase-carousel");
     if (!carousel) return;
     carousel.addEventListener("touchstart", (e) => {
-      if (e.touches && e.touches[0]) touchStartX = e.touches[0].clientX;
+      if (e.touches && e.touches[0]) {
+        touchStartX = e.touches[0].clientX;
+        stopPromoCarousel();
+      }
     }, { passive: true });
     carousel.addEventListener("touchend", (e) => {
       if (!e.changedTouches || !e.changedTouches[0]) return;
       const diff = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(diff) > 36) {
-        setPromoSlide(diff < 0 ? promoSlideIndex + 1 : promoSlideIndex - 1);
-        startPromoCarousel();
+        stepPromoSlide(diff < 0 ? 1 : -1);
       }
+      startPromoCarousel();
     }, { passive: true });
   }
 
@@ -1084,6 +1267,8 @@
 
     const activeAds = getBrandMenuAds(brand);
     brandAdIndex = 0;
+    const brandAdLoop = buildLoopSlides(activeAds);
+    brandAdTrackIndex = brandAdLoop.buffer;
 
     main.innerHTML = `
       <div data-brand-theme="${U.esc(brand.id)}">
@@ -1115,14 +1300,18 @@
               <div class="brand-ad-texture"></div>
             </div>
             <div class="brand-ad-viewport" id="brand-ad-viewport">
-              <div class="brand-ad-track" id="brand-ad-track">
-                ${activeAds.map((ad, idx) => `
-                  <div class="brand-ad-slide ${idx === 0 ? "is-active" : ""}">
-                    <div class="brand-ad-frame">
-                      <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="540" height="675" ${idx <= 1 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
+              <div class="brand-ad-track is-instant" id="brand-ad-track">
+                ${brandAdLoop.entries.map((entry, idx) => {
+                  const ad = entry.item;
+                  const isNearInitial = Math.abs(idx - brandAdTrackIndex) <= 2;
+                  return `
+                    <div class="brand-ad-slide ${idx === brandAdTrackIndex ? "is-active" : ""}" data-real-index="${entry.realIndex}" ${entry.isClone ? 'data-clone="true" aria-hidden="true"' : ""}>
+                      <div class="brand-ad-frame">
+                        <img src="${U.esc(ad.image)}" alt="${entry.isClone ? "" : `Promo ${U.esc(brand.name)} ${entry.realIndex + 1}`}" width="540" height="675" ${isNearInitial ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
+                      </div>
                     </div>
-                  </div>
-                `).join("")}
+                  `;
+                }).join("")}
               </div>
             </div>
             ${activeAds.length > 1 ? `
@@ -1173,7 +1362,7 @@
 
     bindBrandAdTouch();
     renderMenuGrid();
-    requestAnimationFrame(() => setBrandAdSlide(0));
+    requestAnimationFrame(() => setBrandAdSlide(0, true));
   }
 
   function sortItems(items, sort) {
@@ -1928,10 +2117,10 @@
       setPromoSlide(parseInt(el.dataset.index, 10) || 0);
       startPromoCarousel();
     } else if (action === "promo-prev") {
-      setPromoSlide(promoSlideIndex - 1);
+      stepPromoSlide(-1);
       startPromoCarousel();
     } else if (action === "promo-next") {
-      setPromoSlide(promoSlideIndex + 1);
+      stepPromoSlide(1);
       startPromoCarousel();
     } else if (action === "promo-select-brand") {
       const bId = el.dataset.brandId;
@@ -1940,10 +2129,10 @@
       setBrandAdSlide(parseInt(el.dataset.index, 10) || 0);
       startBrandAdCarousel();
     } else if (action === "brand-ad-prev") {
-      setBrandAdSlide(brandAdIndex - 1);
+      stepBrandAdSlide(-1);
       startBrandAdCarousel();
     } else if (action === "brand-ad-next") {
-      setBrandAdSlide(brandAdIndex + 1);
+      stepBrandAdSlide(1);
       startBrandAdCarousel();
     } else if (action === "detect-location") {
       requestUserLocation(true);

@@ -6432,3 +6432,11 @@ body.has-bottom-bar .app-main {
 img.is-img-failed {
   opacity: 0.15;
 }
+
+/* Seamless Infinite Loop Carousel: zero-flicker invisible snap */
+.ad-showcase-track.is-instant,
+.ad-showcase-track.is-instant *,
+.brand-ad-track.is-instant,
+.brand-ad-track.is-instant * {
+  transition: none !important;
+}
