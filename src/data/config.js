@@ -22,9 +22,9 @@ window.DLM_CONFIG = {
   currency: "IDR",
   orderPrefix: "DLM",
   serviceFeeIncluded: false,
-  serviceFeeMode: "tiered_per_order",
+  serviceFeeMode: "partner_exact",
   defaultServiceFeePerItem: 0,
-  defaultServiceFeePerOrder: 1000,
+  defaultServiceFeePerOrder: 2000,
   defaultCostRatioPercent: 52,
 
   paymentNote: "Metode pembayaran akan diinformasikan admin melalui WhatsApp setelah pesanan dikonfirmasi.",
@@ -158,7 +158,7 @@ window.DLM_CONFIG = {
     customer: "dlm_customer_v6",
     cart: "dlm_cart_v6",
     orders: "dlm_orders_v5",
-    catalogCache: "dlm_catalog_cache_v6"
+    catalogCache: "dlm_catalog_cache_v7"
   },
 
   navTabs: [

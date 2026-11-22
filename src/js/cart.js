@@ -42,7 +42,7 @@
         .map(s => `${s.groupId}:${s.optionId}`)
         .sort()
         .join("|");
-      return `${item.id}__${selectionKey}__notes:${(item.notes || "").trim().toLowerCase()}`;
+      return `${item.id}${item.isSatuan ? "__satuan" : ""}__${selectionKey}__notes:${(item.notes || "").trim().toLowerCase()}`;
     }
 
     addItem(item) {
@@ -88,11 +88,20 @@
       const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
       const originalTotal = items.reduce((sum, item) => sum + item.lineOriginal, 0);
       const totalSavings = Math.max(0, originalTotal - subtotal);
-      const feeMode = CFG.serviceFeeMode || "tiered_per_order";
+      const feeMode = CFG.serviceFeeMode || "partner_exact";
       let orderServiceFee = 0;
       if (totalItems > 0) {
-        if (feeMode === "tiered_per_order") {
-          orderServiceFee = totalItems === 1 ? Number(CFG.defaultServiceFeePerOrder || 1000) : 0;
+        if (feeMode === "partner_exact") {
+          const singleRegularKenangan =
+            items.length === 1 &&
+            totalItems === 1 &&
+            items[0].brandId === "kenangan" &&
+            items[0].type !== "bundle" &&
+            items[0].category !== "Bundling" &&
+            !items[0].isSatuan;
+          orderServiceFee = singleRegularKenangan ? Number(CFG.defaultServiceFeePerOrder || 2000) : 0;
+        } else if (feeMode === "tiered_per_order") {
+          orderServiceFee = totalItems === 1 ? 1000 : 0;
         } else if (feeMode === "flat_per_order" || feeMode === "both") {
           orderServiceFee = Number(CFG.defaultServiceFeePerOrder || 0);
         }

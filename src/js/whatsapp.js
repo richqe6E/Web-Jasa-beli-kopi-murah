@@ -69,9 +69,9 @@
     lines.push("*RINGKASAN*");
     lines.push(`Subtotal: ${U.rp(cartSummary.subtotal)}`);
     if (cartSummary.orderServiceFee > 0) {
-      lines.push(`Biaya jasa order: ${U.rp(cartSummary.orderServiceFee)}`);
+      lines.push(`Biaya Transaksi (1 Produk): ${U.rp(cartSummary.orderServiceFee)}`);
     } else {
-      lines.push("Harga sudah termasuk biaya jasa.");
+      lines.push("Biaya admin & layanan: GRATIS (Rp 0)");
     }
     if (cartSummary.totalSavings > 0) {
       lines.push(`Hemat promo: -${U.rp(cartSummary.totalSavings)}`);

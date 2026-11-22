@@ -1,6 +1,6 @@
 /* ============================================================
    KATALOG RESMI BRAND: JANJI JIWA (106 MENU, 6 IKLAN V5 HD)
-   Sinkron 100% dengan Partner Reseller + Opsi Order Resmi
+   Harga 100% Sinkron Partner Reseller + Paket Bundling & Satuan
    ============================================================ */
 (function () {
   "use strict";
@@ -106,6 +106,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -124,6 +125,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -142,6 +144,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -160,6 +163,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -178,6 +182,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -196,6 +201,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -214,6 +220,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -232,6 +239,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -250,6 +258,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -268,6 +277,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -286,6 +296,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -304,6 +315,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -322,6 +334,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -340,6 +353,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -358,6 +372,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -376,6 +391,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -394,6 +410,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -412,6 +429,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -430,6 +448,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -448,6 +467,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -466,6 +486,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -484,6 +505,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -502,6 +524,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -520,6 +543,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -538,6 +562,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -556,6 +581,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -574,6 +600,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -592,6 +619,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -610,6 +638,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -628,6 +657,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -646,6 +676,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -664,6 +695,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -682,6 +714,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -700,6 +733,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -718,6 +752,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -736,6 +771,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -754,6 +790,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -772,6 +809,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -790,6 +828,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -808,6 +847,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -826,6 +866,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -844,6 +885,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -862,6 +904,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -880,6 +923,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -898,6 +942,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -916,6 +961,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -934,6 +980,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -952,6 +999,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -970,6 +1018,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -988,6 +1037,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1006,6 +1056,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1024,6 +1075,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1042,6 +1094,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1060,6 +1113,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1078,6 +1132,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1096,6 +1151,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1114,6 +1170,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1132,6 +1189,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1150,6 +1208,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1168,6 +1227,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1186,6 +1246,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1204,6 +1265,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1222,6 +1284,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1240,6 +1303,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1258,6 +1322,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1276,6 +1341,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1294,6 +1360,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1312,6 +1379,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1328,10 +1396,11 @@
       "priceDiscount": 23500,
       "priceCost": 22500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "janji-jiwa-ultimate-cheesy-beef",
@@ -1348,6 +1417,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1366,6 +1436,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1384,6 +1455,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -1402,6 +1474,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1420,6 +1493,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1438,6 +1512,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1456,6 +1531,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -1474,6 +1550,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1492,6 +1569,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1510,6 +1588,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1528,6 +1607,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1546,6 +1626,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1564,6 +1645,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1582,6 +1664,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -1600,6 +1683,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1618,6 +1702,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1636,6 +1721,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1654,6 +1740,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1672,6 +1759,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1690,6 +1778,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1708,6 +1797,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1726,6 +1816,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1744,6 +1835,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1762,6 +1854,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1780,6 +1873,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1798,6 +1892,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1816,6 +1911,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1834,6 +1930,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1852,6 +1949,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1870,6 +1968,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1888,6 +1987,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1906,6 +2006,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1924,6 +2025,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1942,6 +2044,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1960,6 +2063,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -1978,6 +2082,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1996,9 +2101,11 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     }
-  ]
+  ],
+  "satuanNames": []
 };
 })();

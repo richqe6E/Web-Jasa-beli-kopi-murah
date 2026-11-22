@@ -94,7 +94,7 @@
       if (s.region) CFG.region = s.region;
       if (s.admin_whatsapp) CFG.adminWhatsApp = s.admin_whatsapp;
       if (s.admin_whatsapp_display) CFG.adminWhatsAppDisplay = s.admin_whatsapp_display;
-      if (s.service_fee_mode && CFG.serviceFeeMode !== "tiered_per_order") CFG.serviceFeeMode = s.service_fee_mode;
+      if (s.service_fee_mode && !["tiered_per_order", "partner_exact"].includes(CFG.serviceFeeMode)) CFG.serviceFeeMode = s.service_fee_mode;
       if (s.default_service_fee_per_item != null) CFG.defaultServiceFeePerItem = Number(s.default_service_fee_per_item);
       if (s.default_service_fee_per_order != null) CFG.defaultServiceFeePerOrder = Number(s.default_service_fee_per_order);
       if (s.default_cost_ratio_percent != null) CFG.defaultCostRatioPercent = Number(s.default_cost_ratio_percent);
@@ -115,16 +115,25 @@
 
       const mappedBrands = activeBrands.map(b => {
         const localBrand = initialBrandsMap[b.id] || {};
-        const items = payload.menuItems
-          .filter(it => it.brand_id === b.id && it.is_available !== false)
+        const localItemMap = {};
+        (localBrand.items || []).forEach(li => { localItemMap[li.id] = li; });
+        const allBrandRows = payload.menuItems.filter(it => it.brand_id === b.id);
+        const unavailableNames = allBrandRows
+          .filter(it => it.is_available === false)
+          .map(it => String(it.name || "").trim().toLowerCase());
+
+        const items = allBrandRows
+          .filter(it => it.is_available !== false)
           .sort((a, c) => (a.sort_order || 0) - (c.sort_order || 0))
           .map(it => {
+            const localMatch = localItemMap[it.id] || {};
             const rawItem = {
               id: it.id,
               brandId: it.brand_id,
               name: it.name,
               category: it.category,
-              type: it.type || "drink",
+              type: it.type || localMatch.type || "drink",
+              badge: localMatch.badge || "",
               description: it.description || "",
               info: it.info || "",
               image: it.image_url || "src/assets/products/iced-coffee.webp",
@@ -134,6 +143,8 @@
               serviceFeeUnit: Number(it.service_fee_unit || 0),
               isBestSeller: !!it.is_best_seller,
               isAvailable: it.is_available !== false,
+              isSatuanEligible: !!localMatch.isSatuanEligible,
+              bundleSpec: localMatch.bundleSpec || undefined,
               rating: it.rating || "4.8",
               sold: it.sold_label || "1k+",
               soldCount: Number(it.sold_count || 0),
@@ -144,14 +155,13 @@
               : rawItem;
           });
 
-        const allBrandRows = payload.menuItems.filter(it => it.brand_id === b.id);
         const finalItems = allBrandRows.length > 0
           ? items
           : (localBrand.items || items);
 
-        const baseCats = Array.isArray(localBrand.categories) && localBrand.categories.length
-          ? localBrand.categories
-          : (Array.isArray(b.categories) && b.categories.length ? b.categories : ["Semua"]);
+        const baseCats = Array.isArray(b.categories) && b.categories.length
+          ? b.categories
+          : (Array.isArray(localBrand.categories) && localBrand.categories.length ? localBrand.categories : ["Semua"]);
         const itemCats = finalItems.map(it => it.category).filter(Boolean);
         const mergedCats = ["Semua"].concat(Array.from(new Set(baseCats.concat(itemCats).filter(c => c !== "Semua"))));
 
@@ -165,6 +175,8 @@
           wordmark: localBrand.wordmark || lockedLogo,
           themeStyle: localBrand.themeStyle || b.id,
           ads: Array.isArray(localBrand.ads) ? localBrand.ads : [],
+          satuanNames: Array.isArray(localBrand.satuanNames) ? localBrand.satuanNames : [],
+          unavailableNames,
           tagline: b.tagline || localBrand.tagline || "",
           description: b.description || localBrand.description || "",
           promoBadge: b.promo_badge || localBrand.promoBadge || "Promo Spesial",

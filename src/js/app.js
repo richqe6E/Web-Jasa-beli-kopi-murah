@@ -117,7 +117,7 @@
           }
           renderOutletList();
         } else if (r === "menu") {
-          renderMenuGrid();
+          renderMenuStep();
         } else if (r === "checkout") {
           const payNote = $(".payment-note");
           if (payNote) payNote.textContent = CFG.paymentNote;
@@ -1415,7 +1415,11 @@
     let items = brand.items.slice();
 
     if (STORE.state.activeCategory && STORE.state.activeCategory !== "Semua") {
-      items = items.filter(item => item.category === STORE.state.activeCategory);
+      if (STORE.state.activeCategory === "Satuan") {
+        items = items.filter(item => item.isSatuanEligible && item.type !== "bundle");
+      } else {
+        items = items.filter(item => item.category === STORE.state.activeCategory);
+      }
     }
 
     if (pFilter === "bestseller") {
@@ -1509,19 +1513,20 @@
   }
 
   function mustTryCard(brand, item, eager) {
-    const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
+    const hasOrig = item.priceOriginal > item.priceDiscount;
+    const discount = hasOrig ? Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100) : 0;
     return `
       <button type="button" class="must-try-card" data-item-id="${U.esc(item.id)}">
         <span class="must-try-media">
           ${U.imageTag(item.image, item.name, "product-img", !!eager)}
-          <span class="menu-row-badge">-${discount}%</span>
+          ${discount > 0 ? `<span class="menu-row-badge">-${discount}%</span>` : (item.badge ? `<span class="menu-row-badge">${U.esc(item.badge)}</span>` : "")}
           ${brandMediaDecoration(brand, item)}
         </span>
         <span class="must-try-title">${U.esc(item.name)}</span>
         <span class="must-try-foot">
           <span class="must-try-price">
             <strong>${U.rp(item.priceDiscount)}</strong>
-            <s>${U.rp(item.priceOriginal)}</s>
+            ${hasOrig ? `<s>${U.rp(item.priceOriginal)}</s>` : ""}
           </span>
           <span class="circle-add-btn" aria-hidden="true">${ICON.icon("plus", "w-4 h-4", 2.6)}</span>
         </span>
@@ -1530,7 +1535,8 @@
   }
 
   function menuRowCard(brand, item, eager) {
-    const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
+    const hasOrig = item.priceOriginal > item.priceDiscount;
+    const discount = hasOrig ? Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100) : 0;
     const savingAmount = Math.max(0, item.priceOriginal - item.priceDiscount);
     const watermark = brand.id === "tomoro"
       ? `<span class="tomoro-watermark" aria-hidden="true">${U.esc(item.category.split(" ")[0])}</span>`
@@ -1541,12 +1547,12 @@
         ${watermark}
         <span class="menu-row-media">
           ${U.imageTag(item.image, item.name, "product-img", !!eager)}
-          <span class="menu-row-badge">-${discount}%</span>
+          ${discount > 0 ? `<span class="menu-row-badge">-${discount}%</span>` : (item.badge ? `<span class="menu-row-badge">${U.esc(item.badge)}</span>` : "")}
           ${brandMediaDecoration(brand, item)}
         </span>
         <span class="menu-row-body">
           <span class="menu-row-top">
-            ${item.isBestSeller ? `<span class="menu-row-best">★ Best Seller</span>` : ""}
+            ${item.type === "bundle" ? `<span class="menu-row-best">Paket Bundling</span>` : (item.isBestSeller ? `<span class="menu-row-best">★ Best Seller</span>` : "")}
             ${savingAmount > 0 ? `<span class="menu-row-save">Hemat ${U.rp(savingAmount)}</span>` : ""}
           </span>
           <span class="menu-row-name">${U.esc(item.name)}</span>
@@ -1554,7 +1560,7 @@
           <span class="menu-row-foot">
             <span class="menu-row-price">
               <strong>${U.rp(item.priceDiscount)}</strong>
-              <s>${U.rp(item.priceOriginal)}</s>
+              ${hasOrig ? `<s>${U.rp(item.priceOriginal)}</s>` : ""}
             </span>
             <span class="circle-add-btn" aria-hidden="true">${ICON.icon("plus", "w-4 h-4", 2.6)}</span>
           </span>
@@ -1647,12 +1653,12 @@
         </div>
       ` : ""}
 
-      ${summary.totalItems === 1 ? `
+      ${summary.orderServiceFee > 0 ? `
         <div class="cart-nudge-banner">
           <div class="cart-nudge-icon">${ICON.icon("sparkles", "w-4 h-4", 2.2)}</div>
           <div class="cart-nudge-copy">
-            <strong>Tambah 1 menu lagi = GRATIS Biaya Jasa!</strong>
-            <span>Order 1 item kena biaya jasa Rp 1.000. Order ≥ 2 item langsung gratis biaya jasa.</span>
+            <strong>Tambah 1 menu lagi = GRATIS Biaya Admin!</strong>
+            <span>Order 1 produk reguler Kopi Kenangan kena biaya transaksi Rp 2.000 (atau pilih menu Satuan / Bundling agar gratis).</span>
           </div>
           <button type="button" class="btn-soft btn-xs" data-action="go-menu">+ Tambah</button>
         </div>
@@ -1661,11 +1667,11 @@
       <section class="summary-card">
         <div class="summary-row"><span>Subtotal Menu Promo</span><strong>${U.rp(summary.subtotal)}</strong></div>
         <div class="summary-row ${summary.orderServiceFee === 0 ? "is-success" : ""}">
-          <span>Biaya jasa order ${summary.totalItems === 1 ? "(1 item)" : "(≥ 2 item)"}</span>
+          <span>${summary.orderServiceFee > 0 ? "Biaya Transaksi (1 Produk)" : "Biaya Admin & Layanan"}</span>
           <strong>${summary.orderServiceFee > 0 ? U.rp(summary.orderServiceFee) : "GRATIS (Rp 0)"}</strong>
         </div>
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Total Hemat Promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
-        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Biaya jasa Rp 1.000 untuk order 1 item (gratis jika order ≥ 2 item)." : "Selamat! Biaya jasa order GRATIS karena kamu memesan ≥ 2 item."}</div>
+        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Sesuai ketentuan partner: 1 produk reguler Kopi Kenangan dikenakan biaya transaksi Rp 2.000." : "Harga sudah bersih bebas biaya admin tambahan."}</div>
         <div class="summary-total"><span>Total Bayar</span><strong>${U.rp(summary.grandTotal)}</strong></div>
       </section>
     `;
@@ -1797,7 +1803,7 @@
         </div>
         <div class="summary-row"><span>Subtotal</span><strong>${U.rp(summary.subtotal)}</strong></div>
         <div class="summary-row ${summary.orderServiceFee === 0 ? "is-success" : ""}">
-          <span>Biaya jasa order ${summary.totalItems === 1 ? "(1 item)" : "(≥ 2 item)"}</span>
+          <span>${summary.orderServiceFee > 0 ? "Biaya Transaksi (1 Produk)" : "Biaya Admin & Layanan"}</span>
           <strong>${summary.orderServiceFee > 0 ? U.rp(summary.orderServiceFee) : "GRATIS (Rp 0)"}</strong>
         </div>
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Hemat promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
@@ -2362,7 +2368,7 @@
       if (navigator.vibrate) {
         try { navigator.vibrate(12); } catch (e) { /* ignore */ }
       }
-    });
+    }, { mode: STORE.state.activeCategory === "Satuan" ? "satuan" : "regular" });
   }
 
   function copyPatunganSummary() {
@@ -2659,6 +2665,7 @@
           quantity: item.quantity,
           unit_price: item.unitPrice,
           unit_original_price: item.unitOriginalPrice,
+          is_satuan: !!item.isSatuan,
           selections: item.selections,
           notes: item.notes
         }))
@@ -2815,8 +2822,8 @@
             <article class="terms-clause-card">
               <span class="terms-clause-num">2</span>
               <div class="terms-clause-copy">
-                <strong>Harga Promo &amp; Biaya Jasa Order</strong>
-                <p>Harga di katalog sudah termasuk potongan promo resmi partner. Pembelian 1 item dikenakan biaya jasa ringan Rp 1.000, sedangkan pembelian 2 item atau lebih langsung GRATIS biaya jasa order (Rp 0).</p>
+                <strong>Harga Promo &amp; Biaya Transaksi Partner</strong>
+                <p>Harga di katalog mengikuti harga promo resmi partner (paket Bundling menyesuaikan +Rp 1.000). Pesanan Fore Coffee, Janji Jiwa, Bundling, Satuan, dan Kopi Kenangan ≥ 2 item bebas biaya admin (Rp 0). Khusus order 1 produk reguler Kopi Kenangan dikenakan biaya transaksi Rp 2.000 sesuai ketentuan partner.</p>
               </div>
             </article>
             <article class="terms-clause-card">

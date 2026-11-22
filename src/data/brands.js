@@ -188,16 +188,34 @@
     ]
   });
 
+  const KENANGAN_SATUAN_SET = new Set([
+    "kopi kenangan mantan", "spanish latte", "og thai tea", "taro milk",
+    "taro cloud milk tea", "pistachio aren latte", "raspberry hibiscus",
+    "babyccino", "lemon black tea", "fresh lemonade", "choco caramel", "banana americano"
+  ]);
+
   function hydrateItem(item) {
     const brandId = String(item.brandId || "");
     const lowName = String(item.name || "").toLowerCase();
     const lowCat = String(item.category || "").toLowerCase();
     const is1L = lowName.includes("1l") || lowCat.includes("1l") || lowCat.includes("1 liter") || lowCat.includes("bottled") || lowCat.includes("menu favorit");
 
+    // Extract bundleSpec if packaged inside optionGroups from Supabase
+    let bundleSpec = item.bundleSpec || null;
+    let passedOptionGroups = Array.isArray(item.optionGroups) ? item.optionGroups : [];
+    if (!bundleSpec && passedOptionGroups.length) {
+      const specHolder = passedOptionGroups.find(g => g && g.id === "__bundle_spec__");
+      if (specHolder && specHolder.spec) bundleSpec = specHolder.spec;
+    }
+
+    const isBundle = item.type === "bundle" || lowCat === "bundling" || !!bundleSpec;
     let optionGroups = [];
     let showNotes = true;
 
-    if (brandId === "kenangan") {
+    if (isBundle) {
+      optionGroups = [];
+      showNotes = true;
+    } else if (brandId === "kenangan") {
       showNotes = true;
       if (lowName.includes("steep coffee bag")) {
         optionGroups = [kenanganBeansGroup("steep-box")];
@@ -263,10 +281,15 @@
     const soldCount = Math.round(rawSold.includes("k") ? soldNum * 1000 : soldNum);
 
     return Object.assign({}, item, {
+      type: isBundle ? "bundle" : (item.type || "drink"),
+      bundleSpec: bundleSpec || undefined,
+      isSatuanEligible: !!item.isSatuanEligible || (brandId === "kenangan" && KENANGAN_SATUAN_SET.has(lowName)),
       isAvailable: item.isAvailable !== false,
       showNotes,
       soldCount,
-      optionGroups: Array.isArray(item.optionGroups) && item.optionGroups.length ? item.optionGroups : optionGroups
+      optionGroups: (!isBundle && passedOptionGroups.length && passedOptionGroups[0].id !== "__bundle_spec__")
+        ? passedOptionGroups
+        : optionGroups
     });
   }
 

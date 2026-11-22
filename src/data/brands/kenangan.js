@@ -1,6 +1,6 @@
 /* ============================================================
-   KATALOG RESMI BRAND: KOPI KENANGAN (76 MENU, 6 IKLAN V5 HD)
-   Sinkron 100% dengan Partner Reseller + Opsi Order Resmi
+   KATALOG RESMI BRAND: KOPI KENANGAN (83 MENU, 6 IKLAN V5 HD)
+   Harga 100% Sinkron Partner Reseller + Paket Bundling & Satuan
    ============================================================ */
 (function () {
   "use strict";
@@ -24,6 +24,8 @@
   "logoIcon": "heart",
   "categories": [
     "Semua",
+    "Satuan",
+    "Bundling",
     "Baru!",
     "Coffee",
     "Non Coffee",
@@ -93,6 +95,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -109,10 +112,11 @@
       "priceDiscount": 15000,
       "priceCost": 14500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-taro-cloud-latte",
@@ -127,10 +131,11 @@
       "priceDiscount": 16500,
       "priceCost": 16000,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-taro-cloud-milk-tea",
@@ -145,10 +150,11 @@
       "priceDiscount": 15000,
       "priceCost": 14500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-classic-peanut-butter-panini",
@@ -165,6 +171,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -183,6 +190,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -201,6 +209,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -219,6 +228,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -237,6 +247,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -255,6 +266,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -273,6 +285,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -291,6 +304,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -307,10 +321,11 @@
       "priceDiscount": 15000,
       "priceCost": 14500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-cafe-malt-latte",
@@ -327,6 +342,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -345,6 +361,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -363,6 +380,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -381,6 +399,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -399,6 +418,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -417,6 +437,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -435,6 +456,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -453,6 +475,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -471,6 +494,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -489,6 +513,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -507,6 +532,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -525,6 +551,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -541,10 +568,11 @@
       "priceDiscount": 16000,
       "priceCost": 15500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-butterscotch-aren-latte",
@@ -559,10 +587,11 @@
       "priceDiscount": 15000,
       "priceCost": 14500,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-butterscotch-sea-salt-latte",
@@ -579,6 +608,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -597,6 +627,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -615,6 +646,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -633,6 +665,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -651,6 +684,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -667,10 +701,11 @@
       "priceDiscount": 16500,
       "priceCost": 16000,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-og-thai-tea",
@@ -687,6 +722,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -705,6 +741,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -723,6 +760,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -741,6 +779,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -759,6 +798,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -777,6 +817,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -795,6 +836,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -813,6 +855,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -831,6 +874,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -849,6 +893,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -867,6 +912,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -885,6 +931,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -903,6 +950,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -921,6 +969,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -939,6 +988,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -957,6 +1007,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -975,6 +1026,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -993,6 +1045,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": true,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1011,6 +1064,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1029,6 +1083,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1047,6 +1102,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1065,6 +1121,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1083,6 +1140,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1101,6 +1159,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1117,10 +1176,11 @@
       "priceDiscount": 19500,
       "priceCost": 19000,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-vanilla-kenangan-frappe",
@@ -1137,6 +1197,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1155,6 +1216,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1173,6 +1235,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": true,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "4k+"
     },
@@ -1191,6 +1254,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1209,6 +1273,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1227,6 +1292,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1245,6 +1311,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1263,6 +1330,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1281,6 +1349,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1299,6 +1368,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1317,6 +1387,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1335,6 +1406,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1351,10 +1423,11 @@
       "priceDiscount": 11500,
       "priceCost": 11000,
       "serviceFeeUnit": 0,
-      "isBestSeller": true,
+      "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
-      "sold": "4k+"
+      "sold": "1.5k+"
     },
     {
       "id": "kenangan-sandwich-smoked-beef-and-cheese",
@@ -1371,6 +1444,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1389,6 +1463,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1407,6 +1482,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1425,6 +1501,7 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
     },
@@ -1443,9 +1520,490 @@
       "serviceFeeUnit": 0,
       "isBestSeller": false,
       "isAvailable": true,
+      "isSatuanEligible": false,
       "rating": "4.9",
       "sold": "1.5k+"
+    },
+    {
+      "id": "kenangan-bundle-triple-cup-reg",
+      "brandId": "kenangan",
+      "name": "TRIPLE CUP REG",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "Promo 3 Cup",
+      "description": "Beli 3 minuman reguler sekaligus lebih hemat! Catatan: outlet tertentu/mall/rest area menyesuaikan kebijakan cabang.",
+      "info": "Pilih 3 Minuman Regular • Atur Suhu, Gula & Es per cup",
+      "image": "src/assets/bundles/triple-cup-reg.webp",
+      "priceOriginal": 57000,
+      "priceDiscount": 36000,
+      "priceCost": 35000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": true,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "5k+",
+      "bundleSpec": {
+        "drinkSlots": 3,
+        "foodSlots": 0,
+        "allowedDrinks": [
+          {
+            "name": "Kopi Kenangan Mantan",
+            "extraPrice": 0
+          },
+          {
+            "name": "Banana Americano",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Pistachio Aren Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Spanish Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "OG Thai Tea",
+            "extraPrice": 0
+          },
+          {
+            "name": "Taro Milk",
+            "extraPrice": 0
+          },
+          {
+            "name": "Taro Cloud Milk Tea",
+            "extraPrice": 0
+          },
+          {
+            "name": "Babyccino",
+            "extraPrice": 0
+          }
+        ],
+        "allowedFoods": []
+      }
+    },
+    {
+      "id": "kenangan-bundle-paket-berdua",
+      "brandId": "kenangan",
+      "name": "PAKET BERDUA",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "Promo Hemat",
+      "description": "Nikmati paket hemat ber-2: pilih 2 minuman & 2 makanan favoritmu dalam 1 paket!",
+      "info": "Pilih 2 Minuman + 2 Makanan • Cocok buat berdua",
+      "image": "src/assets/bundles/paket-berdua.webp",
+      "priceOriginal": 36000,
+      "priceDiscount": 36000,
+      "priceCost": 35000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": true,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "4k+",
+      "bundleSpec": {
+        "drinkSlots": 2,
+        "foodSlots": 2,
+        "allowedDrinks": [
+          {
+            "name": "Taro Milk",
+            "extraPrice": 0
+          },
+          {
+            "name": "Taro Cloud Milk Tea",
+            "extraPrice": 0
+          },
+          {
+            "name": "Kopi Kenangan Mantan",
+            "extraPrice": 0
+          },
+          {
+            "name": "Pistachio Aren Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Spanish Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "OG Thai Tea",
+            "extraPrice": 0
+          },
+          {
+            "name": "Babyccino",
+            "extraPrice": 0
+          }
+        ],
+        "allowedFoods": [
+          {
+            "name": "Sugar Donut",
+            "extraPrice": 0
+          },
+          {
+            "name": "Roti Coklat Klasik",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Chocolate Donut",
+            "extraPrice": 1500
+          },
+          {
+            "name": "Vanilla Choux Puff",
+            "extraPrice": 1500,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Strawberry Choux Puff",
+            "extraPrice": 1500
+          },
+          {
+            "name": "Chocolate Choux Puff",
+            "extraPrice": 1500
+          },
+          {
+            "name": "Salt Bread Original",
+            "extraPrice": 1500
+          },
+          {
+            "name": "Roti Keju Manis",
+            "extraPrice": 1500,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Salt Bread Choco Butter",
+            "extraPrice": 1500,
+            "partnerAvailable": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "kenangan-bundle-two-hearts-two-cups-reg",
+      "brandId": "kenangan",
+      "name": "TWO HEARTS, TWO CUPS REG",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "2 Cup Reguler",
+      "description": "Bundling spesial 2 cup minuman reguler pilihan dengan harga super hemat.",
+      "info": "Pilih 2 Minuman Regular • Atur Suhu, Gula & Es",
+      "image": "src/assets/bundles/two-hearts-two-cups.webp",
+      "priceOriginal": 51000,
+      "priceDiscount": 31000,
+      "priceCost": 30000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": true,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "4.5k+",
+      "bundleSpec": {
+        "drinkSlots": 2,
+        "foodSlots": 0,
+        "allowedDrinks": [
+          {
+            "name": "Dua Shot OG Aren",
+            "extraPrice": 0
+          },
+          {
+            "name": "Caramel Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Hazelnut Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Matcha Espresso",
+            "extraPrice": 0
+          },
+          {
+            "name": "Vanilla Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Butterscotch Sea Salt Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Oatside Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Milk Oreo Crumble",
+            "extraPrice": 0
+          },
+          {
+            "name": "Dutch Chocolate",
+            "extraPrice": 0
+          },
+          {
+            "name": "Oreo Shake",
+            "extraPrice": 0
+          },
+          {
+            "name": "Matcha Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Oatside Matcha Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Vanilla Kenangan Frappe",
+            "extraPrice": 0
+          }
+        ],
+        "allowedFoods": []
+      }
+    },
+    {
+      "id": "kenangan-bundle-solo-treats",
+      "brandId": "kenangan",
+      "name": "SOLO TREATS",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "Promo 3 Menu",
+      "description": "1 minuman favorit + 2 makanan/roti pilihan dalam satu paket spesial!",
+      "info": "Pilih 1 Minuman + 2 Roti/Makanan • Praktis & Hemat",
+      "image": "src/assets/bundles/solo-treats.webp",
+      "priceOriginal": 38000,
+      "priceDiscount": 38000,
+      "priceCost": 37000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": true,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "3.5k+",
+      "bundleSpec": {
+        "drinkSlots": 1,
+        "foodSlots": 2,
+        "allowedDrinks": [
+          {
+            "name": "Taro Cloud Matcha",
+            "extraPrice": 0
+          },
+          {
+            "name": "Taro Cloud Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Cafe Malt Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Creamy Aren Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Cappuccino",
+            "extraPrice": 0
+          },
+          {
+            "name": "Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Butterscotch Sea Salt Crumble",
+            "extraPrice": 0
+          },
+          {
+            "name": "Hazelnut Choco Milk Tea",
+            "extraPrice": 0
+          }
+        ],
+        "allowedFoods": [
+          {
+            "name": "Adam Ayam Toast",
+            "extraPrice": 0
+          },
+          {
+            "name": "Wahyu Sapi Toast",
+            "extraPrice": 0
+          },
+          {
+            "name": "Chocolate Croissant",
+            "extraPrice": 0
+          },
+          {
+            "name": "Bananachoco Soft Baked Cookie",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Oatmeal Raisin Soft Baked Cookie",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Bambang Choco Cheese Toast",
+            "extraPrice": 0
+          },
+          {
+            "name": "Sweet Honey Soft Baked Cookie",
+            "extraPrice": 0
+          },
+          {
+            "name": "Choco Peanut Butter Panini",
+            "extraPrice": 0
+          },
+          {
+            "name": "Strawberry Peanut Butter Panini",
+            "extraPrice": 0
+          },
+          {
+            "name": "Double Choco Bagel",
+            "extraPrice": 0
+          },
+          {
+            "name": "Triple Cheese Bagel",
+            "extraPrice": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "kenangan-bundle-kkm-large",
+      "brandId": "kenangan",
+      "name": "BUNDLING KKM LARGE",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "2 Cup KKM Large",
+      "description": "2 cup Kopi Kenangan Mantan ukuran Large harga jauh lebih hemat!",
+      "info": "2 Cup Large Kopi Kenangan Mantan • Atur Suhu, Gula & Es",
+      "image": "src/assets/bundles/bundling-kkm-large.webp",
+      "priceOriginal": 50000,
+      "priceDiscount": 30000,
+      "priceCost": 29000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": true,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "6k+",
+      "bundleSpec": {
+        "drinkSlots": 2,
+        "foodSlots": 0,
+        "allowedDrinks": [
+          {
+            "name": "Kopi Kenangan Mantan",
+            "extraPrice": 0
+          }
+        ],
+        "allowedFoods": []
+      }
+    },
+    {
+      "id": "kenangan-bundle-large",
+      "brandId": "kenangan",
+      "name": "BUNDLING LARGE",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "2 Cup Large",
+      "description": "Bebas mix pilih 2 cup ukuran Large dari menu favorit Kopi Kenangan!",
+      "info": "Pilih 2 Cup Large Bebas Mix • Atur Suhu, Gula & Es",
+      "image": "src/assets/bundles/bundling-large.webp",
+      "priceOriginal": 52000,
+      "priceDiscount": 32000,
+      "priceCost": 31000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": false,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "3k+",
+      "bundleSpec": {
+        "drinkSlots": 2,
+        "foodSlots": 0,
+        "allowedDrinks": [
+          {
+            "name": "Kopi Kenangan Mantan",
+            "extraPrice": 0
+          },
+          {
+            "name": "Spanish Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Butterscotch Aren Latte",
+            "extraPrice": 0
+          },
+          {
+            "name": "Milo Dinosaurus",
+            "extraPrice": 1000
+          }
+        ],
+        "allowedFoods": []
+      }
+    },
+    {
+      "id": "kenangan-bundle-frappe-reg",
+      "brandId": "kenangan",
+      "name": "BUNDLING FRAPPE REG",
+      "category": "Bundling",
+      "type": "bundle",
+      "badge": "Frappe 2 Cup Reg",
+      "description": "Paket hemat 2 cup Kenangan Frappe ukuran Reguler dengan pilihan rasa favorit!",
+      "info": "Pilih 2 Cup Frappe Regular • Atur Gula & Es",
+      "image": "src/assets/bundles/bundling-frappe-reg.webp",
+      "priceOriginal": 36000,
+      "priceDiscount": 36000,
+      "priceCost": 35000,
+      "serviceFeeUnit": 0,
+      "isBestSeller": false,
+      "isAvailable": true,
+      "rating": "4.9",
+      "sold": "2.5k+",
+      "bundleSpec": {
+        "drinkSlots": 2,
+        "foodSlots": 0,
+        "allowedDrinks": [
+          {
+            "name": "Vanilla Kenangan Frappe",
+            "extraPrice": 0
+          },
+          {
+            "name": "Kopi Kenangan Mantan Frappe",
+            "extraPrice": 0
+          },
+          {
+            "name": "Chocoberry Frappe",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Choco Caramel Frappe",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          },
+          {
+            "name": "Butterscotch Kenangan Frappe",
+            "extraPrice": 1000
+          },
+          {
+            "name": "Dutch Choco Kenangan Frappe",
+            "extraPrice": 1000
+          },
+          {
+            "name": "Coffeeberry Frappe",
+            "extraPrice": 0,
+            "partnerAvailable": false
+          }
+        ],
+        "allowedFoods": []
+      }
     }
+  ],
+  "satuanNames": [
+    "Kopi Kenangan Mantan",
+    "Spanish Latte",
+    "OG Thai Tea",
+    "Taro Milk",
+    "Taro Cloud Milk Tea",
+    "Pistachio Aren Latte",
+    "Raspberry Hibiscus",
+    "Babyccino",
+    "Lemon Black Tea",
+    "Fresh Lemonade",
+    "Choco Caramel",
+    "Banana Americano"
   ]
 };
 })();

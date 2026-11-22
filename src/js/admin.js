@@ -680,13 +680,12 @@
       <section class="panel-card" style="background:linear-gradient(145deg,#ffffff 35%,#eef6ff 100%);border-color:var(--primary-line)">
         <div class="panel-head">
           <div>
-            <p class="panel-eyebrow">Skema Aktif Opsi 3 (Partner Reseller)</p>
-            <h2 class="panel-title">Aturan Laba Reseller &amp; Biaya Jasa Bertingkat</h2>
+            <p class="panel-eyebrow">Skema Aktif Partner (Sinkron Reseller + Bundling +Rp 1.000)</p>
+            <h2 class="panel-title">Aturan Laba Reseller &amp; Biaya Transaksi Partner</h2>
             <p class="panel-sub">
-              <strong>Kopi Kenangan:</strong> 1 item fee Rp 500; ≥ 2 item fee Rp 1.000 (Reguler/Food) / Rp 1.500 (Large) •
-              <strong>Janji Jiwa:</strong> fee Rp 1.000/item •
-              <strong>Fore Coffee:</strong> harga dibulatkan Rp 500, fee dasar Rp 500 (Reguler/Deli) / Rp 1.000 (1L &amp; Large) •
-              <strong>Checkout:</strong> Biaya jasa Rp 1.000 (1 item) / GRATIS Rp 0 (≥ 2 item).
+              <strong>Kopi Kenangan:</strong> harga katalog persis partner, paket <strong>Bundling +Rp 1.000</strong> (biaya transaksi Rp 2.000 khusus 1 item reguler) •
+              <strong>Janji Jiwa:</strong> fee Rp 1.000/item, biaya admin checkout Rp 0 •
+              <strong>Fore Coffee:</strong> harga persis partner, fee dasar Rp 500 (Reguler/Deli) / Rp 1.000 (1L &amp; Large), biaya admin checkout Rp 0.
             </p>
           </div>
           <button type="button" class="btn btn-primary btn-xs" data-action="sync-reseller-hpp">
@@ -950,9 +949,9 @@
           <div class="field">
             <label class="field-label" for="set-fee-mode">Mode Perhitungan Biaya Jasa</label>
             <select id="set-fee-mode" class="select">
-              <option value="flat_per_order" ${s.service_fee_mode === "flat_per_order" || !s.service_fee_mode ? "selected" : ""}>Biaya Jasa Bertingkat (1 item Rp 1.000 • ≥2 item GRATIS)</option>
+              <option value="flat_per_order" ${s.service_fee_mode === "flat_per_order" || !s.service_fee_mode ? "selected" : ""}>Sesuai Partner (Kopken 1 Produk Reguler Rp 2.000 • Lainnya Rp 0)</option>
               <option value="included_per_item" ${s.service_fee_mode === "included_per_item" ? "selected" : ""}>Termasuk di Harga Jual per Item</option>
-              <option value="both" ${s.service_fee_mode === "both" ? "selected" : ""}>Gabungan (Per Item + Bertingkat Order)</option>
+              <option value="both" ${s.service_fee_mode === "both" ? "selected" : ""}>Gabungan (Per Item + Transaksi Partner)</option>
             </select>
           </div>
 
@@ -962,8 +961,8 @@
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-fee-order">Biaya Jasa Order 1 Item (Rp)</label>
-            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order != null ? s.default_service_fee_per_order : 1000)}" min="0" step="1">
+            <label class="field-label" for="set-fee-order">Biaya Transaksi 1 Produk Kopken (Rp)</label>
+            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order != null ? s.default_service_fee_per_order : 2000)}" min="0" step="1">
           </div>
 
           <div class="field">
@@ -1333,6 +1332,7 @@
     const cat = String(item.category || "").toLowerCase();
     const name = String(item.name || "").toLowerCase();
     if (item.brand_id === "kenangan") {
+      if (cat === "bundling" || item.type === "bundle") return Math.max(0, sell - 1000);
       return Math.max(0, sell - 500);
     }
     if (item.brand_id === "janji-jiwa") {
