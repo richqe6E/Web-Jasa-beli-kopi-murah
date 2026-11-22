@@ -37,6 +37,29 @@
     });
   }
 
+  const BUNDLE_SLOT_IMAGE_FALLBACK = {
+    "banana americano": "src/assets/menus/kenangan/kenangan-americano.webp",
+    "roti coklat klasik": "src/assets/menus/kenangan/kenangan-chocolate-croissant.webp",
+    "vanilla choux puff": "src/assets/menus/kenangan/kenangan-vanilla-choux-puff.webp",
+    "roti keju manis": "src/assets/menus/kenangan/kenangan-triple-cheese-bagel.webp",
+    "salt bread choco butter": "src/assets/menus/kenangan/kenangan-salt-bread-choco-butter.webp",
+    "bananachoco soft baked cookie": "src/assets/menus/kenangan/kenangan-bananachoco-soft-baked-cookie.webp",
+    "oatmeal raisin soft baked cookie": "src/assets/menus/kenangan/kenangan-oatmeal-raisin-soft-baked-cookie.webp",
+    "chocoberry frappe": "src/assets/menus/kenangan/kenangan-dutch-choco-kenangan-frappe.webp",
+    "choco caramel frappe": "src/assets/menus/kenangan/kenangan-caramel-dutch-choco.webp",
+    "coffeeberry frappe": "src/assets/menus/kenangan/kenangan-kopi-kenangan-mantan-frappe.webp"
+  };
+
+  function resolveBundleSlotImage(name) {
+    const key = String(name || "").trim().toLowerCase();
+    if (!key) return "src/assets/menus/kenangan/kenangan-kopi-kenangan-mantan.webp";
+    if (currentBrand && Array.isArray(currentBrand.items)) {
+      const found = currentBrand.items.find(i => String(i.name || "").trim().toLowerCase() === key && i.image);
+      if (found) return found.image;
+    }
+    return BUNDLE_SLOT_IMAGE_FALLBACK[key] || "src/assets/menus/kenangan/kenangan-kopi-kenangan-mantan.webp";
+  }
+
   function isBundleItemAvailable(entry) {
     if (!entry || entry.partnerAvailable === false) return false;
     const unavail = (currentBrand && Array.isArray(currentBrand.unavailableNames))
@@ -269,7 +292,7 @@
           <div class="option-head">
             <div>
               <h3 class="option-title">Opsi 1: Pilihan Minuman <span class="req-badge">Pilih ${drinkSlots} (${bundleDrinks.length}/${drinkSlots})</span></h3>
-              <p class="option-helper">Ketuk menu di bawah untuk mengisi slot minuman. Kamu bisa ubah suhu, gula &amp; es tiap cup.</p>
+              <p class="option-helper">Ketuk menu di bawah untuk mengisi slot minuman. Atur suhu, gula &amp; es tiap cup setelah dipilih.</p>
             </div>
           </div>
 
@@ -281,9 +304,12 @@
                 return `
                   <div class="bundle-chosen-chip ${isEditing ? "is-editing" : ""}">
                     <div class="bundle-chosen-top">
-                      <div>
-                        <strong>Slot ${idx + 1}: ${U.esc(d.name)} ${d.extraPrice > 0 ? `<span class="bundle-extra-tag">+${U.rp(d.extraPrice)}</span>` : ""}</strong>
-                        <span>${U.esc(detail)}</span>
+                      <div class="bundle-chosen-left">
+                        <span class="bundle-chosen-thumb">${U.imageTag(resolveBundleSlotImage(d.name), d.name, "product-img", true)}</span>
+                        <div class="bundle-chosen-copy">
+                          <strong>Slot ${idx + 1}: ${U.esc(d.name)}${d.extraPrice > 0 ? `<span class="bundle-extra-tag">+${U.rp(d.extraPrice)}</span>` : ""}</strong>
+                          <span class="bundle-chosen-sub">${U.esc(detail)}</span>
+                        </div>
                       </div>
                       <div class="bundle-chosen-actions">
                         <button type="button" class="btn-soft btn-xs" data-bundle-edit-drink="${idx}">${isEditing ? "Selesai" : "✎ Ubah"}</button>
@@ -326,10 +352,15 @@
               const countChosen = bundleDrinks.filter(x => x.name === d.name).length;
               return `
                 <button type="button" class="bundle-slot-card ${avail ? "" : "is-disabled"} ${countChosen > 0 ? "has-picked" : ""}" data-bundle-add-drink="${dIdx}" ${!avail || drinksFull ? "disabled" : ""}>
-                  <span class="bundle-slot-name">${U.esc(d.name)}</span>
-                  <span class="bundle-slot-meta">
-                    ${!avail ? `<span class="bundle-habis-pill">Habis</span>` : (d.extraPrice > 0 ? `+${U.rp(d.extraPrice)}` : "Termasuk Paket")}
-                    ${countChosen > 0 ? ` • <strong>${countChosen}x</strong>` : ""}
+                  <span class="bundle-slot-thumb">
+                    ${U.imageTag(resolveBundleSlotImage(d.name), d.name, "product-img")}
+                    ${countChosen > 0 ? `<span class="bundle-slot-count">${countChosen}x</span>` : ""}
+                  </span>
+                  <span class="bundle-slot-info">
+                    <span class="bundle-slot-name">${U.esc(d.name)}</span>
+                    <span class="bundle-slot-meta">
+                      ${!avail ? `<span class="bundle-habis-pill">Habis</span>` : (d.extraPrice > 0 ? `<span class="bundle-slot-extra">+${U.rp(d.extraPrice)}</span>` : "Termasuk Paket")}
+                    </span>
                   </span>
                 </button>
               `;
@@ -352,9 +383,12 @@
               ${bundleFoods.map((f, idx) => `
                 <div class="bundle-chosen-chip">
                   <div class="bundle-chosen-top">
-                    <div>
-                      <strong>Makanan ${idx + 1}: ${U.esc(f.name)} ${f.extraPrice > 0 ? `<span class="bundle-extra-tag">+${U.rp(f.extraPrice)}</span>` : ""}</strong>
-                      <span>Standar Outlet Resmi</span>
+                    <div class="bundle-chosen-left">
+                      <span class="bundle-chosen-thumb">${U.imageTag(resolveBundleSlotImage(f.name), f.name, "product-img", true)}</span>
+                      <div class="bundle-chosen-copy">
+                        <strong>Makanan ${idx + 1}: ${U.esc(f.name)}${f.extraPrice > 0 ? `<span class="bundle-extra-tag">+${U.rp(f.extraPrice)}</span>` : ""}</strong>
+                        <span class="bundle-chosen-sub">Standar Outlet Resmi</span>
+                      </div>
                     </div>
                     <button type="button" class="icon-btn danger" data-bundle-remove-food="${idx}" aria-label="Hapus makanan ${idx + 1}">${ICON.icon("x", "w-3.5 h-3.5", 2.4)}</button>
                   </div>
@@ -369,10 +403,15 @@
               const countChosen = bundleFoods.filter(x => x.name === f.name).length;
               return `
                 <button type="button" class="bundle-slot-card ${avail ? "" : "is-disabled"} ${countChosen > 0 ? "has-picked" : ""}" data-bundle-add-food="${fIdx}" ${!avail || foodsFull ? "disabled" : ""}>
-                  <span class="bundle-slot-name">${U.esc(f.name)}</span>
-                  <span class="bundle-slot-meta">
-                    ${!avail ? `<span class="bundle-habis-pill">Habis</span>` : (f.extraPrice > 0 ? `+${U.rp(f.extraPrice)}` : "Termasuk Paket")}
-                    ${countChosen > 0 ? ` • <strong>${countChosen}x</strong>` : ""}
+                  <span class="bundle-slot-thumb">
+                    ${U.imageTag(resolveBundleSlotImage(f.name), f.name, "product-img")}
+                    ${countChosen > 0 ? `<span class="bundle-slot-count">${countChosen}x</span>` : ""}
+                  </span>
+                  <span class="bundle-slot-info">
+                    <span class="bundle-slot-name">${U.esc(f.name)}</span>
+                    <span class="bundle-slot-meta">
+                      ${!avail ? `<span class="bundle-habis-pill">Habis</span>` : (f.extraPrice > 0 ? `<span class="bundle-slot-extra">+${U.rp(f.extraPrice)}</span>` : "Termasuk Paket")}
+                    </span>
                   </span>
                 </button>
               `;
@@ -391,6 +430,7 @@
     const visibleGroups = getEffectiveGroups(item);
     const isBundle = item.type === "bundle" && !!item.bundleSpec;
     const remainingSlots = getBundleRemainingCount();
+    const cleanDesc = U.cleanDescription ? U.cleanDescription(item.description) : String(item.description || "").trim();
     const ctaText = isBundle && remainingSlots > 0
       ? `Pilih ${remainingSlots} menu lagi`
       : (isBundle ? "Masukkan ke Keranjang" : "Tambah ke Keranjang");
@@ -404,14 +444,16 @@
           </button>
 
           <div class="sheet-scroll">
-            <div class="sheet-hero">
-              <div class="media-fallback">${ICON.icon("coffee", "w-12 h-12", 1.5)}</div>
-              ${U.imageTag(item.image, item.name, "sheet-hero-img")}
-              <div class="sheet-hero-shade"></div>
-              <div class="sheet-hero-badges">
-                ${discount > 0 ? `<span class="badge badge-save">-${discount}%</span>` : ""}
-                ${isSatuanMode ? `<span class="badge badge-best">Satuan • Bebas Fee</span>` : (item.badge ? `<span class="badge badge-best">${U.esc(item.badge)}</span>` : (item.isBestSeller ? `<span class="badge badge-best">${ICON.icon("star", "w-3 h-3", 2.2)} Best Seller</span>` : ""))}
+            <div class="sheet-hero ${isBundle ? "is-bundle-hero" : ""}">
+              <div class="sheet-hero-frame">
+                <div class="media-fallback">${ICON.icon("coffee", "w-12 h-12", 1.5)}</div>
+                ${U.imageTag(item.image, item.name, "sheet-hero-img", true)}
               </div>
+              ${discount > 0 ? `
+                <div class="sheet-hero-badges">
+                  <span class="badge badge-save">-${discount}%</span>
+                </div>
+              ` : ""}
             </div>
 
             <div class="sheet-body">
@@ -419,7 +461,7 @@
                 <div class="min-w-0">
                   <p class="eyebrow">${U.esc(currentBrand.shortName)}${isSatuanMode ? " • Mode Satuan" : (isBundle ? " • Paket Bundling" : "")}</p>
                   <h2 id="sheet-title" class="sheet-title">${U.esc(item.name)}</h2>
-                  <p class="sheet-desc">${U.esc(item.description)}</p>
+                  ${cleanDesc ? `<p class="sheet-desc">${U.esc(cleanDesc)}</p>` : ""}
                 </div>
               </div>
 
@@ -428,17 +470,11 @@
                   <span class="price-now">${U.rp(item.priceDiscount)}</span>
                   ${hasOriginalDiff ? `<span class="price-old">${U.rp(item.priceOriginal)}</span>` : ""}
                 </div>
-                ${hasOriginalDiff ? `<span class="save-pill">Hemat ${U.rp(item.priceOriginal - item.priceDiscount)}</span>` : ""}
-              </div>
-
-              <div class="info-chips">
-                <span class="info-chip">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${U.esc(item.info)}</span>
-                <span class="info-chip">${ICON.icon("star", "w-3.5 h-3.5", 2)} ${U.esc(item.rating)} • ${U.esc(item.sold)} terjual</span>
               </div>
 
               <div class="sheet-divider"></div>
 
-              ${isBundle ? bundleBuilderMarkup(item) : visibleGroups.map(groupMarkup).join("")}
+              ${isBundle ? `<div id="bundle-builder-root">${bundleBuilderMarkup(item)}</div>` : visibleGroups.map(groupMarkup).join("")}
 
               ${item.showNotes !== false ? `
                 <section class="option-group">
@@ -520,6 +556,100 @@
     });
   }
 
+  function updateBundleFooterCta() {
+    const addBtn = document.getElementById("customizer-add");
+    const ctaEl = document.getElementById("customizer-cta-label");
+    const remainingSlots = getBundleRemainingCount();
+    if (ctaEl) {
+      ctaEl.textContent = remainingSlots > 0 ? `Pilih ${remainingSlots} menu lagi` : "Masukkan ke Keranjang";
+    }
+    if (addBtn) {
+      addBtn.disabled = remainingSlots > 0;
+    }
+    updatePrice();
+  }
+
+  function updateBundleDom() {
+    const builderRoot = document.getElementById("bundle-builder-root");
+    if (!builderRoot || !currentItem || !currentItem.bundleSpec) {
+      updateBundleFooterCta();
+      return;
+    }
+    builderRoot.innerHTML = bundleBuilderMarkup(currentItem);
+    bindBundleEvents(builderRoot);
+    updateBundleFooterCta();
+  }
+
+  function bindBundleEvents(scopeEl) {
+    if (!scopeEl) return;
+
+    scopeEl.querySelectorAll("[data-bundle-add-drink]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.bundleAddDrink, 10);
+        const spec = currentItem && currentItem.bundleSpec;
+        if (!spec || !spec.allowedDrinks || !spec.allowedDrinks[idx]) return;
+        if (bundleDrinks.length >= Number(spec.drinkSlots || 0)) return;
+        const d = spec.allowedDrinks[idx];
+        bundleDrinks.push({
+          name: d.name,
+          extraPrice: Number(d.extraPrice || 0),
+          temp: "Ice",
+          sugar: "Normal Sugar",
+          ice: "Normal Ice"
+        });
+        updateBundleDom();
+      });
+    });
+
+    scopeEl.querySelectorAll("[data-bundle-remove-drink]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.bundleRemoveDrink, 10);
+        bundleDrinks.splice(idx, 1);
+        editingDrinkIdx = -1;
+        updateBundleDom();
+      });
+    });
+
+    scopeEl.querySelectorAll("[data-bundle-edit-drink]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.bundleEditDrink, 10);
+        editingDrinkIdx = editingDrinkIdx === idx ? -1 : idx;
+        updateBundleDom();
+      });
+    });
+
+    scopeEl.querySelectorAll("[data-bundle-opt]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const key = btn.dataset.bundleOpt;
+        const val = btn.dataset.val;
+        if (!bundleDrinks[idx]) return;
+        bundleDrinks[idx][key] = val;
+        updateBundleDom();
+      });
+    });
+
+    scopeEl.querySelectorAll("[data-bundle-add-food]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.bundleAddFood, 10);
+        const spec = currentItem && currentItem.bundleSpec;
+        if (!spec || !spec.allowedFoods || !spec.allowedFoods[idx]) return;
+        if (bundleFoods.length >= Number(spec.foodSlots || 0)) return;
+        const f = spec.allowedFoods[idx];
+        bundleFoods.push({ name: f.name, extraPrice: Number(f.extraPrice || 0) });
+        updateBundleDom();
+      });
+    });
+
+    scopeEl.querySelectorAll("[data-bundle-remove-food]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.bundleRemoveFood, 10);
+        bundleFoods.splice(idx, 1);
+        updateBundleDom();
+      });
+    });
+  }
+
   function bind() {
     const overlay = root.querySelector("[data-sheet-overlay]");
     const closeBtn = root.querySelector("[data-sheet-close]");
@@ -569,80 +699,7 @@
       });
     });
 
-    // Bundle event handlers
-    const rerenderBundlePreservingScroll = () => {
-      const scrollEl = root.querySelector(".sheet-scroll");
-      const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
-      render();
-      const newScrollEl = root.querySelector(".sheet-scroll");
-      if (newScrollEl) newScrollEl.scrollTop = scrollTop;
-    };
-
-    root.querySelectorAll("[data-bundle-add-drink]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.bundleAddDrink, 10);
-        const spec = currentItem && currentItem.bundleSpec;
-        if (!spec || !spec.allowedDrinks || !spec.allowedDrinks[idx]) return;
-        if (bundleDrinks.length >= Number(spec.drinkSlots || 0)) return;
-        const d = spec.allowedDrinks[idx];
-        bundleDrinks.push({
-          name: d.name,
-          extraPrice: Number(d.extraPrice || 0),
-          temp: "Ice",
-          sugar: "Normal Sugar",
-          ice: "Normal Ice"
-        });
-        rerenderBundlePreservingScroll();
-      });
-    });
-
-    root.querySelectorAll("[data-bundle-remove-drink]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.bundleRemoveDrink, 10);
-        bundleDrinks.splice(idx, 1);
-        editingDrinkIdx = -1;
-        rerenderBundlePreservingScroll();
-      });
-    });
-
-    root.querySelectorAll("[data-bundle-edit-drink]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.bundleEditDrink, 10);
-        editingDrinkIdx = editingDrinkIdx === idx ? -1 : idx;
-        rerenderBundlePreservingScroll();
-      });
-    });
-
-    root.querySelectorAll("[data-bundle-opt]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        const key = btn.dataset.bundleOpt;
-        const val = btn.dataset.val;
-        if (!bundleDrinks[idx]) return;
-        bundleDrinks[idx][key] = val;
-        rerenderBundlePreservingScroll();
-      });
-    });
-
-    root.querySelectorAll("[data-bundle-add-food]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.bundleAddFood, 10);
-        const spec = currentItem && currentItem.bundleSpec;
-        if (!spec || !spec.allowedFoods || !spec.allowedFoods[idx]) return;
-        if (bundleFoods.length >= Number(spec.foodSlots || 0)) return;
-        const f = spec.allowedFoods[idx];
-        bundleFoods.push({ name: f.name, extraPrice: Number(f.extraPrice || 0) });
-        rerenderBundlePreservingScroll();
-      });
-    });
-
-    root.querySelectorAll("[data-bundle-remove-food]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.dataset.bundleRemoveFood, 10);
-        bundleFoods.splice(idx, 1);
-        rerenderBundlePreservingScroll();
-      });
-    });
+    bindBundleEvents(document.getElementById("bundle-builder-root"));
 
     root.querySelectorAll("[data-qty]").forEach(btn => {
       btn.addEventListener("click", () => {

@@ -1537,7 +1537,7 @@
   function menuRowCard(brand, item, eager) {
     const hasOrig = item.priceOriginal > item.priceDiscount;
     const discount = hasOrig ? Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100) : 0;
-    const savingAmount = Math.max(0, item.priceOriginal - item.priceDiscount);
+    const cleanDesc = U.cleanDescription ? U.cleanDescription(item.description) : String(item.description || "").trim();
     const watermark = brand.id === "tomoro"
       ? `<span class="tomoro-watermark" aria-hidden="true">${U.esc(item.category.split(" ")[0])}</span>`
       : "";
@@ -1551,12 +1551,9 @@
           ${brandMediaDecoration(brand, item)}
         </span>
         <span class="menu-row-body">
-          <span class="menu-row-top">
-            ${item.type === "bundle" ? `<span class="menu-row-best">Paket Bundling</span>` : (item.isBestSeller ? `<span class="menu-row-best">★ Best Seller</span>` : "")}
-            ${savingAmount > 0 ? `<span class="menu-row-save">Hemat ${U.rp(savingAmount)}</span>` : ""}
-          </span>
+          ${item.type === "bundle" ? `<span class="menu-row-top"><span class="menu-row-best">Paket Bundling</span></span>` : ""}
           <span class="menu-row-name">${U.esc(item.name)}</span>
-          <span class="menu-row-desc">${U.esc(item.description)}</span>
+          ${cleanDesc ? `<span class="menu-row-desc">${U.esc(cleanDesc)}</span>` : ""}
           <span class="menu-row-foot">
             <span class="menu-row-price">
               <strong>${U.rp(item.priceDiscount)}</strong>

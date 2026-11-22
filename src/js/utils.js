@@ -291,9 +291,18 @@
     return { isOpen, is24h: false, reason: isOpen ? "schedule" : "closed_hours" };
   };
 
+  const cleanDescription = (raw) => {
+    const text = String(raw || "").trim();
+    if (!text) return "";
+    if (/resmi khas .+, dipesan langsung ke outlet pilihan Anda\.?$/i.test(text)) return "";
+    if (/^Racikan segar .+ dengan takaran es, gula, dan bahan premium khas outlet resmi\.?$/i.test(text)) return "";
+    return text;
+  };
+
   window.DLM_UTIL = {
     esc, rp, num, clamp, debounce, uid, formatDateID, formatTimeID,
     storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag, getDeviceId,
-    haversineKm, formatDistanceKm, scoreOutletSearch, getWitaMinutes, getOutletOpenStatus
+    haversineKm, formatDistanceKm, scoreOutletSearch, getWitaMinutes, getOutletOpenStatus,
+    cleanDescription
   };
 })();
