@@ -2989,16 +2989,22 @@
       return;
     }
     if (deferredInstallPrompt) {
+      const promptEvent = deferredInstallPrompt;
+      deferredInstallPrompt = null;
+      const startedAt = Date.now();
       try {
-        await deferredInstallPrompt.prompt();
-        const choice = await deferredInstallPrompt.userChoice;
+        await promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
         if (choice && choice.outcome === "accepted") {
-          deferredInstallPrompt = null;
           updateInstallButtonUI();
+          return;
+        }
+        if (Date.now() - startedAt < 250) {
+          showInstallGuideModal();
         }
         return;
       } catch (e) {
-        /* fallback to guide modal */
+        /* fallback to guide modal below */
       }
     }
     showInstallGuideModal();
