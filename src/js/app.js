@@ -48,6 +48,7 @@
 
   // Live merged history cache for current customer device
   let customerHistoryCache = null;
+  let isSubmittingOrder = false;
 
   const debouncedOutletList = U.debounce(() => {
     if (STORE.getRoute() === "outlet") renderOutletList();
@@ -65,6 +66,9 @@
     renderRoute();
     maybeShowIntroSplash();
     initAutoGeolocation();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => { /* ignore */ });
+    }
 
     window.addEventListener("hashchange", renderRoute);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -408,7 +412,7 @@
           <div class="splash-stage">
             ${promos.map((p, idx) => `
               <article class="splash-slide ${idx === splashIndex ? "is-active" : ""}" data-splash-slide="${idx}" style="--splash-accent:${U.esc(p.accent || "#0B6BCB")}">
-                <img src="${U.esc(p.image)}" alt="${U.esc(p.brandName)}" class="splash-slide-bg" width="720" height="900" loading="${idx === 0 ? "eager" : "lazy"}" />
+                <img src="${U.esc(p.image)}" alt="${U.esc(p.brandName)}" class="splash-slide-bg" width="540" height="675" ${idx === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
               </article>
             `).join("")}
           </div>
@@ -792,7 +796,7 @@
                 return `
                   <article class="ad-showcase-slide ${idx === promoSlideIndex ? "is-active" : ""}" data-action="promo-select-brand" data-brand-id="${U.esc(slide.brandId)}">
                     <div class="ad-sculpted-frame">
-                      <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" width="720" height="900" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                      <img src="${U.esc(slide.image)}" alt="${U.esc(slide.title)}" class="ad-showcase-img" width="540" height="675" ${idx <= 1 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
                     </div>
                     <span class="ad-floating-brand" aria-hidden="true">
                       <img src="${U.esc(bLogo)}" alt="" width="24" height="24" />
@@ -1101,7 +1105,7 @@
                 ${activeAds.map((ad, idx) => `
                   <div class="brand-ad-slide ${idx === 0 ? "is-active" : ""}">
                     <div class="brand-ad-frame">
-                      <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="720" height="900" loading="${idx <= 1 ? "eager" : "lazy"}" decoding="async" />
+                      <img src="${U.esc(ad.image)}" alt="Promo ${U.esc(brand.name)} ${idx + 1}" width="540" height="675" ${idx <= 1 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)" />
                     </div>
                   </div>
                 `).join("")}
@@ -1240,6 +1244,8 @@
           ? "Baru & Favorit • Purple Cloud & Mantan"
           : "Janji Jiwa Specials • Borneo & Toast"));
 
+    let renderedRowIdx = 0;
+
     results.innerHTML = `
       ${showMustTry && mustTryItems.length ? `
         <section class="menu-category-group">
@@ -1248,7 +1254,7 @@
             <span>${mustTryItems.length} menu unggulan</span>
           </div>
           <div class="must-try-grid">
-            ${mustTryItems.map(item => mustTryCard(brand, item)).join("")}
+            ${mustTryItems.map(item => mustTryCard(brand, item, true)).join("")}
           </div>
         </section>
       ` : ""}
@@ -1260,7 +1266,7 @@
             <span>${group.list.length} menu</span>
           </div>
           <div class="menu-rows-list">
-            ${group.list.map(item => menuRowCard(brand, item)).join("")}
+            ${group.list.map(item => menuRowCard(brand, item, renderedRowIdx++ < 6)).join("")}
           </div>
         </section>
       `).join("")}
@@ -1273,12 +1279,12 @@
     return "";
   }
 
-  function mustTryCard(brand, item) {
+  function mustTryCard(brand, item, eager) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
     return `
       <button type="button" class="must-try-card" data-item-id="${U.esc(item.id)}">
         <span class="must-try-media">
-          ${U.imageTag(item.image, item.name, "product-img")}
+          ${U.imageTag(item.image, item.name, "product-img", !!eager)}
           <span class="menu-row-badge">-${discount}%</span>
           ${brandMediaDecoration(brand, item)}
         </span>
@@ -1294,7 +1300,7 @@
     `;
   }
 
-  function menuRowCard(brand, item) {
+  function menuRowCard(brand, item, eager) {
     const discount = Math.round(((item.priceOriginal - item.priceDiscount) / item.priceOriginal) * 100);
     const savingAmount = Math.max(0, item.priceOriginal - item.priceDiscount);
     const watermark = brand.id === "tomoro"
@@ -1305,7 +1311,7 @@
       <button type="button" class="menu-row-card" data-item-id="${U.esc(item.id)}">
         ${watermark}
         <span class="menu-row-media">
-          ${U.imageTag(item.image, item.name, "product-img")}
+          ${U.imageTag(item.image, item.name, "product-img", !!eager)}
           <span class="menu-row-badge">-${discount}%</span>
           ${brandMediaDecoration(brand, item)}
         </span>
@@ -2254,6 +2260,8 @@
   }
 
   function submitOrder() {
+    if (isSubmittingOrder) return;
+
     const summary = CART.getSummary();
     const brand = STORE.getBrand();
     const outlet = STORE.getOutlet();
@@ -2277,11 +2285,15 @@
       return;
     }
 
+    isSubmittingOrder = true;
+    setTimeout(() => { isSubmittingOrder = false; }, 1400);
+
+    const isDelivery = STORE.state.orderMode === "delivery";
     const customer = {
       name: STORE.state.customer.name.trim(),
       phone: STORE.state.customer.phone.trim(),
       pickupTime: STORE.state.customer.pickupTime.trim() || "Secepatnya",
-      address: STORE.state.customer.address.trim(),
+      address: isDelivery ? STORE.state.customer.address.trim() : "",
       notes: STORE.state.customer.notes.trim()
     };
 
@@ -2297,6 +2309,24 @@
     });
 
     const result = WA.openWhatsApp(message);
+    const normalizedItems = summary.items.map(item => {
+      const catItem = STORE.getItem(brand.id, item.id);
+      return {
+        id: item.id,
+        brandId: item.brandId,
+        brandName: item.brandName,
+        category: item.category || (catItem && catItem.category) || "",
+        name: item.name,
+        image: item.image,
+        type: item.type,
+        selections: item.selections || [],
+        notes: item.notes || "",
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        unitOriginalPrice: item.unitOriginalPrice
+      };
+    });
+
     const order = {
       orderId,
       deviceId: STORE.state.deviceId,
@@ -2308,19 +2338,7 @@
       outletAddress: outlet.address,
       total: summary.grandTotal,
       itemsCount: summary.totalItems,
-      items: summary.items.map(item => ({
-        id: item.id,
-        brandId: item.brandId,
-        brandName: item.brandName,
-        name: item.name,
-        image: item.image,
-        type: item.type,
-        selections: item.selections,
-        notes: item.notes,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        unitOriginalPrice: item.unitOriginalPrice
-      })),
+      items: normalizedItems,
       mode: STORE.state.orderMode,
       message,
       url: result.url,
@@ -2332,7 +2350,7 @@
     CART.clear();
 
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.submitCustomerOrder === "function") {
-      window.DLM_SUPABASE.submitCustomerOrder({
+      const rpcPayload = {
         order_code: orderId,
         customer_device_id: STORE.state.deviceId,
         status: "pending_wa",
@@ -2348,19 +2366,41 @@
         delivery_address: customer.address,
         customer_notes: customer.notes,
         wa_message: message,
-        items: summary.items.map(item => ({
+        items: normalizedItems.map(item => ({
           id: item.id,
           name: item.name,
-          category: item.category || "",
+          category: item.category,
           quantity: item.quantity,
           unit_price: item.unitPrice,
           unit_original_price: item.unitOriginalPrice,
-          selections: item.selections || [],
-          notes: item.notes || ""
+          selections: item.selections,
+          notes: item.notes
         }))
-      }).catch(() => {
-        /* fallback tersimpan di localStorage perangkat */
-      });
+      };
+
+      const syncRemoteHistory = () => {
+        if (typeof window.DLM_SUPABASE.fetchCustomerOrders === "function") {
+          window.DLM_SUPABASE.fetchCustomerOrders(STORE.state.deviceId).then(remoteOrders => {
+            if (Array.isArray(remoteOrders)) {
+              customerHistoryCache = remoteOrders;
+              if (STORE.getRoute() === "history") {
+                renderHistoryCards(mergeHistoryOrders(WA.getOrders() || [], remoteOrders));
+              }
+            }
+          }).catch(() => { /* ignore */ });
+        }
+      };
+
+      window.DLM_SUPABASE.submitCustomerOrder(rpcPayload)
+        .then(syncRemoteHistory)
+        .catch(() => {
+          // Auto-retry once if transient mobile network blip occurs
+          setTimeout(() => {
+            window.DLM_SUPABASE.submitCustomerOrder(rpcPayload)
+              .then(syncRemoteHistory)
+              .catch(() => { /* fallback remains saved in localStorage */ });
+          }, 1200);
+        });
     }
 
     showSuccessModal(order);
@@ -2391,6 +2431,7 @@
             id: raw.id || (catalogItem ? catalogItem.id : U.uid("item")),
             brandId: brand.id,
             brandName: brand.name,
+            category: raw.category || (catalogItem ? catalogItem.category : ""),
             name: raw.name || (catalogItem ? catalogItem.name : "Menu Kopi"),
             image: raw.image || (catalogItem ? catalogItem.image : "src/assets/products/iced-coffee.webp"),
             type: raw.type || (catalogItem ? catalogItem.type : "drink"),

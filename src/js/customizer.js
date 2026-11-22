@@ -369,6 +369,7 @@
           id: currentItem.id,
           brandId: currentItem.brandId,
           brandName: currentBrand.name,
+          category: currentItem.category || "",
           name: currentItem.name,
           image: currentItem.image,
           type: currentItem.type,

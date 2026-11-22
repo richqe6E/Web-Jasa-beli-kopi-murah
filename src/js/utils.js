@@ -85,9 +85,32 @@
     window.scrollTo({ top: 0, behavior: smooth === false ? "auto" : "smooth" });
   };
 
+  const retryImage = (img) => {
+    if (!img || !img.src) return;
+    const count = parseInt(img.dataset.retry || "0", 10);
+    if (count >= 2) {
+      img.classList.add("is-img-failed");
+      return;
+    }
+    const next = count + 1;
+    img.dataset.retry = String(next);
+    const base = img.dataset.origSrc || img.getAttribute("src") || "";
+    if (!base) return;
+    img.dataset.origSrc = base;
+    const sep = base.includes("?") ? "&" : "?";
+    setTimeout(() => {
+      if (img && img.isConnected) {
+        img.src = `${base}${sep}_r=${next}`;
+      }
+    }, next === 1 ? 550 : 1400);
+  };
+
+  window.DLM_IMG_RETRY = retryImage;
+
   const imageTag = (src, alt, className, eager) => {
     const cls = className || "";
-    return `<img src="${esc(src)}" alt="${esc(alt)}" class="${cls}" width="400" height="400" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.classList.add('is-hidden')">`;
+    const loadingAttr = eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+    return `<img src="${esc(src)}" alt="${esc(alt)}" class="${cls}" width="400" height="400" ${loadingAttr} decoding="async" onerror="window.DLM_IMG_RETRY&&window.DLM_IMG_RETRY(this)">`;
   };
 
   const getDeviceId = () => {
