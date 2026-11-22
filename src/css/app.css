@@ -3913,6 +3913,20 @@ body.has-bottom-bar .app-main {
   letter-spacing: 0.02em;
 }
 
+.brand-select-promo.is-coming-soon {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.brand-select-card.is-coming-soon {
+  opacity: 0.86;
+}
+
+.empty-state.is-coming-soon-card {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+  border: 1px dashed #f59e0b;
+}
+
 .brand-select-name {
   font-size: 13.5px;
   font-weight: 800;

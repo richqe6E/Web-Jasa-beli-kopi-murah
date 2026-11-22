@@ -153,9 +153,103 @@
     return `${km.toFixed(1).replace(".", ",")} km`;
   };
 
+  /* Smart multi-token + typo-tolerant outlet matcher (substring, middle/end words, aliases, Damerau-Levenshtein) */
+  const OUTLET_ALIASES = {
+    smd: "samarinda",
+    smr: "samarinda",
+    bpn: "balikpapan",
+    tgr: "tenggarong",
+    teng: "tenggarong",
+    jl: "jalan",
+    jln: "jalan",
+    rs: "rumah sakit",
+    rsud: "rumah sakit",
+    dt: "drive thru",
+    spbu: "pertamina",
+    scp: "samarinda central plaza",
+    bsb: "balikpapan superblock",
+    smc: "samarinda medika citra",
+    aws: "abdul wahab sjahranie"
+  };
+
+  const normalizeSearchText = (str) => String(str || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  const editDistance = (a, b) => {
+    const la = a.length;
+    const lb = b.length;
+    if (la === 0) return lb;
+    if (lb === 0) return la;
+    const dp = Array.from({ length: la + 1 }, () => new Array(lb + 1).fill(0));
+    for (let i = 0; i <= la; i++) dp[i][0] = i;
+    for (let j = 0; j <= lb; j++) dp[0][j] = j;
+    for (let i = 1; i <= la; i++) {
+      for (let j = 1; j <= lb; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let val = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          val = Math.min(val, dp[i - 2][j - 2] + cost);
+        }
+        dp[i][j] = val;
+      }
+    }
+    return dp[la][lb];
+  };
+
+  const scoreOutletSearch = (outlet, rawQuery) => {
+    const qNorm = normalizeSearchText(rawQuery);
+    if (!qNorm) return 1;
+    const nameNorm = normalizeSearchText(outlet.name);
+    const addrNorm = normalizeSearchText(outlet.address);
+    const areaNorm = normalizeSearchText(outlet.area);
+    const haystack = `${nameNorm} ${areaNorm} ${addrNorm}`;
+    const words = haystack.split(/\s+/).filter(Boolean);
+
+    // Direct full-phrase substring match gets highest score
+    if (nameNorm.includes(qNorm)) return 100;
+    if (haystack.includes(qNorm)) return 85;
+
+    const rawTokens = qNorm.split(/\s+/).filter(Boolean);
+    let totalScore = 0;
+
+    for (const rawTok of rawTokens) {
+      const tok = OUTLET_ALIASES[rawTok] || rawTok;
+      const subTokens = tok.split(/\s+/).filter(Boolean);
+      for (const st of subTokens) {
+        if (nameNorm.includes(st)) {
+          totalScore += 30;
+          continue;
+        }
+        if (areaNorm.includes(st) || addrNorm.includes(st)) {
+          totalScore += 20;
+          continue;
+        }
+        // Fuzzy match against individual words (handles typos in middle/end of words)
+        if (st.length >= 3) {
+          const maxDist = st.length <= 4 ? 1 : (st.length <= 7 ? 1 : 2);
+          let bestDist = Infinity;
+          for (const w of words) {
+            if (Math.abs(w.length - st.length) > maxDist) continue;
+            const d = editDistance(st, w);
+            if (d < bestDist) bestDist = d;
+            if (d === 1) break;
+          }
+          if (bestDist <= maxDist) {
+            totalScore += bestDist === 1 ? 14 : 9;
+            continue;
+          }
+        }
+        return 0; // Token did not match even fuzzily
+      }
+    }
+    return totalScore;
+  };
+
   window.DLM_UTIL = {
     esc, rp, num, clamp, debounce, uid, formatDateID, formatTimeID,
     storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag, getDeviceId,
-    haversineKm, formatDistanceKm
+    haversineKm, formatDistanceKm, scoreOutletSearch
   };
 })();

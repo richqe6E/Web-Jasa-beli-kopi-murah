@@ -11,7 +11,7 @@
 
   const state = {
     deviceId: U.getDeviceId(),
-    selectedBrandId: "tomoro",
+    selectedBrandId: "kenangan",
     selectedOutletId: null,
     activeCategory: "Semua",
     priceFilter: "all", // "all" | "under15k" | "disc40" | "bestseller"
@@ -36,14 +36,15 @@
   };
 
   function load() {
-    const brandId = U.storage.get(CFG.storageKeys.brand, "tomoro");
+    const brandId = U.storage.get(CFG.storageKeys.brand, "kenangan");
     const outletId = U.storage.get(CFG.storageKeys.outlet, null);
     const customer = U.storage.get(CFG.storageKeys.customer, null);
 
-    if (brandId && window.DLM_BRANDS.some(b => b.id === brandId)) {
+    if (brandId && window.DLM_BRANDS.some(b => b.id === brandId) && getBrandOutlets(brandId).length > 0) {
       state.selectedBrandId = brandId;
-    } else if (window.DLM_BRANDS.length) {
-      state.selectedBrandId = window.DLM_BRANDS[0].id;
+    } else {
+      const firstActive = window.DLM_BRANDS.find(b => getBrandOutlets(b.id).length > 0) || window.DLM_BRANDS[0];
+      if (firstActive) state.selectedBrandId = firstActive.id;
     }
 
     if (outletId) {

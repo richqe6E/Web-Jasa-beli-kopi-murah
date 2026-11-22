@@ -961,7 +961,7 @@
 
     main.innerHTML = `
       <!-- Organic Textured Curved Hero Stage + Ambient Footage + Sculpted Peek Ad Showcase -->
-      <section class="outlet-hero-stage" aria-label="Promo & Iklan Kopi Samarinda">
+      <section class="outlet-hero-stage" aria-label="Promo & Iklan Kopi Kaltim">
         <div class="hero-ambient-layer" aria-hidden="true">
           ${initialSlide ? `<img src="${U.esc(initialSlide.image)}" alt="" id="hero-ambient-img" data-current-src="${U.esc(initialSlide.image)}" class="hero-ambient-img" />` : ""}
           <div class="hero-ambient-tint"></div>
@@ -972,7 +972,7 @@
 
         <div class="outlet-hero-top">
           <span class="outlet-loc-pill">
-            ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}, ${U.esc(CFG.region)}
+            ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}
           </span>
           <button type="button" class="outlet-story-btn" data-action="open-splash-stories">
             ${ICON.icon("sparkles", "w-3.5 h-3.5", 2.2)} Lihat Semua Iklan
@@ -1067,7 +1067,7 @@
 
         <div class="search-field">
           ${ICON.icon("search", "w-4 h-4", 2.2)}
-          <input type="search" id="outlet-search" class="search-input" placeholder="Cari Big Mall, SCP, Gajah Mada, Juanda..." value="${U.esc(STORE.state.outletQuery)}" autocomplete="off">
+          <input type="search" id="outlet-search" class="search-input" placeholder="Cari cabang, jalan, mall, atau kota (Samarinda, Balikpapan, Tenggarong)..." value="${U.esc(STORE.state.outletQuery)}" autocomplete="off">
         </div>
 
         <div class="chip-row no-scrollbar" id="outlet-areas">
@@ -1079,7 +1079,7 @@
 
       <footer class="app-footer reveal">
         <div class="footer-brand">${ICON.icon("coffee", "w-4 h-4", 2)} ${CFG.appName}</div>
-        <p>Jasa order minuman &amp; makanan resmi • ${CFG.city}, ${CFG.region}</p>
+        <p>Jasa order minuman &amp; makanan resmi • ${U.esc(CFG.city)}</p>
         <div class="footer-links">
           <button type="button" class="footer-link" data-action="open-splash-stories">
             ${ICON.icon("sparkles", "w-3.5 h-3.5", 2)} Poster Promo
@@ -1115,17 +1115,18 @@
 
   function brandSelectorCard(brand, isSelected) {
     const outletCount = STORE.getBrandOutlets(brand.id).length;
+    const isComingSoon = outletCount === 0;
     const menuCount = (brand.items || []).length;
     const logoUrl = getLockedBrandLogo(brand);
     return `
-      <button type="button" class="brand-select-card ${isSelected ? "is-selected" : ""}" data-brand-id="${U.esc(brand.id)}" aria-pressed="${isSelected ? "true" : "false"}" style="--brand-tint:${U.esc(brand.accentSoft || "#eaf3ff")}">
+      <button type="button" class="brand-select-card ${isSelected ? "is-selected" : ""} ${isComingSoon ? "is-coming-soon" : ""}" data-brand-id="${U.esc(brand.id)}" aria-pressed="${isSelected ? "true" : "false"}" style="--brand-tint:${U.esc(brand.accentSoft || "#eaf3ff")}">
         <span class="brand-select-logo">
           <img src="${U.esc(logoUrl)}" alt="Logo ${U.esc(brand.name)}" loading="lazy" decoding="async" />
         </span>
         <span class="brand-select-info">
-          <span class="brand-select-promo" style="background:${U.esc(brand.accentSoft)};color:${U.esc(brand.accent)}">${U.esc(brand.promoBadge)}</span>
+          <span class="brand-select-promo ${isComingSoon ? "is-coming-soon" : ""}" style="${isComingSoon ? "" : `background:${U.esc(brand.accentSoft)};color:${U.esc(brand.accent)}`}">${isComingSoon ? "Coming Soon" : U.esc(brand.promoBadge)}</span>
           <span class="brand-select-name">${U.esc(brand.name)}</span>
-          <span class="brand-select-meta">${outletCount} cabang • ${menuCount} menu</span>
+          <span class="brand-select-meta">${isComingSoon ? `Segera Hadir • ${menuCount} menu` : `${outletCount} cabang • ${menuCount} menu`}</span>
         </span>
         <span class="brand-select-check" aria-hidden="true">${ICON.icon("check", "w-3 h-3", 2.8)}</span>
       </button>
@@ -1137,22 +1138,37 @@
     const brand = STORE.getBrand();
     if (!listEl || !brand) return;
 
-    const query = (STORE.state.outletQuery || "").trim().toLowerCase();
-    let outlets = STORE.getBrandOutlets(brand.id);
+    const allBrandOutlets = STORE.getBrandOutlets(brand.id);
+    const countEl = $("#outlet-count");
+
+    if (!allBrandOutlets.length) {
+      if (countEl) countEl.textContent = "Coming Soon";
+      listEl.innerHTML = `
+        <div class="empty-state compact is-coming-soon-card">
+          <div class="empty-icon">${ICON.icon("sparkles", "w-7 h-7", 1.8)}</div>
+          <h3>${U.esc(brand.name)} — Segera Hadir (Coming Soon)</h3>
+          <p>Lokasi outlet resmi ${U.esc(brand.name)} sedang dalam tahap penentuan &amp; verifikasi. Silakan pilih brand lain yang sudah tersedia di Samarinda, Balikpapan, dan Tenggarong.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const query = (STORE.state.outletQuery || "").trim();
+    let outlets = allBrandOutlets;
 
     if (STORE.state.outletArea && STORE.state.outletArea !== "Semua Area") {
       outlets = outlets.filter(outlet => outlet.area === STORE.state.outletArea);
     }
 
+    const scoreMap = new Map();
     if (query) {
-      outlets = outlets.filter(outlet =>
-        outlet.name.toLowerCase().includes(query) ||
-        outlet.address.toLowerCase().includes(query) ||
-        outlet.area.toLowerCase().includes(query)
-      );
+      outlets = outlets.filter(outlet => {
+        const s = U.scoreOutletSearch(outlet, query);
+        if (s > 0) scoreMap.set(outlet.id, s);
+        return s > 0;
+      });
     }
 
-    const countEl = $("#outlet-count");
     if (countEl) countEl.textContent = `${outlets.length} cabang`;
 
     if (!outlets.length) {
@@ -1160,7 +1176,7 @@
         <div class="empty-state compact">
           <div class="empty-icon">${ICON.icon("map-pin", "w-7 h-7", 1.8)}</div>
           <h3>Outlet tidak ditemukan</h3>
-          <p>Coba kata kunci lain atau pilih area Semua Area.</p>
+          <p>Coba kata kunci lain (nama cabang, jalan, atau kota) atau pilih Semua Area.</p>
         </div>
       `;
       return;
@@ -1172,10 +1188,17 @@
     const enriched = outlets.map((outlet, origIdx) => ({
       outlet,
       origIdx,
+      searchScore: scoreMap.get(outlet.id) || 0,
       distKm: STORE.getOutletDistanceKm(outlet)
     }));
 
-    if (hasGps) {
+    if (query) {
+      enriched.sort((a, b) => {
+        if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
+        if (hasGps && a.distKm != null && b.distKm != null) return a.distKm - b.distKm;
+        return a.origIdx - b.origIdx;
+      });
+    } else if (hasGps) {
       enriched.sort((a, b) => {
         if (a.distKm == null && b.distKm == null) return a.origIdx - b.origIdx;
         if (a.distKm == null) return 1;

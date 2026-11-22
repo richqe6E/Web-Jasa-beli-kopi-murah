@@ -206,7 +206,7 @@
             lng,
             distance: null,
             isOpen: o.is_open !== false,
-            mapsQuery: o.maps_query || `${o.name}, ${o.address}, Samarinda`
+            mapsQuery: o.maps_query || `${o.name}, ${o.address}`
           };
         });
 

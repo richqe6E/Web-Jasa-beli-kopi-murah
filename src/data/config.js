@@ -6,9 +6,9 @@ window.DLM_CONFIG = {
   appName: "Dibeliin Lebih Murah",
   shortName: "Dibeliin",
   tagline: "Jasa order minuman & makanan resmi lebih hemat.",
-  city: "Samarinda",
+  city: "Samarinda, Balikpapan & Tenggarong",
   region: "Kalimantan Timur",
-  areaLabel: "Samarinda, Kalimantan Timur",
+  areaLabel: "Samarinda, Balikpapan & Tenggarong • Kalimantan Timur",
 
   // Supabase Cloud Integration (ap-southeast-1)
   supabaseUrl: "https://qfjjhnudiyybuqddwlav.supabase.co",
