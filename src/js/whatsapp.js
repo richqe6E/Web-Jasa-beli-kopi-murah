@@ -32,7 +32,7 @@
     const modeLabel = orderMode === "delivery" ? "Dikirim driver" : "Ambil sendiri di outlet";
     const lines = [];
 
-    lines.push("*DIBELIIN LEBIH MURAH*");
+    lines.push(`*${(CFG.appName || "Dibeliin Lebih Murah").toUpperCase()}*`);
     lines.push(`Pesanan baru • #${orderId}`);
     lines.push(`${U.formatDateID(now)} • ${U.formatTimeID(now)}`);
     lines.push("");

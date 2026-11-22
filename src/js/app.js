@@ -88,15 +88,29 @@
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.syncCatalog === "function") {
       window.DLM_SUPABASE.syncCatalog().then(res => {
         if (!res || !res.ok) return;
+        document.title = `${CFG.appName} — Order Kopi & Makanan ${CFG.city}`;
         const r = STORE.getRoute();
+        renderHeader(r);
+        const footerBrand = $(".footer-brand");
+        if (footerBrand) footerBrand.innerHTML = `${ICON.icon("coffee", "w-4 h-4", 2)} ${U.esc(CFG.appName)}`;
+        const locPill = $(".outlet-loc-pill");
+        if (locPill) locPill.innerHTML = `${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}, ${U.esc(CFG.region)}`;
         const isOverlayOpen = document.body.classList.contains("modal-open") || document.body.classList.contains("sheet-open");
         const activeTag = document.activeElement && document.activeElement.tagName;
         const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA";
         if (isOverlayOpen || isTyping) return;
         if (r === "outlet") {
+          const brandGrid = $(".brand-selector-grid");
+          const selectedBrand = STORE.getBrand();
+          if (brandGrid && selectedBrand) {
+            brandGrid.innerHTML = window.DLM_BRANDS.map(b => brandSelectorCard(b, b.id === selectedBrand.id)).join("");
+          }
           renderOutletList();
         } else if (r === "menu") {
           renderMenuGrid();
+        } else if (r === "checkout") {
+          const payNote = $(".payment-note");
+          if (payNote) payNote.textContent = CFG.paymentNote;
         }
       });
     }
@@ -201,7 +215,7 @@
     const outlet = STORE.getOutlet();
 
     let eyebrow = `${CFG.city} • Jasa Order Kopi Resmi`;
-    let title = "Dibeliin Lebih Murah";
+    let title = CFG.appName || "Dibeliin Lebih Murah";
     let showBack = false;
 
     if (route === "menu") {
@@ -2684,7 +2698,7 @@
       `;
     }).join("");
 
-    const waAdminLink = `https://wa.me/${U.normalizePhone(CFG.adminWhatsApp)}?text=${encodeURIComponent(`Halo Admin Dibeliin, saya ingin menanyakan status pesanan #${data.order_code} (${data.brand_name} - ${data.outlet_name}).`)}`;
+    const waAdminLink = `https://wa.me/${U.normalizePhone(CFG.adminWhatsApp)}?text=${encodeURIComponent(`Halo Admin ${CFG.appName || "Dibeliin"}, saya ingin menanyakan status pesanan #${data.order_code} (${data.brand_name} - ${data.outlet_name}).`)}`;
     const savingsVal = Number(data.customer_savings || 0);
     const serviceFeeVal = Number(data.order_service_fee || 0);
 

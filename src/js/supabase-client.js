@@ -438,6 +438,14 @@
     return `${baseUrl()}/storage/v1/object/public/public-assets/${objectPath}`;
   }
 
+  // Hydrate immediately from last synced localStorage cache so Admin settings (e.g. app_name) render in 0ms
+  try {
+    const cachedRaw = CFG && CFG.storageKeys && localStorage.getItem(CFG.storageKeys.catalogCache);
+    if (cachedRaw) applyCatalogToWindow(JSON.parse(cachedRaw));
+  } catch (e) {
+    /* ignore */
+  }
+
   window.DLM_SUPABASE = {
     getSession,
     signIn,

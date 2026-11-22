@@ -252,6 +252,9 @@
       return;
     }
 
+    const appName = (state.dataset.settings && state.dataset.settings.app_name) || CFG.appName || "Dibeliin Lebih Murah";
+    document.title = `Admin & Laporan Keuangan — ${appName}`;
+
     root.innerHTML = `
       <div class="admin-shell">
         <header class="admin-header">
@@ -259,7 +262,7 @@
             <div class="auth-logo">${ICON.icon("layout-dashboard", "w-5 h-5", 2.2)}</div>
             <div>
               <div class="auth-eyebrow">Admin & Financial Console</div>
-              <h1 class="auth-title">Dibeliin Lebih Murah</h1>
+              <h1 class="auth-title">${U.esc(appName)}</h1>
             </div>
           </div>
           <div class="admin-header-right">
@@ -310,7 +313,7 @@
           <div class="auth-brand">
             <div class="auth-logo">${ICON.icon("lock", "w-5 h-5", 2.2)}</div>
             <div>
-              <div class="auth-eyebrow">Dibeliin Lebih Murah</div>
+              <div class="auth-eyebrow">${U.esc(CFG.appName || "Dibeliin Lebih Murah")}</div>
               <h1 class="auth-title">Login Admin</h1>
             </div>
           </div>
@@ -1925,6 +1928,7 @@
       const name = $("#of-name").value.trim();
       const slug = existingId || `${brandId}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
+      const existingObj = existingId ? (state.dataset.outlets || []).find(x => x.id === existingId) : null;
       const latRaw = $("#of-lat") ? $("#of-lat").value.trim() : "";
       const lngRaw = $("#of-lng") ? $("#of-lng").value.trim() : "";
       const latitude = latRaw !== "" && !Number.isNaN(Number(latRaw)) ? Number(latRaw) : null;
@@ -1944,6 +1948,7 @@
           maps_query: `${name}, Samarinda`,
           is_open: $("#of-open").checked,
           is_active: true,
+          sort_order: existingObj && existingObj.sort_order != null ? existingObj.sort_order : 10,
           updated_at: new Date().toISOString()
         });
         closeAdminModal();
@@ -1978,8 +1983,9 @@
 
     if (form.id === "settings-form") {
       try {
+        const newAppName = $("#set-app-name").value.trim();
         await SB.saveSettings({
-          app_name: $("#set-app-name").value.trim(),
+          app_name: newAppName,
           admin_whatsapp: $("#set-wa-number").value.trim(),
           admin_whatsapp_display: $("#set-wa-display").value.trim(),
           city: $("#set-city").value.trim(),
@@ -1989,7 +1995,13 @@
           default_cost_ratio_percent: Number($("#set-cost-ratio").value),
           payment_note: $("#set-payment-note").value.trim()
         });
-        toast("Pengaturan layanan berhasil disimpan.");
+        if (newAppName) CFG.appName = newAppName;
+        try {
+          if (CFG.storageKeys && CFG.storageKeys.catalogCache) {
+            localStorage.removeItem(CFG.storageKeys.catalogCache);
+          }
+        } catch (err2) { /* ignore */ }
+        toast("Pengaturan layanan berhasil disimpan & langsung aktif!");
         await reloadData();
       } catch (err) {
         toast("Gagal menyimpan pengaturan: " + err.message, "error");
