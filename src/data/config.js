@@ -21,10 +21,10 @@ window.DLM_CONFIG = {
 
   currency: "IDR",
   orderPrefix: "DLM",
-  serviceFeeIncluded: true,
-  serviceFeeMode: "included_per_item",
-  defaultServiceFeePerItem: 2000,
-  defaultServiceFeePerOrder: 0,
+  serviceFeeIncluded: false,
+  serviceFeeMode: "tiered_per_order",
+  defaultServiceFeePerItem: 0,
+  defaultServiceFeePerOrder: 1000,
   defaultCostRatioPercent: 52,
 
   paymentNote: "Metode pembayaran akan diinformasikan admin melalui WhatsApp setelah pesanan dikonfirmasi.",

@@ -20,6 +20,7 @@
     outletArea: "Semua Area",
     sort: "popular",
     orderMode: "pickup",
+    termsAccepted: false,
     userLocation: {
       lat: null,
       lng: null,

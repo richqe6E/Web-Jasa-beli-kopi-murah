@@ -1647,11 +1647,25 @@
         </div>
       ` : ""}
 
+      ${summary.totalItems === 1 ? `
+        <div class="cart-nudge-banner">
+          <div class="cart-nudge-icon">${ICON.icon("sparkles", "w-4 h-4", 2.2)}</div>
+          <div class="cart-nudge-copy">
+            <strong>Tambah 1 menu lagi = GRATIS Biaya Jasa!</strong>
+            <span>Order 1 item kena biaya jasa Rp 1.000. Order ≥ 2 item langsung gratis biaya jasa.</span>
+          </div>
+          <button type="button" class="btn-soft btn-xs" data-action="go-menu">+ Tambah</button>
+        </div>
+      ` : ""}
+
       <section class="summary-card">
         <div class="summary-row"><span>Subtotal Menu Promo</span><strong>${U.rp(summary.subtotal)}</strong></div>
-        ${summary.orderServiceFee > 0 ? `<div class="summary-row"><span>Biaya jasa order</span><strong>${U.rp(summary.orderServiceFee)}</strong></div>` : ""}
+        <div class="summary-row ${summary.orderServiceFee === 0 ? "is-success" : ""}">
+          <span>Biaya jasa order ${summary.totalItems === 1 ? "(1 item)" : "(≥ 2 item)"}</span>
+          <strong>${summary.orderServiceFee > 0 ? U.rp(summary.orderServiceFee) : "GRATIS (Rp 0)"}</strong>
+        </div>
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Total Hemat Promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
-        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Biaya jasa order sudah termasuk di total akhir." : "Harga sudah bersih termasuk biaya jasa admin."}</div>
+        <div class="summary-note">${ICON.icon("info", "w-3.5 h-3.5", 2)} ${summary.orderServiceFee > 0 ? "Biaya jasa Rp 1.000 untuk order 1 item (gratis jika order ≥ 2 item)." : "Selamat! Biaya jasa order GRATIS karena kamu memesan ≥ 2 item."}</div>
         <div class="summary-total"><span>Total Bayar</span><strong>${U.rp(summary.grandTotal)}</strong></div>
       </section>
     `;
@@ -1782,7 +1796,10 @@
           ${summary.items.map(item => `<div class="checkout-line"><span>${item.quantity}x ${U.esc(item.name)}</span><strong>${U.rp(item.unitPrice * item.quantity)}</strong></div>`).join("")}
         </div>
         <div class="summary-row"><span>Subtotal</span><strong>${U.rp(summary.subtotal)}</strong></div>
-        ${summary.orderServiceFee > 0 ? `<div class="summary-row"><span>Biaya jasa order</span><strong>${U.rp(summary.orderServiceFee)}</strong></div>` : ""}
+        <div class="summary-row ${summary.orderServiceFee === 0 ? "is-success" : ""}">
+          <span>Biaya jasa order ${summary.totalItems === 1 ? "(1 item)" : "(≥ 2 item)"}</span>
+          <strong>${summary.orderServiceFee > 0 ? U.rp(summary.orderServiceFee) : "GRATIS (Rp 0)"}</strong>
+        </div>
         ${summary.totalSavings > 0 ? `<div class="summary-row is-success"><span>Hemat promo</span><strong>-${U.rp(summary.totalSavings)}</strong></div>` : ""}
         <div class="summary-total"><span>Total Bayar</span><strong>${U.rp(summary.grandTotal)}</strong></div>
       </section>
@@ -1805,6 +1822,23 @@
           ${paymentLogo("bca.svg", "BCA")}
           ${paymentLogo("mandiri.svg", "Mandiri")}
         </div>
+      </section>
+
+      <section class="terms-consent-card reveal ${STORE.state.termsAccepted ? "is-checked" : ""}" id="terms-consent-card">
+        <label class="terms-check-row" for="checkout-terms">
+          <input type="checkbox" id="checkout-terms" class="terms-checkbox" ${STORE.state.termsAccepted ? "checked" : ""}>
+          <span class="terms-check-box" aria-hidden="true">${ICON.icon("check", "w-3.5 h-3.5", 3)}</span>
+          <span class="terms-check-copy">
+            <strong>Saya menyetujui Syarat &amp; Ketentuan pemesanan</strong>
+            <span>Ketentuan promo partner, ketersediaan outlet, konfirmasi pembayaran WA, dan pembatalan.</span>
+          </span>
+        </label>
+        <div class="terms-actions-row">
+          <button type="button" class="terms-open-btn" data-action="open-terms-modal">
+            ${ICON.icon("file-text", "w-3.5 h-3.5", 2.1)} Baca Syarat &amp; Ketentuan Lengkap
+          </button>
+        </div>
+        <p class="form-error" id="error-terms" role="alert" style="margin-top:6px"></p>
       </section>
     `;
   }
@@ -2197,6 +2231,17 @@
       copyPatunganSummary();
     } else if (action === "submit-order") {
       submitOrder();
+    } else if (action === "open-terms-modal") {
+      showTermsModal();
+    } else if (action === "accept-terms-modal") {
+      STORE.state.termsAccepted = true;
+      const cb = $("#checkout-terms");
+      if (cb) cb.checked = true;
+      const card = $("#terms-consent-card");
+      if (card) card.classList.add("is-checked");
+      clearFieldError(card, "error-terms");
+      closeModal();
+      toast("Syarat & ketentuan telah disetujui.");
     } else if (action === "close-modal") {
       closeModal();
     } else if (action === "confirm-yes") {
@@ -2394,6 +2439,13 @@
     if (event.target.id === "menu-sort") {
       STORE.state.sort = event.target.value;
       renderMenuGrid();
+      return;
+    }
+    if (event.target.id === "checkout-terms") {
+      STORE.state.termsAccepted = !!event.target.checked;
+      const card = $("#terms-consent-card");
+      if (card) card.classList.toggle("is-checked", STORE.state.termsAccepted);
+      if (STORE.state.termsAccepted) clearFieldError(card, "error-terms");
     }
   }
 
@@ -2460,6 +2512,9 @@
     if (STORE.state.orderMode === "delivery" && (!customer.address || customer.address.trim().length < 8)) {
       errors.address = "Alamat pengantaran wajib diisi minimal 8 karakter.";
     }
+    if (!STORE.state.termsAccepted) {
+      errors.terms = "Centang persetujuan Syarat & Ketentuan terlebih dahulu.";
+    }
 
     return errors;
   }
@@ -2468,7 +2523,8 @@
     const map = {
       name: { input: $("#customer-name"), error: $("#error-name") },
       phone: { input: $("#customer-phone"), error: $("#error-phone") },
-      address: { input: $("#delivery-address"), error: $("#error-address") }
+      address: { input: $("#delivery-address"), error: $("#error-address") },
+      terms: { input: $("#terms-consent-card"), error: $("#error-terms") }
     };
 
     Object.keys(map).forEach(key => {
@@ -2576,6 +2632,7 @@
 
     WA.saveOrder(order);
     lastSuccess = order;
+    STORE.state.termsAccepted = false;
     CART.clear();
 
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.submitCustomerOrder === "function") {
@@ -2727,6 +2784,76 @@
     document.body.classList.add("modal-open");
     setTimeout(() => {
       const btn = modalRoot.querySelector("[data-action='open-wa']");
+      if (btn) btn.focus({ preventScroll: true });
+    }, 80);
+  }
+
+  function showTermsModal() {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const brandName = U.esc(CFG.appName || "Jasdor Neli");
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" data-modal-overlay>
+        <div class="modal-card terms-modal-card" role="dialog" aria-modal="true" aria-labelledby="terms-modal-title">
+          <div class="terms-modal-hero">
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup Syarat dan Ketentuan">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+            <span class="terms-modal-badge">${ICON.icon("shield-check", "w-3.5 h-3.5", 2.2)} Ketentuan Resmi ${brandName}</span>
+            <h2 id="terms-modal-title" class="modal-title" style="color:#fff;margin-top:6px">Syarat &amp; Ketentuan Pemesanan</h2>
+            <p style="font-size:12px;color:rgba(255,255,255,0.88);margin-top:4px">Harap dibaca singkat sebelum melanjutkan pemesanan ke outlet resmi pilihanmu.</p>
+          </div>
+
+          <div class="terms-modal-body">
+            <article class="terms-clause-card">
+              <span class="terms-clause-num">1</span>
+              <div class="terms-clause-copy">
+                <strong>Ketersediaan Stok &amp; Jam Outlet</strong>
+                <p>Pesanan diproses langsung ke outlet resmi yang dipilih selama jam operasional WITA. Jika varian/menu mendadak habis di kasir outlet, admin akan menghubungi Anda via WhatsApp untuk opsi penggantian atau penyesuaian nominal.</p>
+              </div>
+            </article>
+            <article class="terms-clause-card">
+              <span class="terms-clause-num">2</span>
+              <div class="terms-clause-copy">
+                <strong>Harga Promo &amp; Biaya Jasa Order</strong>
+                <p>Harga di katalog sudah termasuk potongan promo resmi partner. Pembelian 1 item dikenakan biaya jasa ringan Rp 1.000, sedangkan pembelian 2 item atau lebih langsung GRATIS biaya jasa order (Rp 0).</p>
+              </div>
+            </article>
+            <article class="terms-clause-card">
+              <span class="terms-clause-num">3</span>
+              <div class="terms-clause-copy">
+                <strong>Konfirmasi &amp; Pembayaran Resmi</strong>
+                <p>Setelah menekan kirim ke WhatsApp, admin memverifikasi rincian &amp; total tagihan sebelum mengirimkan metode pembayaran (QRIS / E-Wallet / Transfer Bank). Pesanan diracik setelah pembayaran terkonfirmasi.</p>
+              </div>
+            </article>
+            <article class="terms-clause-card">
+              <span class="terms-clause-num">4</span>
+              <div class="terms-clause-copy">
+                <strong>Ketentuan Pickup &amp; Delivery Driver</strong>
+                <p>Untuk metode Pickup, silakan ambil pesanan sesuai estimasi waktu dengan menyebut kode antrean/nama pemesan. Untuk metode Delivery, ongkos kirim ojek online (GoSend/GrabExpress) ditanggung pemesan sesuai tarif aplikasi.</p>
+              </div>
+            </article>
+            <article class="terms-clause-card">
+              <span class="terms-clause-num">5</span>
+              <div class="terms-clause-copy">
+                <strong>Perubahan &amp; Pembatalan Pesanan</strong>
+                <p>Pesanan yang sudah dibayarkan dan masuk ke sistem racikan kasir outlet resmi tidak dapat dibatalkan sepihak atau diubah variannya.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="terms-modal-foot">
+            <button type="button" class="btn-soft" data-action="close-modal">Tutup</button>
+            <button type="button" class="btn-primary" data-action="accept-terms-modal">
+              ${ICON.icon("check", "w-4 h-4", 2.4)} Saya Setuju &amp; Centang
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+    setTimeout(() => {
+      const btn = modalRoot.querySelector("[data-action='accept-terms-modal']");
       if (btn) btn.focus({ preventScroll: true });
     }, 80);
   }

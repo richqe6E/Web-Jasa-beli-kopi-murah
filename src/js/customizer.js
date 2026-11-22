@@ -223,16 +223,22 @@
 
               ${visibleGroups.map(groupMarkup).join("")}
 
-              <section class="option-group">
-                <div class="option-head">
-                  <div>
-                    <h3 class="option-title">Catatan Tambahan</h3>
-                    <p class="option-helper">Opsional, tulis permintaan khususmu.</p>
+              ${item.showNotes !== false ? `
+                <section class="option-group">
+                  <div class="option-head">
+                    <div>
+                      <h3 class="option-title">Catatan Tambahan</h3>
+                      <p class="option-helper">Opsional, tulis permintaan khususmu.</p>
+                    </div>
                   </div>
-                </div>
-                <textarea id="customizer-notes" class="form-input form-textarea" rows="2" maxlength="160" placeholder="Contoh: es dipisah, sedotan 2 pcs, manis dikurangi">${U.esc(notes)}</textarea>
-                <div class="char-count"><span id="notes-count">${notes.length}</span>/160</div>
-              </section>
+                  <textarea id="customizer-notes" class="form-input form-textarea" rows="2" maxlength="160" placeholder="Contoh: es dipisah, sedotan 2 pcs, manis dikurangi">${U.esc(notes)}</textarea>
+                  <div class="char-count"><span id="notes-count">${notes.length}</span>/160</div>
+                </section>
+              ` : (!visibleGroups.length ? `
+                <p style="font-size:12.5px;color:var(--muted);margin:6px 0 4px">
+                  Produk siap dipesan sesuai standar outlet resmi. Atur jumlah pesanan di bawah ini.
+                </p>
+              ` : "")}
             </div>
           </div>
 

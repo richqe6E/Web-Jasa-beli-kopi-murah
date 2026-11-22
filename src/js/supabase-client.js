@@ -94,7 +94,7 @@
       if (s.region) CFG.region = s.region;
       if (s.admin_whatsapp) CFG.adminWhatsApp = s.admin_whatsapp;
       if (s.admin_whatsapp_display) CFG.adminWhatsAppDisplay = s.admin_whatsapp_display;
-      if (s.service_fee_mode) CFG.serviceFeeMode = s.service_fee_mode;
+      if (s.service_fee_mode && CFG.serviceFeeMode !== "tiered_per_order") CFG.serviceFeeMode = s.service_fee_mode;
       if (s.default_service_fee_per_item != null) CFG.defaultServiceFeePerItem = Number(s.default_service_fee_per_item);
       if (s.default_service_fee_per_order != null) CFG.defaultServiceFeePerOrder = Number(s.default_service_fee_per_order);
       if (s.default_cost_ratio_percent != null) CFG.defaultCostRatioPercent = Number(s.default_cost_ratio_percent);

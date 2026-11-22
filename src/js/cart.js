@@ -88,10 +88,15 @@
       const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
       const originalTotal = items.reduce((sum, item) => sum + item.lineOriginal, 0);
       const totalSavings = Math.max(0, originalTotal - subtotal);
-      const feeMode = CFG.serviceFeeMode || "included_per_item";
-      const orderServiceFee = (totalItems > 0 && (feeMode === "flat_per_order" || feeMode === "both"))
-        ? Number(CFG.defaultServiceFeePerOrder || 0)
-        : 0;
+      const feeMode = CFG.serviceFeeMode || "tiered_per_order";
+      let orderServiceFee = 0;
+      if (totalItems > 0) {
+        if (feeMode === "tiered_per_order") {
+          orderServiceFee = totalItems === 1 ? Number(CFG.defaultServiceFeePerOrder || 1000) : 0;
+        } else if (feeMode === "flat_per_order" || feeMode === "both") {
+          orderServiceFee = Number(CFG.defaultServiceFeePerOrder || 0);
+        }
+      }
       const grandTotal = subtotal + orderServiceFee;
 
       return {
