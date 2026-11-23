@@ -3259,7 +3259,7 @@
               <span class="terms-clause-num">2</span>
               <div class="terms-clause-copy">
                 <strong>Harga Promo &amp; Biaya Transaksi Partner</strong>
-                <p>Harga di katalog mengikuti harga promo resmi partner (paket Bundling menyesuaikan +Rp 1.000). Pesanan Fore Coffee, Janji Jiwa, Bundling, Satuan, dan Kopi Kenangan ≥ 2 item bebas biaya admin (Rp 0). Khusus order 1 produk reguler Kopi Kenangan dikenakan biaya transaksi Rp 2.000 sesuai ketentuan partner.</p>
+                <p>Harga di katalog mengikuti harga promo resmi partner (termasuk paket Bundling). Pesanan Fore Coffee, Janji Jiwa, Bundling, Satuan, dan Kopi Kenangan &ge; 2 item bebas biaya admin (Rp 0). Khusus order 1 produk reguler Kopi Kenangan dikenakan biaya transaksi Rp 2.000 sesuai ketentuan partner.</p>
               </div>
             </article>
             <article class="terms-clause-card">

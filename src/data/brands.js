@@ -189,9 +189,15 @@
   });
 
   const KENANGAN_SATUAN_SET = new Set([
-    "kopi kenangan mantan", "spanish latte", "og thai tea", "taro milk",
-    "taro cloud milk tea", "pistachio aren latte", "raspberry hibiscus",
-    "babyccino", "lemon black tea", "fresh lemonade", "choco caramel", "banana americano"
+    "babyccino",
+    "choco caramel",
+    "kopi kenangan mantan",
+    "spanish latte",
+    "og thai tea",
+    "taro milk",
+    "taro cloud milk tea",
+    "pistachio aren latte",
+    "banana americano"
   ]);
 
   function hydrateItem(item) {
@@ -217,12 +223,12 @@
       showNotes = true;
     } else if (brandId === "kenangan") {
       showNotes = true;
-      if (lowName.includes("steep coffee bag")) {
+      if (lowName.includes("steep coffee bag (box)") || lowName.includes("drip bag coffee (box)")) {
         optionGroups = [kenanganBeansGroup("steep-box")];
         showNotes = false;
-      } else if (lowName.includes("drip bag coffee (sachet)")) {
+      } else if (lowName.includes("drip bag coffee (sachet)") || lowName.includes("steep coffee bag (sachet)")) {
         optionGroups = [];
-      } else if (lowCat.includes("manual brew") || lowName.includes("drip bag coffee (brewed)")) {
+      } else if (lowCat.includes("manual brew") || lowName.includes("drip bag coffee (brewed)") || lowName.includes("steep coffee (brewed)")) {
         optionGroups = [
           kenanganTempGroup(true),
           kenanganSizeGroup(false),
@@ -233,12 +239,51 @@
       } else if (item.type === "food") {
         optionGroups = [];
       } else {
-        const isFrappe = lowCat.includes("frappe");
-        const isIceOnly = isFrappe || lowName.includes("avocado") || lowName.includes("dua shot iced shaken") || lowName.includes("lemonade") || lowName.includes("oreo") || lowName.includes("crumble") || lowName.includes("oatside") || lowName.includes("loaded") || lowName.includes("grass jelly");
+        const isFrappe = lowCat.includes("frappe") || lowName.includes("frappe");
+        const isIceOnly = isFrappe ||
+          lowName.includes("bluebericano") ||
+          lowName.includes("strawbericano") ||
+          lowName.includes("creamy cheesecake latte") ||
+          lowName.includes("banana americano") ||
+          lowName.includes("avocado") ||
+          lowName.includes("dua shot iced shaken") ||
+          lowName.includes("lemonade") ||
+          lowName.includes("oreo") ||
+          lowName.includes("crumble") ||
+          lowName.includes("oatside") ||
+          lowName.includes("loaded") ||
+          lowName.includes("grass jelly");
         const hasHot = !isIceOnly;
-        const isCoffee = lowCat.includes("coffee") || lowName.includes("latte") || lowName.includes("espresso") || lowName.includes("americano") || lowName.includes("cappuccino") || lowName.includes("macchiato") || lowName.includes("shaken") || lowName.includes("mantan") || lowName.includes("aren");
-        const hasMilk = !lowName.includes("americano") && !lowName.includes("lemonade") && !lowName.includes("lemon black tea") && !lowName.includes("earl grey tea") && !lowName.includes("raspberry hibiscus");
-        const sugarDef = lowName.includes("americano") ? "no" : "normal";
+        const isCoffee = !isFrappe && (
+          lowCat.includes("coffee") ||
+          lowName.includes("latte") ||
+          lowName.includes("espresso") ||
+          lowName.includes("americano") ||
+          lowName.includes("bluebericano") ||
+          lowName.includes("strawbericano") ||
+          lowName.includes("cappuccino") ||
+          lowName.includes("macchiato") ||
+          lowName.includes("shaken") ||
+          lowName.includes("mantan") ||
+          lowName.includes("aren")
+        );
+        const hasMilk = !isFrappe &&
+          !lowName.includes("americano") &&
+          !lowName.includes("bluebericano") &&
+          !lowName.includes("strawbericano") &&
+          !lowName.includes("creamy cheesecake latte") &&
+          !lowName.includes("spanish latte") &&
+          !lowName.includes("oatside") &&
+          !lowName.includes("lemonade") &&
+          !lowName.includes("lemon black tea") &&
+          !lowName.includes("earl grey tea") &&
+          !lowName.includes("raspberry hibiscus") &&
+          !lowName.includes("thai tea") &&
+          !lowName.includes("milo") &&
+          !lowName.includes("babyccino");
+        const sugarDef = (lowName.includes("americano") && !lowName.includes("banana") && !lowName.includes("bluebericano") && !lowName.includes("strawbericano"))
+          ? "no"
+          : "normal";
 
         optionGroups.push(kenanganTempGroup(hasHot));
         optionGroups.push(kenanganSizeGroup(true));
@@ -263,8 +308,10 @@
       }
     } else if (brandId === "janji-jiwa") {
       showNotes = true;
-      if (item.type === "food" || is1L) {
+      if (item.type === "food" || lowCat.includes("bottled") || lowName.includes("mineral water")) {
         optionGroups = [];
+      } else if (is1L) {
+        optionGroups = [janjiSugarGroup()];
       } else {
         optionGroups = [janjiSizeGroup(), janjiSugarGroup(), janjiIceGroup()];
       }
@@ -283,7 +330,7 @@
     return Object.assign({}, item, {
       type: isBundle ? "bundle" : (item.type || "drink"),
       bundleSpec: bundleSpec || undefined,
-      isSatuanEligible: !!item.isSatuanEligible || (brandId === "kenangan" && KENANGAN_SATUAN_SET.has(lowName)),
+      isSatuanEligible: brandId === "kenangan" ? (!isBundle && KENANGAN_SATUAN_SET.has(lowName)) : !!item.isSatuanEligible,
       isAvailable: item.isAvailable !== false,
       showNotes,
       soldCount,

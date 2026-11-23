@@ -55,21 +55,11 @@
 
   function formatItemLines(items, opts) {
     const lines = [];
-    const isPartner = !!(opts && opts.isPartner);
     (items || []).forEach((item, index) => {
       const qty = Number(item.quantity || 1);
       const name = item.name || item.item_name || "Menu";
-      const category = String(item.category || "");
-      const brandId = String(item.brandId || item.brand_id || (opts && opts.brandId) || "");
       const unitSelling = Number(item.unitPrice != null ? item.unitPrice : (item.unit_selling_price || 0));
-
-      // For Kopi Kenangan Bundling, our catalog adds +Rp 1.000 over partner price.
-      // When forwarding to partner, adjust unit price to match partner catalog price.
-      let effectiveUnit = unitSelling;
-      if (isPartner && brandId === "kenangan" && /bundling/i.test(category) && effectiveUnit > 1000) {
-        effectiveUnit = unitSelling - 1000;
-      }
-      const lineTotal = effectiveUnit * qty;
+      const lineTotal = unitSelling * qty;
 
       lines.push(`${index + 1}. ${name} x${qty} - ${U.rp(lineTotal)}`);
 
@@ -175,17 +165,12 @@
     const customerNotes = String(order.customer_notes || order.notes || "").trim();
     const rawItems = order.order_items || order.items || [];
 
-    // Recompute partner subtotal (subtracting +Rp 1.000 KopKen Bundling markup)
+    // Recompute partner subtotal (catalog & bundle prices already 1:1 with partner)
     let partnerSubtotal = 0;
     rawItems.forEach(item => {
       const qty = Number(item.quantity || 1);
       const unitSelling = Number(item.unitPrice != null ? item.unitPrice : (item.unit_selling_price || 0));
-      const category = String(item.category || "");
-      let effectiveUnit = unitSelling;
-      if (brandId === "kenangan" && /bundling/i.test(category) && effectiveUnit > 1000) {
-        effectiveUnit = unitSelling - 1000;
-      }
-      partnerSubtotal += effectiveUnit * qty;
+      partnerSubtotal += unitSelling * qty;
     });
 
     const adminFee = Number(order.order_service_fee != null ? order.order_service_fee : (order.orderServiceFee || 0));

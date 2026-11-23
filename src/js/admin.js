@@ -820,12 +820,12 @@
       <section class="panel-card" style="background:linear-gradient(145deg,#ffffff 35%,#eef6ff 100%);border-color:var(--primary-line)">
         <div class="panel-head" style="margin-bottom:10px">
           <div class="panel-head-copy">
-            <p class="panel-eyebrow">Skema Aktif Partner (Sinkron Reseller + Bundling +Rp 1.000)</p>
+            <p class="panel-eyebrow">Skema Aktif Partner (Sinkron Reseller + Bundling 1:1 Partner)</p>
             <h2 class="panel-title">Aturan Laba Reseller &amp; Biaya Transaksi Partner</h2>
             <p class="panel-sub">
-              <strong>Kopi Kenangan:</strong> harga katalog persis partner, paket <strong>Bundling +Rp 1.000</strong> (biaya transaksi Rp 2.000 khusus 1 item reguler) •
-              <strong>Janji Jiwa:</strong> fee Rp 1.000/item, biaya admin checkout Rp 0 •
-              <strong>Fore Coffee:</strong> harga persis partner, fee dasar Rp 500 (Reguler/Deli) / Rp 1.000 (1L &amp; Large), biaya admin checkout Rp 0.
+              <strong>Kopi Kenangan:</strong> harga katalog &amp; Bundling 100% persis partner (biaya transaksi Rp 2.000 khusus 1 item reguler) •
+              <strong>Janji Jiwa:</strong> harga 100% persis partner, biaya admin checkout Rp 0 •
+              <strong>Fore Coffee:</strong> harga 100% persis partner, biaya admin checkout Rp 0.
             </p>
           </div>
           <div class="toolbar-row">
@@ -1402,7 +1402,7 @@
 
           <div style="font-size:12px;color:var(--body);margin-bottom:10px;padding:10px 12px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0">
             <strong>Tujuan WA Partner:</strong> <span class="mono">${U.esc(settings.partner_whatsapp)}</span> •
-            Teks otomatis diformat sesuai template partner (paket Bundling Kopken otomatis menyesuaikan ke harga dasar partner). Anda juga dapat mengedit cepat sebelum mengirim.
+            Teks otomatis diformat sesuai template partner dan harga sudah 1:1 dengan katalog partner. Anda juga dapat mengedit cepat sebelum mengirim.
           </div>
 
           <div class="field">
@@ -1667,7 +1667,7 @@
     const cat = String(item.category || "").toLowerCase();
     const name = String(item.name || "").toLowerCase();
     if (item.brand_id === "kenangan") {
-      if (cat === "bundling" || item.type === "bundle") return Math.max(0, sell - 1000);
+      if (cat === "bundling" || item.type === "bundle") return sell;
       return Math.max(0, sell - 500);
     }
     if (item.brand_id === "janji-jiwa") {
