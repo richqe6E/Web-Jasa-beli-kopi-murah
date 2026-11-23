@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>3D Motion Promo Video Studio - JasDor RisGold</title>
+  <meta name="description" content="Studio generator video promosi 3D Motion (Gaya Blender) untuk JasDor RisGold (jasdor.web.id). Mendukung format 9:16 Reels/TikTok/WA & 16:9 Widescreen." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#070E1A" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/src/assets/favicon-48.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/css/promo-video.css?v=1.0" />
+</head>
+<body>
+  <div class="studio-shell">
+    <!-- Top Bar -->
+    <header class="studio-topbar">
+      <div class="studio-brand">
+        <div class="studio-badge-3d">3D</div>
+        <div>
+          <span class="studio-eyebrow">BLENDER-STYLE 3D MOTION GENERATOR</span>
+          <h1 class="studio-title">JasDor RisGold - Promo Video Studio</h1>
+        </div>
+      </div>
+
+      <div class="studio-top-actions">
+        <a href="index.html" class="st-btn st-btn-ghost">Buka Web Utama</a>
+        <a href="scripts/blender_promo_generator.py" download class="st-btn st-btn-outline">Unduh Script Blender (.py)</a>
+        <button type="button" id="btn-export-frames" class="st-btn st-btn-soft">Unduh 6 Frame PNG (HD)</button>
+        <button type="button" id="btn-record-video" class="st-btn st-btn-primary">
+          <span class="rec-dot" id="rec-dot"></span>
+          <span id="rec-label">Render &amp; Unduh Video (30s)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="studio-main">
+      <!-- Center 3D Render Stage -->
+      <section class="stage-panel" aria-label="Pratinjau 3D Motion Video">
+        <div class="stage-viewport-wrap" id="viewport-wrap" data-aspect="9:16">
+          <canvas id="promo-canvas" width="1080" height="1920"></canvas>
+          <div class="stage-overlay-hud">
+            <span class="hud-pill" id="hud-scene-badge">SCENE 1 / 6 • HOOK</span>
+            <span class="hud-pill mono" id="hud-time-badge">00.0s / 30.0s • 60 FPS</span>
+          </div>
+          <div class="render-progress-modal is-hidden" id="render-modal">
+            <div class="render-card">
+              <div class="render-spinner"></div>
+              <h3 id="render-title">Merender Video 3D Motion (60 FPS)...</h3>
+              <p id="render-sub">Jangan tutup tab ini. Video sedang direkam beserta efek suara &amp; musik.</p>
+              <div class="render-bar-track">
+                <div class="render-bar-fill" id="render-bar-fill" style="width:0%"></div>
+              </div>
+              <div class="render-meta-row">
+                <span class="mono" id="render-pct">0%</span>
+                <button type="button" id="btn-cancel-record" class="st-btn st-btn-ghost st-btn-xs">Batalkan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transport & Timeline Bar -->
+        <div class="timeline-bar">
+          <div class="transport-controls">
+            <button type="button" id="btn-play-toggle" class="st-btn st-btn-icon" title="Putar / Jeda (Spasi)">
+              <span id="play-icon-label">Jeda</span>
+            </button>
+            <button type="button" id="btn-restart" class="st-btn st-btn-ghost st-btn-xs" title="Ulang dari 00:00">
+              Ulang
+            </button>
+            <button type="button" id="btn-audio-toggle" class="st-btn st-btn-soft st-btn-xs" data-muted="false">
+              Suara &amp; Musik: ON
+            </button>
+          </div>
+
+          <div class="scrubber-wrap">
+            <input type="range" id="timeline-scrubber" min="0" max="30" step="0.05" value="0" aria-label="Garis waktu video" />
+            <div class="scene-markers" id="scene-markers">
+              <button type="button" class="scene-chip is-active" data-jump="0">1. Hook (0s)</button>
+              <button type="button" class="scene-chip" data-jump="4.5">2. Outlet GPS (4.5s)</button>
+              <button type="button" class="scene-chip" data-jump="10">3. Menu &amp; Bundling (10s)</button>
+              <button type="button" class="scene-chip" data-jump="17">4. Bukti Hemat (17s)</button>
+              <button type="button" class="scene-chip" data-jump="22">5. Struk &amp; WA (22s)</button>
+              <button type="button" class="scene-chip" data-jump="26">6. Testimoni &amp; CTA (26s)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Inspector / Director Controls -->
+      <aside class="inspector-panel">
+        <div class="inspector-card">
+          <span class="ins-eyebrow">PENGATURAN FORMAT &amp; KAMERA 3D</span>
+          <h2 class="ins-title">Kontrol Sutradara &amp; Teks Iklan</h2>
+
+          <div class="ins-field">
+            <label class="ins-label">Rasio Resolusi Video</label>
+            <div class="aspect-toggle-group">
+              <button type="button" class="aspect-btn is-active" data-aspect-btn="9:16">
+                <strong>9:16 Vertikal</strong>
+                <small>1080x1920 • TikTok / Reels / Status WA</small>
+              </button>
+              <button type="button" class="aspect-btn" data-aspect-btn="16:9">
+                <strong>16:9 Landscape</strong>
+                <small>1920x1080 • YouTube / Web Banner</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="ins-field">
+            <label class="ins-label" for="ctrl-cam-intensity">Intensitas Gerakan Kamera 3D (Blender Orbit &amp; Parallax)</label>
+            <select id="ctrl-cam-intensity" class="ins-select">
+              <option value="1.0" selected>Sinematik Standar (Halus &amp; Mudah Dibaca)</option>
+              <option value="1.35">Dinamis Ekstra (Sudut 3D Lebih Dramatis)</option>
+              <option value="0.65">Minimalis Fokus Layar (Tilt Lembut)</option>
+            </select>
+          </div>
+
+          <div class="ins-field">
+            <label class="ins-label" for="ctrl-hook-text">Judul Hook Pembuka (Scene 1)</label>
+            <input type="text" id="ctrl-hook-text" class="ins-input" value="Ngopi Resmi di Outlet Terdekat, Kok Bisa Semurah Ini?" />
+          </div>
+
+          <div class="ins-field">
+            <label class="ins-label" for="ctrl-cta-url">Domain &amp; Call To Action Penutup (Scene 6)</label>
+            <input type="text" id="ctrl-cta-url" class="ins-input mono" value="jasdor.web.id" />
+          </div>
+
+          <div class="ins-field">
+            <label class="ins-label" for="ctrl-cta-sub">Sub-Teks Penutup (Scene 6)</label>
+            <input type="text" id="ctrl-cta-sub" class="ins-input" value="Ambil Langsung di Kasir Outlet Resmi • Bayar QRIS / E-Wallet" />
+          </div>
+        </div>
+
+        <div class="inspector-card">
+          <span class="ins-eyebrow">RINGKASAN STORYBOARD 30 DETIK</span>
+          <ol class="storyboard-list" id="storyboard-list">
+            <li data-scene-idx="0" class="is-current">
+              <strong>00s - 04.5s • Hook Harga Coret 3D</strong>
+              <span>3 kartu brand resmi (Kopi Kenangan, Fore, Janji Jiwa) mengorbit HP 3D, harga Rp 28.000 flip ke Rp 18.000.</span>
+            </li>
+            <li data-scene-idx="1">
+              <strong>04.5s - 10s • Pilih Brand &amp; Cabang GPS</strong>
+              <span>Kartu Samarinda, Balikpapan, Tenggarong melayang 3D; klik cabang Samarinda Central Plaza.</span>
+            </li>
+            <li data-scene-idx="2">
+              <strong>10s - 17s • Pilih Menu, Varian &amp; Bundling</strong>
+              <span>Pop-out 3 layer: Kopi Kenangan Mantan Rp 15.000, Paket Berdua Rp 35.000, dan opsi Ice / Regular / Sugar.</span>
+            </li>
+            <li data-scene-idx="3">
+              <strong>17s - 22s • Bukti Perbandingan Hemat</strong>
+              <span>Kartu Royal Blue: Toko Resmi Rp 57.000 vs JasDor RisGold Rp 35.000 (Hemat Rp 22.000, Admin Rp 0).</span>
+            </li>
+            <li data-scene-idx="4">
+              <strong>22s - 26s • Struk Digital JPG &amp; WA 1-Klik</strong>
+              <span>Struk JPG keluar secara 3D dari atas HP disertai klik tombol Lanjut Kirim ke WA.</span>
+            </li>
+            <li data-scene-idx="5">
+              <strong>26s - 30s • Testimoni Rating 5.0 &amp; CTA</strong>
+              <span>Balon chat testimoni terverifikasi melayang di kiri-kanan HP + ajakan buka jasdor.web.id.</span>
+            </li>
+          </ol>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="src/js/promo-video.js?v=1.0"></script>
+</body>
+</html>

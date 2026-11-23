@@ -5,6 +5,10 @@
       "destination": "/review.html"
     },
     {
+      "source": "/promo-video",
+      "destination": "/promo-video.html"
+    },
+    {
       "source": "/media/testimonials/:path*",
       "destination": "https://qfjjhnudiyybuqddwlav.supabase.co/storage/v1/object/public/testimonials/:path*"
     }
@@ -45,7 +49,7 @@
       ]
     },
     {
-      "source": "/(index\\.html|admin\\.html|review\\.html|lisensi\\.html|sw\\.js|manifest\\.webmanifest)",
+      "source": "/(index\\.html|admin\\.html|review\\.html|promo-video\\.html|lisensi\\.html|sw\\.js|manifest\\.webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",
