@@ -529,42 +529,57 @@
 
   function drawSceneHeaderCaption(c, W, H, stepPill, headline, subline, animIn) {
     const isPortrait = H > W;
-    const enter = easeOutBack(animIn);
-    const topY = isPortrait ? lerp(40, 96, enter) : lerp(24, 58, enter);
-    const centerX = isPortrait ? W / 2 : W * 0.31;
-    const maxW = isPortrait ? W - 110 : W * 0.48;
+    const enter = easeOutCubic(clamp(0.35 + animIn * 1.6, 0, 1));
+    const topY = isPortrait ? lerp(64, 88, enter) : lerp(34, 52, enter);
+    const centerX = isPortrait ? W / 2 : W * 0.30;
+    const maxW = isPortrait ? W - 120 : W * 0.48;
 
     c.save();
-    c.globalAlpha = clamp(animIn * 1.4, 0, 1);
+    c.globalAlpha = clamp(0.85 + animIn * 0.8, 0, 1);
+
+    // Glass Backing Card behind Top Headline for high contrast
+    const cardW = isPortrait ? W - 84 : W * 0.52;
+    const cardH = isPortrait ? 315 : 275;
+    fillRoundRect(
+      c,
+      centerX - cardW / 2,
+      topY - 18,
+      cardW,
+      cardH,
+      28,
+      "rgba(8, 23, 52, 0.78)",
+      "rgba(56, 189, 248, 0.38)",
+      2
+    );
 
     // Step Pill
     c.font = "800 22px 'Outfit', sans-serif";
-    const pillW = Math.max(260, c.measureText(stepPill).width + 52);
+    const pillW = Math.max(290, c.measureText(stepPill).width + 56);
     fillRoundRect(
       c,
       centerX - pillW / 2,
-      topY,
+      topY + 4,
       pillW,
-      46,
+      48,
       999,
-      "rgba(11, 107, 203, 0.35)",
+      "rgba(11, 107, 203, 0.45)",
       "#38BDF8",
       2
     );
     c.fillStyle = "#7DD3FC";
     c.textAlign = "center";
-    c.fillText(stepPill, centerX, topY + 30);
+    c.fillText(stepPill, centerX, topY + 35);
 
     // Main Headline
     c.fillStyle = "#FFFFFF";
-    c.font = isPortrait ? "800 50px 'Outfit', sans-serif" : "800 44px 'Outfit', sans-serif";
-    const lineCount = wrapText(c, headline, centerX, topY + 106, maxW, isPortrait ? 58 : 52, "center");
+    c.font = isPortrait ? "800 48px 'Outfit', sans-serif" : "800 42px 'Outfit', sans-serif";
+    const lineCount = wrapText(c, headline, centerX, topY + 108, maxW, isPortrait ? 56 : 50, "center");
 
     // Subline
     if (subline) {
-      c.fillStyle = "#CBD5E1";
-      c.font = isPortrait ? "500 25px 'DM Sans', sans-serif" : "500 22px 'DM Sans', sans-serif";
-      wrapText(c, subline, centerX, topY + 106 + lineCount * (isPortrait ? 58 : 52) + 10, maxW, 34, "center");
+      c.fillStyle = "#BAE6FD";
+      c.font = isPortrait ? "600 24px 'DM Sans', sans-serif" : "600 21px 'DM Sans', sans-serif";
+      wrapText(c, subline, centerX, topY + 112 + lineCount * (isPortrait ? 56 : 50) + 8, maxW, 33, "center");
     }
     c.restore();
   }
@@ -582,9 +597,9 @@
 
     drawStudioBackground(ctx, W, H, t, scene.index);
 
-    const phoneCX = isPortrait ? W * 0.5 : W * 0.71;
-    const phoneCY = isPortrait ? H * 0.57 : H * 0.53;
-    const baseScale = isPortrait ? 1.12 : 0.88;
+    const phoneCX = isPortrait ? W * 0.5 : W * 0.72;
+    const phoneCY = isPortrait ? H * 0.61 : H * 0.54;
+    const baseScale = isPortrait ? 1.24 : 0.92;
 
     /* ==========================================================
        SCENE 1 (0.0s - 4.5s): HOOK - NGOPI RESMI LEBIH HEMAT
@@ -1473,7 +1488,7 @@
     sceneChips.forEach(chip => {
       chip.addEventListener("click", () => {
         ensureAudio();
-        state.time = parseFloat(chip.dataset.jump) || 0;
+        state.time = (parseFloat(chip.dataset.jump) || 0) + 0.35;
         renderFrame(state.time);
         syncHud(state.time);
       });
@@ -1484,7 +1499,7 @@
         ensureAudio();
         const idx = parseInt(li.dataset.sceneIdx, 10) || 0;
         if (SCENES[idx]) {
-          state.time = SCENES[idx].start + 0.1;
+          state.time = SCENES[idx].start + 0.35;
           renderFrame(state.time);
           syncHud(state.time);
         }
