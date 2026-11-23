@@ -6085,9 +6085,9 @@ body.has-bottom-bar .app-main {
   width: calc(100% - 20px);
   max-width: calc(var(--shell) - 20px);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  padding: 6px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  padding: 5px;
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.78);
   background: linear-gradient(
@@ -6127,6 +6127,9 @@ body.has-bottom-bar .app-main {
 .bottom-nav-item {
   position: relative;
   min-height: 52px;
+  padding: 4px 2px;
+  font-size: 9.8px;
+  white-space: nowrap;
   border-radius: 22px;
   color: #475569;
   transition: background 0.24s var(--ease), color 0.22s var(--ease), transform 0.16s var(--ease), box-shadow 0.24s var(--ease);
