@@ -2952,7 +2952,7 @@ body.modal-open {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -2977,8 +2977,129 @@ body.modal-open {
   color: var(--primary);
 }
 
+.wifi-btn svg {
+  color: #991b1b;
+}
+
 .track-btn:active {
   transform: scale(0.95);
+}
+
+/* WiFi Kopi Kenangan Modal */
+.wifi-modal-hero {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 55%, #b91c1c 100%);
+}
+
+.wifi-pass-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+  border: 1.5px solid rgba(153, 27, 27, 0.22);
+}
+
+.wifi-pass-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.wifi-day-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(153, 27, 27, 0.12);
+  color: #7f1d1d;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.wifi-pass-box {
+  padding: 11px 12px;
+  border-radius: 13px;
+  background: #ffffff;
+  border: 1px dashed rgba(153, 27, 27, 0.35);
+  text-align: center;
+}
+
+.wifi-pass-value {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #0f172a;
+  word-break: break-all;
+  -webkit-user-select: all;
+  user-select: all;
+}
+
+.wifi-copy-main-btn {
+  width: 100%;
+  min-height: 44px;
+  background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);
+  box-shadow: 0 10px 20px -10px rgba(153, 27, 27, 0.75);
+}
+
+.wifi-copy-main-btn.is-copied {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  box-shadow: 0 10px 20px -10px rgba(22, 163, 74, 0.65);
+}
+
+.wifi-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.wifi-info-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.wifi-info-copy span {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.wifi-info-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.wifi-mini-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wifi-mini-copy.is-copied {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #15803d;
 }
 
 /* readability upgrades across secondary text */

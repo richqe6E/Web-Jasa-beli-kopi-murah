@@ -104,10 +104,7 @@
     return { url, blocked: !win };
   }
 
-  function copyMessage(message) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(message).then(() => true).catch(() => false);
-    }
+  function fallbackCopy(message) {
     try {
       const textarea = document.createElement("textarea");
       textarea.value = message;
@@ -118,10 +115,17 @@
       textarea.select();
       const ok = document.execCommand("copy");
       document.body.removeChild(textarea);
-      return Promise.resolve(ok);
+      return ok;
     } catch (e) {
-      return Promise.resolve(false);
+      return false;
     }
+  }
+
+  function copyMessage(message) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(message).then(() => true).catch(() => fallbackCopy(message));
+    }
+    return Promise.resolve(fallbackCopy(message));
   }
 
   function saveOrder(order) {

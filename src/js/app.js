@@ -334,6 +334,10 @@
         ${leftBlock}
       </div>
       <div class="header-actions">
+        <button type="button" class="track-btn wifi-btn" data-action="open-wifi-modal" aria-label="Password WiFi Kopi Kenangan hari ini">
+          ${ICON.icon("wifi", "w-4 h-4", 2)}
+          <span>WiFi</span>
+        </button>
         <button type="button" class="track-btn" data-action="open-tracker" aria-label="Lacak status pesanan">
           ${ICON.icon("package", "w-4 h-4", 2)}
           <span>Lacak</span>
@@ -2194,6 +2198,27 @@
       copyPatunganSummary();
     } else if (action === "submit-order") {
       submitOrder();
+    } else if (action === "open-wifi-modal") {
+      showWifiModal();
+    } else if (action === "copy-wifi-field") {
+      const val = el.dataset.copyValue || "";
+      const label = el.dataset.copyLabel || "Teks";
+      if (!val) return;
+      WA.copyMessage(val).then(ok => {
+        if (ok) {
+          if (!el.dataset.origHtml) el.dataset.origHtml = el.innerHTML;
+          el.classList.add("is-copied");
+          el.innerHTML = `${ICON.icon("check", "w-4 h-4", 2.4)} <span>Tersalin!</span>`;
+          clearTimeout(el._copyTimer);
+          el._copyTimer = setTimeout(() => {
+            el.classList.remove("is-copied");
+            if (el.dataset.origHtml) el.innerHTML = el.dataset.origHtml;
+          }, 1800);
+          toast(`${label} berhasil disalin!`);
+        } else {
+          toast(`Gagal menyalin ${label.toLowerCase()}.`, "error");
+        }
+      });
     } else if (action === "open-terms-modal") {
       showTermsModal();
     } else if (action === "accept-terms-modal") {
@@ -3022,6 +3047,93 @@
     if (status === "processing") return { label: "Diproses Outlet", cls: "is-processing", step: 2 };
     if (status === "cancelled") return { label: "Dibatalkan", cls: "is-cancelled", step: 0 };
     return { label: "Menunggu WA", cls: "is-pending_wa", step: 1 };
+  }
+
+  function getTodayKenanganWifi(nowDate) {
+    const wifiCfg = CFG.kenanganWifi || {};
+    const dateInfo = U.getWitaDateParts
+      ? U.getWitaDateParts(nowDate)
+      : { day: (nowDate || new Date()).getDate(), label: U.formatDateID(nowDate || new Date()) };
+    const dayNum = Math.min(31, Math.max(1, Number(dateInfo.day) || 1));
+    const passwords = wifiCfg.passwords || {};
+    const password = passwords[dayNum] || passwords[String(dayNum)] || "";
+    return {
+      brandName: wifiCfg.brandName || "Kopi Kenangan (Kopken)",
+      ssid: wifiCfg.ssid || "Teman Kenangan",
+      username: wifiCfg.username || "kopikenangan",
+      day: dayNum,
+      dateLabel: dateInfo.label,
+      password
+    };
+  }
+
+  function showWifiModal() {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const wifi = getTodayKenanganWifi();
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" data-modal-overlay>
+        <div class="modal-card terms-modal-card" role="dialog" aria-modal="true" aria-labelledby="wifi-modal-title">
+          <div class="terms-modal-hero wifi-modal-hero">
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup Info WiFi">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
+            <div style="display:flex;align-items:center;gap:12px">
+              <img src="src/assets/brands/kenangan-official.webp" alt="" width="44" height="44" style="border-radius:13px;background:#ffffff;padding:5px;object-fit:contain;box-shadow:0 8px 18px -6px rgba(0,0,0,0.35);flex-shrink:0" />
+              <div style="min-width:0">
+                <span class="terms-modal-badge">${ICON.icon("wifi", "w-3.5 h-3.5", 2.2)} WiFi Gratis Outlet</span>
+                <h2 id="wifi-modal-title" class="modal-title" style="color:#fff;margin-top:4px">WiFi ${U.esc(wifi.brandName)}</h2>
+              </div>
+            </div>
+            <p style="font-size:12px;color:rgba(255,255,255,0.9);margin-top:8px">Password berganti otomatis setiap hari • ${U.esc(wifi.dateLabel)} (WITA)</p>
+          </div>
+
+          <div class="terms-modal-body">
+            <div class="wifi-pass-card">
+              <div class="wifi-pass-label">
+                <span>Password WiFi Hari Ini</span>
+                <span class="wifi-day-pill">Tanggal ${wifi.day}</span>
+              </div>
+              <div class="wifi-pass-box">
+                <code class="wifi-pass-value" id="wifi-today-password">${U.esc(wifi.password)}</code>
+              </div>
+              <button type="button" class="btn-primary wifi-copy-main-btn" id="wifi-copy-password-btn" data-action="copy-wifi-field" data-copy-value="${U.esc(wifi.password)}" data-copy-label="Password WiFi hari ini">
+                ${ICON.icon("copy", "w-4 h-4", 2.2)} <span>Salin Password</span>
+              </button>
+            </div>
+
+            <div class="wifi-info-row">
+              <div class="wifi-info-copy">
+                <span>Nama WiFi (SSID)</span>
+                <strong>${U.esc(wifi.ssid)}</strong>
+              </div>
+              <button type="button" class="wifi-mini-copy" data-action="copy-wifi-field" data-copy-value="${U.esc(wifi.ssid)}" data-copy-label="Nama WiFi (SSID)">
+                ${ICON.icon("copy", "w-3.5 h-3.5", 2.2)} <span>Salin</span>
+              </button>
+            </div>
+
+            <div class="wifi-info-row">
+              <div class="wifi-info-copy">
+                <span>Username Portal</span>
+                <strong>${U.esc(wifi.username)}</strong>
+              </div>
+              <button type="button" class="wifi-mini-copy" data-action="copy-wifi-field" data-copy-value="${U.esc(wifi.username)}" data-copy-label="Username WiFi">
+                ${ICON.icon("copy", "w-3.5 h-3.5", 2.2)} <span>Salin</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="terms-modal-foot is-single-action">
+            <button type="button" class="btn-soft" data-action="close-modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+    setTimeout(() => {
+      const btn = $("#wifi-copy-password-btn");
+      if (btn) btn.focus({ preventScroll: true });
+    }, 80);
   }
 
   function showTrackerModal(initialCode) {

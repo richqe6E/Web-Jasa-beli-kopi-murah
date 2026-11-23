@@ -31,6 +31,46 @@ window.DLM_CONFIG = {
   operationalNote: "Harga sudah termasuk diskon jasa order. Ketersediaan menu mengikuti outlet Samarinda yang dipilih.",
   maxToppings: 3,
 
+  // Password WiFi Harian Kopi Kenangan (Kopken) berdasarkan tanggal kalender (1 - 31)
+  kenanganWifi: {
+    brandName: "Kopi Kenangan (Kopken)",
+    ssid: "Teman Kenangan",
+    username: "kopikenangan",
+    passwords: {
+      1: "NgopiSantuy#01",
+      2: "KopiPenyemangat@02",
+      3: "SemangatBaru03",
+      4: "HariCeria=04",
+      5: "KopiTemanSetia!05",
+      6: "NgopiSeru#06",
+      7: "KopiTemanPagi@07",
+      8: "KopiPenutupSore08",
+      9: "SegarnyaKopi=09",
+      10: "NgopiBarengYuk!10",
+      11: "KenanganIndah#11",
+      12: "KopiJodohSejati@12",
+      13: "HangatnyaKopi13",
+      14: "PagiSemangat=14",
+      15: "NgopiDuluGaes!15",
+      16: "KopiPenyelamat#16",
+      17: "RasaKangen@17",
+      18: "SecangkirRindu18",
+      19: "KopiTanpaBatas=19",
+      20: "NgopiSambilKerja!20",
+      21: "KenanganManis#21",
+      22: "KopiTemanCurhat@22",
+      23: "BahagiaItuSederhana23",
+      24: "NgopiPenuhCinta=24",
+      25: "KopiRasaCinta!25",
+      26: "SemangatPejuang#26",
+      27: "KopiBikinSemangat@27",
+      28: "PagiPenuhSyukur28",
+      29: "KenanganTakTerlupa=29",
+      30: "KopiSelaluSetia!30",
+      31: "NgopiSampaiPuas#31"
+    }
+  },
+
   // Logo resmi permanen dari folder Logo Outlate dan Brand (terkunci)
   lockedBrandLogos: {
     "tomoro": "src/assets/brands/tomoro-official.webp",

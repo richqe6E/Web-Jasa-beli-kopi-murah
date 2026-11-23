@@ -299,10 +299,41 @@
     return text;
   };
 
+  const getWitaDateParts = (nowDate) => {
+    const d = nowDate || new Date();
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Makassar",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+      }).formatToParts(d);
+      const day = parseInt((parts.find(p => p.type === "day") || {}).value || "1", 10);
+      const month = parseInt((parts.find(p => p.type === "month") || {}).value || "1", 10);
+      const year = parseInt((parts.find(p => p.type === "year") || {}).value || String(d.getFullYear()), 10);
+      const label = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Makassar",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(d);
+      return { day, month, year, label };
+    } catch (e) {
+      const wita = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+      return {
+        day: wita.getUTCDate(),
+        month: wita.getUTCMonth() + 1,
+        year: wita.getUTCFullYear(),
+        label: formatDateID(wita)
+      };
+    }
+  };
+
   window.DLM_UTIL = {
     esc, rp, num, clamp, debounce, uid, formatDateID, formatTimeID,
     storage, normalizePhone, isValidPhone, initials, scrollTop, imageTag, getDeviceId,
-    haversineKm, formatDistanceKm, scoreOutletSearch, getWitaMinutes, getOutletOpenStatus,
+    haversineKm, formatDistanceKm, scoreOutletSearch, getWitaMinutes, getWitaDateParts, getOutletOpenStatus,
     cleanDescription
   };
 })();
