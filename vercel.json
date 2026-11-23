@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/review",
+      "destination": "/review.html"
+    }
+  ],
   "headers": [
     {
       "source": "/src/assets/(.*)",
@@ -10,7 +16,7 @@
       ]
     },
     {
-      "source": "/(index\\.html|admin\\.html|lisensi\\.html|sw\\.js|manifest\\.webmanifest)",
+      "source": "/(index\\.html|admin\\.html|review\\.html|lisensi\\.html|sw\\.js|manifest\\.webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",

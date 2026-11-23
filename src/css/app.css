@@ -3723,8 +3723,8 @@ body.has-bottom-bar .app-main {
   width: 100%;
   max-width: var(--shell);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 6px 8px calc(6px + var(--safe-b));
+  grid-template-columns: repeat(5, 1fr);
+  padding: 6px 4px calc(6px + var(--safe-b));
   background: rgba(255, 255, 255, 0.96);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   backdrop-filter: blur(18px) saturate(160%);
@@ -3740,12 +3740,12 @@ body.has-bottom-bar .app-main {
   justify-content: center;
   gap: 3px;
   min-height: 52px;
-  padding: 4px 6px;
+  padding: 4px 2px;
   border: 0;
   border-radius: 12px;
   background: transparent;
   color: #64748b;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: color 0.18s var(--ease), background 0.18s var(--ease), transform 0.15s var(--ease);
@@ -7274,4 +7274,618 @@ img.is-img-failed {
 .btn-primary:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* ============================================================
+   DIGITAL RECEIPT MODAL (JPG DOWNLOAD + WA HANDOFF)
+   ============================================================ */
+.receipt-modal-card {
+  max-width: 420px;
+  padding: 16px;
+  background: #f8fbff;
+  border: 1px solid rgba(11, 107, 203, 0.14);
+}
+
+.receipt-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.receipt-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.receipt-modal-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.receipt-preview-stage {
+  max-height: 54vh;
+  max-height: 54dvh;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #e7f1fd 0%, #eef5fc 100%);
+  border: 1px solid rgba(11, 107, 203, 0.1);
+}
+
+.receipt-paper {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 16px 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px -18px rgba(15, 23, 42, 0.35);
+}
+
+.receipt-paper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #0b6bcb 0%, #1d8cf8 68%, #d97706 100%);
+}
+
+.receipt-paper-head {
+  text-align: center;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.receipt-brand-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.receipt-brand-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.receipt-brand-title {
+  font-size: 16.5px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #0b6bcb;
+}
+
+.receipt-subtitle {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.receipt-code-pill {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0b6bcb;
+}
+
+.receipt-date {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.receipt-meta {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11.5px;
+  color: #0f172a;
+}
+
+.receipt-meta-line {
+  display: flex;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.receipt-meta-line strong {
+  flex-shrink: 0;
+  color: #475569;
+  font-weight: 700;
+}
+
+.receipt-items {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.receipt-item-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.receipt-item-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.receipt-item-opts {
+  margin-top: 2px;
+  font-size: 10.5px;
+  line-height: 1.38;
+  color: #64748b;
+}
+
+.receipt-item-note {
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-style: italic;
+  color: #0b6bcb;
+}
+
+.receipt-item-price {
+  flex-shrink: 0;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.receipt-totals {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.receipt-sub-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.receipt-sub-row .is-free {
+  color: #059669;
+  font-weight: 700;
+}
+
+.receipt-grand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+  font-size: 15.5px;
+  font-weight: 900;
+  color: #0b6bcb;
+}
+
+.receipt-paper-foot {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.receipt-paper-foot small {
+  display: block;
+  margin-top: 2px;
+  font-size: 9.8px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.receipt-actions-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.receipt-actions-bar.is-single {
+  grid-template-columns: 1fr;
+}
+
+.btn-receipt-jpg,
+.btn-receipt-wa {
+  min-height: 46px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn-receipt-jpg {
+  background: #0f2942;
+  color: #ffffff;
+  box-shadow: 0 10px 22px -14px rgba(15, 41, 66, 0.85);
+}
+
+.btn-receipt-jpg:active {
+  transform: scale(0.97);
+}
+
+.receipt-secondary-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.receipt-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--body);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ============================================================
+   WHATSAPP-STYLE PUBLIC TESTIMONIALS CHAT MODAL
+   ============================================================ */
+.wa-chat-overlay {
+  padding: 0;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.wa-chat-modal {
+  width: 100%;
+  max-width: var(--shell);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #eaf3fc;
+  overflow: hidden;
+  animation: modal-pop 0.25s var(--ease);
+}
+
+@media (min-width: 520px) {
+  .wa-chat-overlay {
+    padding: 18px;
+    align-items: center;
+  }
+  .wa-chat-modal {
+    height: 88vh;
+    max-height: 760px;
+    border-radius: 26px;
+    box-shadow: 0 28px 60px -22px rgba(15, 23, 42, 0.55);
+  }
+}
+
+.wa-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(10px + var(--safe-t, 0px)) 12px 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid rgba(11, 107, 203, 0.12);
+  flex-shrink: 0;
+}
+
+.wa-chat-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.wa-chat-badge {
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.wa-chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #bfdbfe;
+  flex-shrink: 0;
+}
+
+.wa-chat-head-copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wa-chat-head-copy strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wa-chat-head-copy span {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wa-chat-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-mute);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.wa-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #e6f0fa;
+  background-image:
+    radial-gradient(rgba(11, 107, 203, 0.08) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(217, 119, 6, 0.07) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.wa-chat-system-pill,
+.wa-chat-date-sep {
+  align-self: center;
+  text-align: center;
+}
+
+.wa-chat-system-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(11, 107, 203, 0.14);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.wa-chat-date-sep span {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  font-size: 10px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.wa-load-more-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.wa-load-more-btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #ffffff;
+  color: var(--primary);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -12px rgba(11, 107, 203, 0.55);
+}
+
+.wa-bubble {
+  align-self: flex-end;
+  width: min(88%, 340px);
+  padding: 10px 12px 8px;
+  border-radius: 16px 16px 4px 16px;
+  background: linear-gradient(155deg, #ffffff 0%, #f0f7ff 100%);
+  border: 1px solid rgba(11, 107, 203, 0.16);
+  box-shadow: 0 8px 20px -16px rgba(15, 23, 42, 0.35);
+}
+
+.wa-bubble.is-welcome {
+  align-self: center;
+  width: min(94%, 350px);
+  border-radius: 18px;
+  text-align: center;
+  padding: 16px;
+}
+
+.wa-bubble-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+}
+
+.wa-bubble-head strong {
+  color: #0b6bcb;
+  font-weight: 800;
+}
+
+.wa-bubble-loc {
+  color: #64748b;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wa-bubble-photo-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 7px;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #dbeafe;
+  cursor: pointer;
+}
+
+.wa-bubble-photo {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.wa-bubble-text {
+  font-size: 13px;
+  line-height: 1.48;
+  color: #0f172a;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wa-bubble-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.wa-bubble-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wa-bubble-stars {
+  color: #f59e0b;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.wa-bubble-brand {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #084f99;
+  font-size: 9.8px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wa-bubble-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.wa-double-tick {
+  color: #0ea5e9;
+}
+
+.wa-chat-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: auto 0;
+}
+
+.wa-chat-footer {
+  padding: 10px 12px calc(10px + var(--safe-b, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(11, 107, 203, 0.12);
+  flex-shrink: 0;
+}
+
+.wa-chat-compose-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #f8fbff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wa-chat-send-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 800;
+  flex-shrink: 0;
 }

@@ -3,7 +3,7 @@
    Cache-First ONLY for static images/vectors in /src/assets/
    Skips .mp4 Range streams, Supabase APIs, HTML, and JS/CSS so app updates apply immediately.
    ============================================================ */
-const ASSET_CACHE = "dlm-assets-v6-4";
+const ASSET_CACHE = "dlm-assets-v6-5";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

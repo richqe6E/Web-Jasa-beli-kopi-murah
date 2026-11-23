@@ -3,9 +3,10 @@
    Ubah nomor WhatsApp, area, dan teks layanan di sini.
    ============================================================ */
 window.DLM_CONFIG = {
-  appName: "Dibeliin Lebih Murah",
-  shortName: "Dibeliin",
+  appName: "JasDor RisGold",
+  shortName: "JasDor",
   tagline: "Jasa order minuman & makanan resmi lebih hemat.",
+  siteBaseUrl: "https://jasdor.web.id",
   city: "Samarinda, Balikpapan & Tenggarong",
   region: "Kalimantan Timur",
   areaLabel: "Samarinda, Balikpapan & Tenggarong • Kalimantan Timur",
@@ -16,8 +17,15 @@ window.DLM_CONFIG = {
   supabasePublishableKey: "sb_publishable_S1CYFAZFtWPxKjvqMKmMNQ_WUyOrQy0",
 
   // Nomor WhatsApp Admin (bisa diubah langsung dari halaman Admin)
-  adminWhatsApp: "6281234567890",
-  adminWhatsAppDisplay: "0812-3456-7890",
+  adminWhatsApp: "6282259871192",
+  adminWhatsAppDisplay: "082259871192",
+
+  // Pengaturan Share Pesanan ke Partner (bisa diubah dari halaman Admin)
+  partnerName: "Jasdor Moulii",
+  partnerWhatsApp: "6281521692248",
+  partnerPaymentMethods: "BCA / GoPay / Dana / QRIS",
+  partnerUseAdminPhone: false,
+  customerPaymentMethods: "QRIS / Transfer Bank / E-Wallet (konfirmasi via Admin)",
 
   currency: "IDR",
   orderPrefix: "DLM",
@@ -205,6 +213,7 @@ window.DLM_CONFIG = {
     { key: "outlet", label: "Outlet", icon: "store" },
     { key: "menu", label: "Menu", icon: "cup-soda" },
     { key: "cart", label: "Keranjang", icon: "shopping-bag" },
+    { key: "testimonials", label: "Testimoni", icon: "message-circle" },
     { key: "history", label: "Riwayat", icon: "receipt" }
   ]
 };

@@ -8,6 +8,20 @@
   const U = window.DLM_UTIL;
   const ICON = window.DLM_ICONS;
   const SB = window.DLM_SUPABASE;
+  const WA = window.DLM_WA;
+  const PARTNER_LOCAL_KEY = "dlm_partner_settings_fallback_v1";
+
+  function getEffectiveSettings() {
+    const db = state.dataset.settings || {};
+    const local = U.storage.get(PARTNER_LOCAL_KEY, {}) || {};
+    return Object.assign({
+      partner_name: CFG.partnerName || "Jasdor Moulii",
+      partner_whatsapp: CFG.partnerWhatsApp || "6281521692248",
+      partner_payment_methods: CFG.partnerPaymentMethods || "BCA / GoPay / Dana / QRIS",
+      partner_use_admin_phone: !!CFG.partnerUseAdminPhone,
+      customer_payment_methods: CFG.customerPaymentMethods || "QRIS / Transfer Bank / E-Wallet (konfirmasi via Admin)"
+    }, local, db);
+  }
 
   const state = {
     user: null,
@@ -25,7 +39,8 @@
       brands: [],
       outlets: [],
       menuItems: [],
-      orders: []
+      orders: [],
+      testimonials: []
     }
   };
 
@@ -294,6 +309,9 @@
           <button type="button" class="admin-tab ${state.activeTab === "outlets" ? "is-active" : ""}" data-tab="outlets">
             ${ICON.icon("store", "w-4 h-4", 2.2)} Outlet (${(state.dataset.outlets || []).length})
           </button>
+          <button type="button" class="admin-tab ${state.activeTab === "testimonials" ? "is-active" : ""}" data-tab="testimonials">
+            ${ICON.icon("message-circle", "w-4 h-4", 2.2)} Testimoni (${(state.dataset.testimonials || []).length})
+          </button>
           <button type="button" class="admin-tab ${state.activeTab === "settings" ? "is-active" : ""}" data-tab="settings">
             ${ICON.icon("settings", "w-4 h-4", 2.2)} Pengaturan & Brand
           </button>
@@ -346,6 +364,7 @@
     if (state.activeTab === "orders") return renderOrdersTab();
     if (state.activeTab === "menus") return renderMenusTab();
     if (state.activeTab === "outlets") return renderOutletsTab();
+    if (state.activeTab === "testimonials") return renderTestimonialsTab();
     if (state.activeTab === "settings") return renderSettingsTab();
     return "";
   }
@@ -609,6 +628,7 @@
                 <th>Modal HPP</th>
                 <th>Selisih + Jasa = Laba</th>
                 <th>Status</th>
+                <th>Share ke Partner</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -643,6 +663,17 @@
                     </td>
                     <td><span class="status-badge ${U.esc(o.status)}">${statusLabel(o.status)}</span></td>
                     <td>
+                      <div style="display:flex;flex-direction:column;gap:5px;min-width:136px">
+                        <button type="button" class="btn btn-xs" style="background:#16a34a;color:#fff;border:0;justify-content:center" data-action="share-partner-wa" data-id="${o.id}" title="Kirim langsung pesanan ini ke WhatsApp Partner dengan format partner">
+                          ${ICON.brand("whatsapp", "w-3.5 h-3.5")} Kirim ke Partner
+                        </button>
+                        <div style="display:flex;gap:5px">
+                          <button type="button" class="btn btn-soft btn-xs" style="flex:1;justify-content:center" data-action="preview-partner-share" data-id="${o.id}">Preview</button>
+                          <button type="button" class="btn btn-outline btn-xs" style="flex:1;justify-content:center" data-action="copy-partner-text" data-id="${o.id}">Salin</button>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
                       <div style="display:flex;gap:6px;flex-wrap:wrap">
                         ${o.status !== "completed" ? `<button type="button" class="btn btn-success btn-xs" data-action="quick-complete-order" data-id="${o.id}">Selesai</button>` : ""}
                         <button type="button" class="btn btn-soft btn-xs" data-action="edit-order" data-id="${o.id}">Rekonsiliasi</button>
@@ -651,7 +682,7 @@
                     </td>
                   </tr>
                 `;
-              }).join("") : `<tr><td colspan="9" style="text-align:center;color:var(--muted)">Tidak ada pesanan yang cocok.</td></tr>`}
+              }).join("") : `<tr><td colspan="10" style="text-align:center;color:var(--muted)">Tidak ada pesanan yang cocok.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -911,11 +942,91 @@
   }
 
   /* ------------------------------------------------------------
+     TAB 4B — TESTIMONIALS MODERATION
+     ------------------------------------------------------------ */
+
+  function renderTestimonialsTab() {
+    const list = state.dataset.testimonials || [];
+    const publishedCount = list.filter(t => t.is_published !== false).length;
+
+    return `
+      <section class="panel-card">
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow">Moderasi Ulasan Terverifikasi</p>
+            <h2 class="panel-title">Daftar Testimoni Pelanggan (${list.length})</h2>
+            <p class="panel-sub">${publishedCount} ulasan tayang di obrolan testimoni publik. Foto otomatis dikompres WebP ringan oleh sistem.</p>
+          </div>
+          <div class="toolbar-row">
+            <a href="review.html" target="_blank" rel="noopener" class="btn btn-outline btn-xs">
+              ${ICON.icon("external-link", "w-3.5 h-3.5", 2)} Buka Form /review
+            </a>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>Pelanggan & Order</th>
+                <th>Brand & Outlet</th>
+                <th>Rating & Ulasan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.length ? list.map(t => {
+                const stars = "★".repeat(Math.max(1, Math.min(5, Number(t.rating || 5))));
+                const isPub = t.is_published !== false;
+                return `
+                  <tr>
+                    <td>
+                      ${t.photo_url
+                        ? `<a href="${U.esc(t.photo_url)}" target="_blank" rel="noopener"><img src="${U.esc(t.photo_url)}" alt="Foto ulasan" style="width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid var(--border)" loading="lazy"></a>`
+                        : `<span style="font-size:11px;color:var(--muted)">Tanpa foto</span>`}
+                    </td>
+                    <td>
+                      <strong>${U.esc(t.customer_name_masked)}</strong>
+                      <div class="mono" style="font-size:11px;color:var(--primary)">#${U.esc(t.order_code)}</div>
+                      <div style="font-size:11px;color:var(--muted)">${new Date(t.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                    </td>
+                    <td>
+                      <strong>${U.esc(t.brand_name || "-")}</strong>
+                      <div style="font-size:11.5px;color:var(--muted)">${U.esc(t.city_label || t.outlet_name || "-")}</div>
+                    </td>
+                    <td style="max-width:300px;font-size:12.5px;line-height:1.45">
+                      <div style="color:#f59e0b;font-weight:800;letter-spacing:1px">${stars}</div>
+                      <div>${U.esc(t.message)}</div>
+                    </td>
+                    <td>
+                      <span class="status-badge ${isPub ? "completed" : "cancelled"}">${isPub ? "Tayang" : "Disembunyikan"}</span>
+                    </td>
+                    <td>
+                      <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        <button type="button" class="btn btn-soft btn-xs" data-action="toggle-testimonial-publish" data-id="${t.id}" data-next="${isPub ? "false" : "true"}">
+                          ${isPub ? "Sembunyikan" : "Tampilkan"}
+                        </button>
+                        <button type="button" class="btn btn-danger btn-xs" data-action="delete-testimonial" data-id="${t.id}">Hapus</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Belum ada testimoni masuk (atau jalankan migrasi SQL tabel testimonials terlebih dahulu).</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  /* ------------------------------------------------------------
      TAB 5 — GLOBAL SETTINGS & BRAND LOGOS
      ------------------------------------------------------------ */
 
   function renderSettingsTab() {
-    const s = state.dataset.settings || {};
+    const s = getEffectiveSettings();
     return `
       <section class="panel-card">
         <div class="panel-head">
@@ -971,8 +1082,40 @@
           </div>
 
           <div class="field" style="grid-column:1 / -1">
-            <label class="field-label" for="set-payment-note">Catatan Pembayaran di Checkout & Struk WA</label>
+            <label class="field-label" for="set-payment-note">Catatan Pembayaran di Checkout</label>
             <textarea id="set-payment-note" class="textarea" rows="2">${U.esc(s.payment_note || "")}</textarea>
+          </div>
+
+          <div class="field" style="grid-column:1 / -1">
+            <label class="field-label" for="set-customer-pay">Label Metode Pembayaran di Invoice WA Pelanggan</label>
+            <input type="text" id="set-customer-pay" class="input" value="${U.esc(s.customer_payment_methods || "QRIS / Transfer Bank / E-Wallet (konfirmasi via Admin)")}">
+          </div>
+
+          <div style="grid-column:1 / -1;border-top:1px dashed var(--border);padding-top:14px;margin-top:4px">
+            <p class="panel-eyebrow">Share Pesanan 1-Klik ke Partner</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:2px">Atur nama &amp; nomor WA partner agar tombol <strong>Kirim ke Partner</strong> di tab Pesanan langsung membuka chat WhatsApp dengan format partner.</p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="set-partner-name">Nama Partner (Header Pesan WA Partner)</label>
+            <input type="text" id="set-partner-name" class="input" value="${U.esc(s.partner_name || "Jasdor Moulii")}" placeholder="Contoh: Jasdor Moulii">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="set-partner-wa">Nomor WhatsApp Partner (Format 628...)</label>
+            <input type="text" id="set-partner-wa" class="input mono" value="${U.esc(s.partner_whatsapp || "6281521692248")}" placeholder="6281521692248">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="set-partner-pay">Metode Pembayaran di Teks Partner</label>
+            <input type="text" id="set-partner-pay" class="input" value="${U.esc(s.partner_payment_methods || "BCA / GoPay / Dana / QRIS")}">
+          </div>
+
+          <div class="field" style="display:flex;align-items:center;padding-top:18px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer">
+              <input type="checkbox" id="set-partner-use-admin-phone" ${s.partner_use_admin_phone ? "checked" : ""}>
+              <span>Ganti No. WA pembeli jadi No. WA Admin saat kirim ke partner</span>
+            </label>
           </div>
 
           <div style="grid-column:1 / -1;display:flex;justify-content:flex-end">
@@ -1084,6 +1227,47 @@
             <button type="submit" class="btn btn-primary">${ICON.icon("save", "w-4 h-4", 2.2)} Simpan Rekonsiliasi</button>
           </div>
         </form>
+      </div>
+    `;
+  }
+
+  function openPartnerShareModal(orderId) {
+    const order = (state.dataset.orders || []).find(o => String(o.id) === String(orderId));
+    if (!order || !WA) return;
+    const settings = getEffectiveSettings();
+    const partnerText = WA.buildPartnerMessage(order, settings);
+    const root = $("#admin-modal-root");
+
+    root.innerHTML = `
+      <div class="admin-modal-overlay" data-modal-backdrop>
+        <div class="admin-modal" role="dialog" aria-modal="true" data-partner-order-id="${order.id}">
+          <div class="admin-modal-head">
+            <div>
+              <div class="panel-eyebrow">Share Pesanan ke Partner (${U.esc(settings.partner_name)})</div>
+              <h3 class="panel-title">#${U.esc(order.order_code)} — ${U.esc(order.customer_name)}</h3>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" data-action="close-admin-modal">Tutup</button>
+          </div>
+
+          <div style="font-size:12px;color:var(--body);margin-bottom:10px;padding:10px 12px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0">
+            <strong>Tujuan WA Partner:</strong> <span class="mono">${U.esc(settings.partner_whatsapp)}</span> •
+            Teks otomatis diformat sesuai template partner (paket Bundling Kopken otomatis menyesuaikan ke harga dasar partner). Anda juga dapat mengedit cepat sebelum mengirim.
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="partner-share-textarea">Preview Teks Pesanan untuk Partner</label>
+            <textarea id="partner-share-textarea" class="textarea mono" rows="14" style="font-size:12px;line-height:1.45">${U.esc(partnerText)}</textarea>
+          </div>
+
+          <div class="admin-modal-foot">
+            <button type="button" class="btn btn-soft" data-action="copy-partner-modal-text">
+              ${ICON.icon("copy", "w-4 h-4", 2)} Salin Teks Partner
+            </button>
+            <button type="button" class="btn" style="background:#16a34a;color:#fff;border:0" data-action="send-partner-modal-wa" data-id="${order.id}">
+              ${ICON.brand("whatsapp", "w-4 h-4")} Kirim ke WA Partner Sekarang
+            </button>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -1566,6 +1750,58 @@
       closeAdminModal();
     } else if (action === "edit-order") {
       openReconcileModal(actEl.dataset.id);
+    } else if (action === "share-partner-wa") {
+      const ord = (state.dataset.orders || []).find(o => String(o.id) === String(actEl.dataset.id));
+      if (!ord || !WA) return;
+      const settings = getEffectiveSettings();
+      if (!settings.partner_whatsapp) {
+        toast("Atur Nomor WhatsApp Partner terlebih dahulu di tab Pengaturan.", "error");
+        return;
+      }
+      WA.openPartnerWhatsApp(ord, settings);
+      toast(`Membuka WhatsApp Partner (${settings.partner_name}) untuk #${ord.order_code}...`);
+    } else if (action === "preview-partner-share") {
+      openPartnerShareModal(actEl.dataset.id);
+    } else if (action === "copy-partner-text") {
+      const ord = (state.dataset.orders || []).find(o => String(o.id) === String(actEl.dataset.id));
+      if (!ord || !WA) return;
+      const txt = WA.buildPartnerMessage(ord, getEffectiveSettings());
+      WA.copyMessage(txt).then(ok => {
+        toast(ok ? `Format teks partner #${ord.order_code} disalin!` : "Gagal menyalin teks.", ok ? "" : "error");
+      });
+    } else if (action === "copy-partner-modal-text") {
+      const ta = $("#partner-share-textarea");
+      if (!ta || !WA) return;
+      WA.copyMessage(ta.value).then(ok => {
+        toast(ok ? "Teks format partner berhasil disalin!" : "Gagal menyalin teks.", ok ? "" : "error");
+      });
+    } else if (action === "send-partner-modal-wa") {
+      const ord = (state.dataset.orders || []).find(o => String(o.id) === String(actEl.dataset.id));
+      const ta = $("#partner-share-textarea");
+      if (!ord || !WA) return;
+      const settings = getEffectiveSettings();
+      WA.openPartnerWhatsApp(ord, settings, ta ? ta.value : undefined);
+      toast(`Mengirim pesanan #${ord.order_code} ke WhatsApp ${settings.partner_name}...`);
+    } else if (action === "toggle-testimonial-publish") {
+      const id = actEl.dataset.id;
+      const nextVal = actEl.dataset.next === "true";
+      try {
+        await SB.toggleTestimonialPublish(id, nextVal);
+        toast(nextVal ? "Testimoni ditampilkan kembali ke publik." : "Testimoni disembunyikan dari publik.");
+        await reloadData();
+      } catch (err) {
+        toast("Gagal memperbarui testimoni: " + err.message, "error");
+      }
+    } else if (action === "delete-testimonial") {
+      const t = (state.dataset.testimonials || []).find(x => String(x.id) === String(actEl.dataset.id));
+      if (!confirm("Hapus testimoni ini secara permanen?")) return;
+      try {
+        await SB.deleteTestimonial(actEl.dataset.id, t ? t.photo_url : null);
+        toast("Testimoni dihapus.");
+        await reloadData();
+      } catch (err) {
+        toast("Gagal menghapus testimoni: " + err.message, "error");
+      }
     } else if (action === "delete-order") {
       if (!confirm("Hapus pesanan ini dari riwayat & laporan keuangan secara permanen?")) return;
       try {
@@ -1982,7 +2218,16 @@
     if (form.id === "settings-form") {
       try {
         const newAppName = $("#set-app-name").value.trim();
-        await SB.saveSettings({
+        const partnerPatch = {
+          partner_name: ($("#set-partner-name") && $("#set-partner-name").value.trim()) || "Jasdor Moulii",
+          partner_whatsapp: ($("#set-partner-wa") && U.normalizePhone($("#set-partner-wa").value.trim())) || "6281521692248",
+          partner_payment_methods: ($("#set-partner-pay") && $("#set-partner-pay").value.trim()) || "BCA / GoPay / Dana / QRIS",
+          partner_use_admin_phone: !!($("#set-partner-use-admin-phone") && $("#set-partner-use-admin-phone").checked),
+          customer_payment_methods: ($("#set-customer-pay") && $("#set-customer-pay").value.trim()) || "QRIS / Transfer Bank / E-Wallet (konfirmasi via Admin)"
+        };
+        U.storage.set(PARTNER_LOCAL_KEY, partnerPatch);
+
+        const basePayload = {
           app_name: newAppName,
           admin_whatsapp: $("#set-wa-number").value.trim(),
           admin_whatsapp_display: $("#set-wa-display").value.trim(),
@@ -1992,14 +2237,27 @@
           default_service_fee_per_order: Number($("#set-fee-order").value),
           default_cost_ratio_percent: Number($("#set-cost-ratio").value),
           payment_note: $("#set-payment-note").value.trim()
-        });
+        };
+
+        try {
+          await SB.saveSettings(Object.assign({}, basePayload, partnerPatch));
+        } catch (colErr) {
+          // Graceful fallback if new partner columns haven't been migrated in DB yet
+          await SB.saveSettings(basePayload);
+        }
+
         if (newAppName) CFG.appName = newAppName;
+        CFG.partnerName = partnerPatch.partner_name;
+        CFG.partnerWhatsApp = partnerPatch.partner_whatsapp;
+        CFG.partnerPaymentMethods = partnerPatch.partner_payment_methods;
+        CFG.partnerUseAdminPhone = partnerPatch.partner_use_admin_phone;
+        CFG.customerPaymentMethods = partnerPatch.customer_payment_methods;
         try {
           if (CFG.storageKeys && CFG.storageKeys.catalogCache) {
             localStorage.removeItem(CFG.storageKeys.catalogCache);
           }
         } catch (err2) { /* ignore */ }
-        toast("Pengaturan layanan berhasil disimpan & langsung aktif!");
+        toast("Pengaturan layanan & partner berhasil disimpan!");
         await reloadData();
       } catch (err) {
         toast("Gagal menyimpan pengaturan: " + err.message, "error");

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Beri Testimoni — JasDor RisGold</title>
+  <meta name="description" content="Bagikan pengalaman dan foto pesanan minumanmu di JasDor RisGold. Nama otomatis disensor demi privasi." />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#0B6BCB" />
+  <meta name="color-scheme" content="light" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/src/assets/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/src/assets/apple-touch-icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/css/review.css?v=1.0" />
+</head>
+<body>
+  <div class="review-page">
+    <header class="review-topbar">
+      <a href="/" class="review-back-pill" aria-label="Kembali ke Beranda JasDor RisGold">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        <span>Ke Beranda</span>
+      </a>
+      <a href="/" class="review-brand-badge">
+        <img src="src/assets/app-icon-64.png" alt="JasDor RisGold" width="28" height="28" />
+        <span id="review-brand-title">JasDor RisGold</span>
+      </a>
+    </header>
+
+    <main id="review-root" class="review-main">
+      <div class="review-card review-loading">
+        <div class="review-spinner" aria-hidden="true"></div>
+        <p>Memeriksa kode pesanan kamu...</p>
+      </div>
+    </main>
+
+    <footer class="review-footer">
+      <p>&copy; 2026 <span id="review-footer-brand">JasDor RisGold</span> &bull; Pesan kopi resmi lebih hemat</p>
+    </footer>
+  </div>
+
+  <div id="review-toast" class="review-toast-root" aria-live="polite"></div>
+
+  <script src="src/data/config.js?v=6.8"></script>
+  <script src="src/js/utils.js?v=6.7"></script>
+  <script src="src/js/supabase-client.js?v=6.8"></script>
+  <script src="src/js/review.js?v=1.0"></script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+/* ============================================================
+   JASDOR RISGOLD — VERIFIED REVIEW & TESTIMONIAL PAGE
+   Clean Royal Blue & Gold Liquid Glass Mobile-First Design
+   ============================================================ */
+:root {
+  --bg-top: #ebf4ff;
+  --bg-bottom: #f8fbff;
+  --surface: #ffffff;
+  --surface-soft: #f1f5f9;
+  --primary: #0b6bcb;
+  --primary-deep: #084f99;
+  --primary-soft: #eff6ff;
+  --primary-line: #bfdbfe;
+  --gold: #d97706;
+  --gold-soft: #fef3c7;
+  --ink: #0f172a;
+  --body: #334155;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --success: #059669;
+  --success-soft: #ecfdf5;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --font: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(11, 107, 203, 0.14), transparent 36%),
+    radial-gradient(circle at 88% 18%, rgba(217, 119, 6, 0.10), transparent 34%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.review-page {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.review-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(11, 107, 203, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 26px -18px rgba(11, 107, 203, 0.45);
+}
+
+.review-back-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.review-back-pill:active {
+  transform: scale(0.96);
+}
+
+.review-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 13.5px;
+  padding-right: 4px;
+}
+
+.review-brand-badge img {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(11, 107, 203, 0.22);
+}
+
+.review-main {
+  flex: 1;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(11, 107, 203, 0.12);
+  border-radius: 26px;
+  padding: 24px 20px;
+  box-shadow: 0 22px 48px -28px rgba(15, 23, 42, 0.28);
+}
+
+.review-loading {
+  text-align: center;
+  padding: 44px 20px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.review-spinner {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-soft);
+  border-top-color: var(--primary);
+  animation: rev-spin 0.8s linear infinite;
+}
+
+@keyframes rev-spin {
+  to { transform: rotate(360deg); }
+}
+
+.review-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-line);
+  color: var(--primary);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.review-head {
+  text-align: center;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.review-head h1 {
+  margin-top: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.review-head p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--body);
+}
+
+.order-summary-box {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+  border: 1.5px solid var(--primary-line);
+  margin-bottom: 18px;
+}
+
+.order-summary-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.order-summary-code {
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.order-summary-meta {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.rev-field {
+  margin-bottom: 16px;
+}
+
+.rev-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 7px;
+}
+
+.rev-label .req {
+  color: var(--danger);
+}
+
+.rev-label .opt {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.rev-input,
+.rev-textarea {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.rev-input:focus,
+.rev-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(11, 107, 203, 0.12);
+}
+
+.rev-textarea {
+  resize: vertical;
+  min-height: 92px;
+  line-height: 1.5;
+}
+
+.star-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: #cbd5e1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+
+.star-btn.is-active {
+  background: var(--gold-soft);
+  border-color: #fcd34d;
+  color: #f59e0b;
+}
+
+.star-btn:active {
+  transform: scale(0.92);
+}
+
+.star-caption {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.photo-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 14px;
+  border: 2px dashed var(--primary-line);
+  border-radius: 16px;
+  background: #f8fbff;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.photo-dropzone:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.photo-dropzone.has-photo {
+  border-style: solid;
+  border-color: #a7f3d0;
+  background: var(--success-soft);
+}
+
+.photo-dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.photo-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--primary-line);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px -10px rgba(11, 107, 203, 0.5);
+}
+
+.photo-dropzone strong {
+  font-size: 13px;
+  color: var(--primary-deep);
+}
+
+.photo-dropzone span {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.photo-preview-img {
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 8px 20px -10px rgba(15, 23, 42, 0.45);
+}
+
+.photo-remove-btn {
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.privacy-box {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--body);
+  margin-bottom: 18px;
+}
+
+.rev-btn {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #0b6bcb 0%, #1d8cf8 100%);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 14px 28px -16px rgba(11, 107, 203, 0.85);
+  transition: transform 0.14s ease, opacity 0.14s ease;
+  text-decoration: none;
+}
+
+.rev-btn:active {
+  transform: scale(0.98);
+}
+
+.rev-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rev-btn-soft {
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+  box-shadow: none;
+  border: 1px solid var(--primary-line);
+}
+
+.state-card {
+  text-align: center;
+  padding: 10px 4px;
+}
+
+.state-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 14px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+}
+
+.state-icon.is-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.state-icon.is-warn {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.state-icon.is-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.state-card h2 {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.state-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--body);
+  margin-bottom: 18px;
+}
+
+.state-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.review-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.review-toast-root {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.review-toast {
+  padding: 12px 15px;
+  border-radius: 14px;
+  background: #0b2e52;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 16px 36px -18px rgba(15, 23, 42, 0.8);
+}
+
+.review-toast.is-error {
+  background: #991b1b;
+}

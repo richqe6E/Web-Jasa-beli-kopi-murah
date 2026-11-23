@@ -18,6 +18,7 @@
   const CART = window.DLM_CART;
   const CUSTOMIZER = window.DLM_CUSTOMIZER;
   const WA = window.DLM_WA;
+  const RECEIPT = window.DLM_RECEIPT;
 
   const $ = (selector, root) => (root || document).querySelector(selector);
   const $$ = (selector, root) => Array.from((root || document).querySelectorAll(selector));
@@ -25,9 +26,20 @@
   let firstRender = true;
   let toastTimer = null;
   let lastSuccess = null;
+  let activeReceiptOrder = null;
   let confirmCallback = null;
   let revealObserver = null;
   let modalLastFocus = null;
+
+  const testimonialFeed = {
+    items: [],
+    totalCount: 0,
+    avgRating: 5.0,
+    offset: 0,
+    hasMore: false,
+    loading: false,
+    loadedOnce: false
+  };
 
   // Smart scroll direction state
   let lastScrollY = 0;
@@ -164,6 +176,14 @@
     document.addEventListener("input", handleInput);
     document.addEventListener("change", handleChange);
     document.addEventListener("keydown", handleKeydown);
+
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("open") === "testimonials") {
+        setTimeout(() => showTestimonialsModal(), 250);
+        window.history.replaceState(null, "", window.location.pathname + window.location.hash);
+      }
+    } catch (e) { /* ignore */ }
 
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.syncCatalog === "function") {
       window.DLM_SUPABASE.syncCatalog().then(res => {
@@ -427,7 +447,7 @@
             <strong>${U.rp(summary.grandTotal)}</strong>
           </div>
           <button type="button" class="btn-wa btn-bottom" data-action="submit-order">
-            ${ICON.brand("whatsapp", "w-4 h-4")} Kirim Pesanan WA
+            ${ICON.icon("receipt", "w-4 h-4", 2.2)} Lihat Struk &amp; Kirim WA
           </button>
         </div>
       `;
@@ -1927,6 +1947,9 @@
         }
         map[code].url = loc.url;
         map[code].message = loc.message;
+        map[code].customer = loc.customer || map[code].customer;
+        map[code].orderServiceFee = loc.orderServiceFee != null ? loc.orderServiceFee : map[code].orderServiceFee;
+        map[code].totalSavings = loc.totalSavings != null ? loc.totalSavings : map[code].totalSavings;
       } else {
         map[code] = {
           orderId: loc.orderId,
@@ -1937,8 +1960,11 @@
           outletId: loc.outletId,
           outletName: loc.outletName,
           mode: loc.mode || "pickup",
+          customer: loc.customer || null,
+          orderServiceFee: Number(loc.orderServiceFee || 0),
+          totalSavings: Number(loc.totalSavings || 0),
           total: Number(loc.total || 0),
-          savings: 0,
+          savings: Number(loc.totalSavings || 0),
           itemsCount: Number(loc.itemsCount || (loc.items ? loc.items.length : 0)),
           adminNotes: "",
           items: loc.items || [],
@@ -2033,8 +2059,14 @@
               <strong>${U.rp(ord.total)}</strong>
             </div>
             <div class="history-actions">
+              <button type="button" class="btn-soft btn-sm" data-action="open-history-receipt" data-code="${U.esc(ord.orderId)}">
+                ${ICON.icon("receipt", "w-3.5 h-3.5", 2)} Struk JPG
+              </button>
+              <a class="btn-soft btn-sm" href="/review?order=${encodeURIComponent(ord.orderId)}" style="text-decoration:none">
+                ${ICON.icon("star", "w-3.5 h-3.5", 2)} Ulas
+              </a>
               <button type="button" class="btn-soft btn-sm" data-action="open-tracker" data-code="${U.esc(ord.orderId)}">
-                ${ICON.icon("package", "w-3.5 h-3.5", 2)} Detail Status
+                ${ICON.icon("package", "w-3.5 h-3.5", 2)} Status
               </button>
               <button type="button" class="btn-primary btn-sm" data-action="reorder-code" data-code="${U.esc(ord.orderId)}">
                 Beli Lagi
@@ -2118,7 +2150,18 @@
 
     if (action === "nav-tab") {
       const tab = el.dataset.tab || "outlet";
-      STORE.navigate(tab);
+      if (tab === "testimonials") {
+        showTestimonialsModal();
+      } else {
+        STORE.navigate(tab);
+      }
+    } else if (action === "open-testimonials") {
+      showTestimonialsModal();
+    } else if (action === "load-more-testimonials") {
+      loadTestimonialsPage(false);
+    } else if (action === "zoom-testimonial-photo") {
+      const src = el.dataset.photoSrc || "";
+      if (src) window.open(src, "_blank", "noopener,noreferrer");
     } else if (action === "open-how-to-order") {
       showHowToOrderModal();
     } else if (action === "install-pwa-app") {
@@ -2238,11 +2281,43 @@
       if (typeof callback === "function") callback();
     } else if (action === "confirm-no") {
       closeModal();
-    } else if (action === "open-wa") {
-      if (lastSuccess && lastSuccess.url) window.open(lastSuccess.url, "_blank", "noopener,noreferrer");
+    } else if (action === "open-wa" || action === "send-receipt-wa") {
+      const targetOrder = activeReceiptOrder || lastSuccess;
+      if (targetOrder) {
+        const waUrl = targetOrder.url || (targetOrder.message ? WA.buildUrl(targetOrder.message) : "");
+        if (waUrl) {
+          window.open(waUrl, "_blank", "noopener,noreferrer");
+          toast("Membuka WhatsApp dengan invoice pesananmu...");
+        }
+      }
+    } else if (action === "download-receipt-jpg") {
+      const targetOrder = activeReceiptOrder || lastSuccess;
+      if (!targetOrder || !RECEIPT) return;
+      el.disabled = true;
+      toast("Menyiapkan struk JPG...");
+      RECEIPT.downloadReceiptJpg(targetOrder)
+        .then(() => {
+          toast("Struk JPG berhasil diunduh!");
+        })
+        .catch(() => {
+          toast("Gagal mengunduh struk JPG. Coba lagi.", "error");
+        })
+        .finally(() => {
+          el.disabled = false;
+        });
+    } else if (action === "open-history-receipt") {
+      const code = String(el.dataset.code || "").toUpperCase();
+      const merged = mergeHistoryOrders(WA.getOrders() || [], customerHistoryCache || []);
+      const found = merged.find(o => String(o.orderId || "").toUpperCase() === code);
+      if (found) {
+        showReceiptModal(found, { isCheckoutFlow: false });
+      } else {
+        toast("Data struk pesanan tidak ditemukan.", "error");
+      }
     } else if (action === "copy-message") {
-      if (lastSuccess && lastSuccess.message) {
-        WA.copyMessage(lastSuccess.message).then(ok => {
+      const targetOrder = activeReceiptOrder || lastSuccess;
+      if (targetOrder && targetOrder.message) {
+        WA.copyMessage(targetOrder.message).then(ok => {
           toast(ok ? "Pesan pesanan disalin." : "Gagal menyalin. Coba lagi.");
         });
       }
@@ -2581,7 +2656,7 @@
       notes: customer.notes
     });
 
-    const result = WA.openWhatsApp(message);
+    const waUrl = WA.buildUrl(message);
     const normalizedItems = summary.items.map(item => {
       const catItem = STORE.getItem(brand.id, item.id);
       return {
@@ -2609,17 +2684,20 @@
       outletId: outlet.id,
       outletName: outlet.name,
       outletAddress: outlet.address,
+      customer,
+      orderServiceFee: summary.orderServiceFee,
+      totalSavings: summary.totalSavings,
       total: summary.grandTotal,
       itemsCount: summary.totalItems,
       items: normalizedItems,
       mode: STORE.state.orderMode,
       message,
-      url: result.url,
-      blocked: result.blocked
+      url: waUrl
     };
 
     WA.saveOrder(order);
     lastSuccess = order;
+    activeReceiptOrder = order;
     STORE.state.termsAccepted = false;
     CART.clear();
 
@@ -2678,9 +2756,9 @@
         });
     }
 
-    showSuccessModal(order);
     STORE.navigate("history", true);
     renderRoute();
+    showReceiptModal(order, { isCheckoutFlow: true });
   }
 
   function reorderByCode(code) {
@@ -2740,41 +2818,305 @@
      MODALS, MODERN ORDER TRACKER & TOAST
      ============================================================ */
 
-  function showSuccessModal(order) {
+  function showReceiptModal(order, options) {
     const modalRoot = $("#modal-root");
-    if (!modalRoot) return;
+    if (!modalRoot || !order) return;
+    const isCheckout = !options || options.isCheckoutFlow !== false;
+    activeReceiptOrder = order;
     modalLastFocus = document.activeElement;
+
+    const receiptBodyHtml = RECEIPT
+      ? RECEIPT.renderReceiptHtml(order)
+      : `<div class="success-summary"><div class="success-row"><span>Kode</span><strong>#${U.esc(order.orderId)}</strong></div><div class="success-row"><span>Total</span><strong>${U.rp(order.total)}</strong></div></div>`;
+
+    const hasWaAction = Boolean(order.url || order.message);
+
     modalRoot.innerHTML = `
       <div class="modal-overlay" data-modal-overlay>
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="success-title">
-          <button type="button" class="modal-close" data-action="close-modal" aria-label="Tutup">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
-          <div class="success-icon">${ICON.icon("circle-check", "w-7 h-7", 2.2)}</div>
-          <h2 id="success-title" class="modal-title">Pesanan Siap Dikirim</h2>
-          <p class="modal-text">Pesananmu sudah tercatat di tab <strong>Riwayat</strong>. Jika WhatsApp belum terbuka otomatis, ketuk tombol di bawah.</p>
-
-          <div class="success-summary">
-            <div class="success-row"><span>Kode pesanan</span><strong>#${U.esc(order.orderId)}</strong></div>
-            <div class="success-row"><span>Outlet</span><strong>${U.esc(order.outletName)}</strong></div>
-            <div class="success-row"><span>Total</span><strong>${U.rp(order.total)}</strong></div>
+        <div class="modal-card receipt-modal-card" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
+          <div class="receipt-modal-head">
+            <div>
+              <h2 id="receipt-modal-title" class="receipt-modal-title">Struk Pesanan</h2>
+              <p class="receipt-modal-sub">${isCheckout ? "Unduh struk (JPG), lalu lanjut kirim pesanan ke WhatsApp admin." : "Simpan atau kirim ulang invoice pesananmu."}</p>
+            </div>
+            <button type="button" class="modal-close" style="position:static" data-action="close-modal" aria-label="Tutup Struk">${ICON.icon("x", "w-4 h-4", 2.4)}</button>
           </div>
 
-          <button type="button" class="btn-wa btn-full" data-action="open-wa">
-            ${ICON.brand("whatsapp", "w-4 h-4")} Buka WhatsApp Resmi
-          </button>
-          <button type="button" class="btn-soft btn-full" data-action="open-tracker" data-code="${U.esc(order.orderId)}">
-            ${ICON.icon("package", "w-4 h-4", 2)} Lacak Status Pesanan
-          </button>
-          <button type="button" class="btn-soft btn-full" data-action="copy-message">
-            ${ICON.icon("copy", "w-4 h-4", 2)} Salin Teks Pesanan
-          </button>
+          <div class="receipt-preview-stage">
+            ${receiptBodyHtml}
+          </div>
+
+          <div class="receipt-actions-bar ${hasWaAction ? "" : "is-single"}">
+            <button type="button" class="btn-receipt-jpg" data-action="download-receipt-jpg">
+              ${ICON.icon("download", "w-4 h-4", 2.3)}
+              <span>Unduh Struk (JPG)</span>
+            </button>
+            ${hasWaAction ? `
+              <button type="button" class="btn-wa btn-receipt-wa" data-action="send-receipt-wa">
+                ${ICON.brand("whatsapp", "w-4 h-4")}
+                <span>Lanjut Kirim ke WA</span>
+              </button>
+            ` : ""}
+          </div>
+
+          <div class="receipt-secondary-row">
+            ${order.message ? `
+              <button type="button" class="receipt-link-btn" data-action="copy-message">
+                ${ICON.icon("copy", "w-3.5 h-3.5", 2)} Salin Teks WA
+              </button>
+            ` : ""}
+            <button type="button" class="receipt-link-btn" data-action="open-tracker" data-code="${U.esc(order.orderId)}">
+              ${ICON.icon("package", "w-3.5 h-3.5", 2)} Lacak Status
+            </button>
+            <a class="receipt-link-btn" href="/review?order=${encodeURIComponent(order.orderId)}">
+              ${ICON.icon("star", "w-3.5 h-3.5", 2)} Beri Testimoni
+            </a>
+          </div>
         </div>
       </div>
     `;
     document.body.classList.add("modal-open");
     setTimeout(() => {
-      const btn = modalRoot.querySelector("[data-action='open-wa']");
+      const btn = modalRoot.querySelector("[data-action='send-receipt-wa']") || modalRoot.querySelector("[data-action='download-receipt-jpg']");
       if (btn) btn.focus({ preventScroll: true });
     }, 80);
+  }
+
+  function showSuccessModal(order) {
+    showReceiptModal(order, { isCheckoutFlow: true });
+  }
+
+  /* ============================================================
+     WHATSAPP-STYLE PUBLIC TESTIMONIALS CHAT MODAL (LAZY & PAGINATED)
+     ============================================================ */
+
+  function formatChatTime(iso) {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Makassar",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).replace(":", ".");
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function formatChatDatePill(iso) {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleDateString("id-ID", {
+        timeZone: "Asia/Makassar",
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function renderTestimonialsBubbles(scrollToBottom) {
+    const body = $("#wa-chat-body");
+    const countEl = $("#wa-chat-subtitle");
+    const badgeEl = $("#wa-chat-count-badge");
+    if (!body) return;
+
+    const total = Math.max(testimonialFeed.totalCount || 0, testimonialFeed.items.length);
+    if (countEl) {
+      countEl.textContent = total > 0
+        ? `online • ${total} ulasan terverifikasi • ★ ${Number(testimonialFeed.avgRating || 5).toFixed(1)}`
+        : "online • ulasan pelanggan terverifikasi";
+    }
+    if (badgeEl) {
+      badgeEl.textContent = total > 0 ? String(total) : "";
+    }
+
+    if (testimonialFeed.loading && !testimonialFeed.items.length) {
+      body.innerHTML = `
+        <div class="wa-chat-empty">
+          <div class="wa-chat-system-pill">Memuat obrolan testimoni...</div>
+        </div>
+      `;
+      return;
+    }
+
+    if (!testimonialFeed.items.length) {
+      body.innerHTML = `
+        <div class="wa-chat-empty">
+          <div class="wa-chat-system-pill">Semua ulasan terverifikasi dari kode pesanan resmi</div>
+          <div class="wa-bubble is-welcome">
+            <div class="wa-bubble-head">
+              <strong>Admin ${U.esc(CFG.appName || "JasDor RisGold")}</strong>
+              <span>• Samarinda</span>
+            </div>
+            <p class="wa-bubble-text">Belum ada testimoni yang tampil nih! Kalau kamu sudah pernah pesan kopi lewat ${U.esc(CFG.appName || "JasDor RisGold")}, yuk jadi yang pertama kirim review &amp; foto minumanmu ☕✨</p>
+            <a href="/review" class="btn-primary btn-sm" style="margin-top:10px;text-decoration:none">
+              ${ICON.icon("star", "w-3.5 h-3.5", 2.2)} Tulis Testimoni Pertama
+            </a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // Reverse fetched newest-first items so newest sits at bottom like real WhatsApp chat
+    const chronological = testimonialFeed.items.slice().reverse();
+    let lastDate = "";
+    const bubblesHtml = chronological.map(item => {
+      const dateStr = formatChatDatePill(item.created_at);
+      const dateSep = dateStr && dateStr !== lastDate
+        ? `<div class="wa-chat-date-sep"><span>${U.esc(dateStr)}</span></div>`
+        : "";
+      lastDate = dateStr;
+
+      const stars = "★".repeat(Math.max(1, Math.min(5, Number(item.rating || 5))));
+      const loc = item.city_label || item.outlet_name || "";
+      const timeStr = formatChatTime(item.created_at);
+
+      return `
+        ${dateSep}
+        <article class="wa-bubble">
+          <div class="wa-bubble-head">
+            <strong>${U.esc(item.customer_name_masked || "Pe***")}</strong>
+            ${loc ? `<span class="wa-bubble-loc">• ${U.esc(loc)}</span>` : ""}
+          </div>
+          ${item.photo_url ? `
+            <button type="button" class="wa-bubble-photo-btn" data-action="zoom-testimonial-photo" data-photo-src="${U.esc(item.photo_url)}" aria-label="Perbesar foto testimoni">
+              <img src="${U.esc(item.photo_url)}" alt="Foto pesanan ${U.esc(item.brand_name || "kopi")}" class="wa-bubble-photo" loading="lazy" decoding="async" />
+            </button>
+          ` : ""}
+          <p class="wa-bubble-text">${U.esc(item.message)}</p>
+          <div class="wa-bubble-foot">
+            <span class="wa-bubble-meta">
+              <span class="wa-bubble-stars" aria-label="${Number(item.rating || 5)} bintang">${stars}</span>
+              ${item.brand_name ? `<span class="wa-bubble-brand">${U.esc(item.brand_name)}</span>` : ""}
+            </span>
+            <span class="wa-bubble-time">
+              ${U.esc(timeStr)}
+              ${ICON.icon("check-check", "w-3.5 h-3.5 wa-double-tick", 2.4)}
+            </span>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    const prevHeight = body.scrollHeight;
+    body.innerHTML = `
+      <div class="wa-chat-system-pill">Ulasan terverifikasi dari pelanggan resmi ${U.esc(CFG.appName || "JasDor RisGold")}</div>
+      ${testimonialFeed.hasMore ? `
+        <div class="wa-load-more-wrap">
+          <button type="button" class="wa-load-more-btn" data-action="load-more-testimonials" ${testimonialFeed.loading ? "disabled" : ""}>
+            ${testimonialFeed.loading ? "Memuat..." : "↑ Muat ulasan lebih lama"}
+          </button>
+        </div>
+      ` : ""}
+      ${bubblesHtml}
+    `;
+
+    if (scrollToBottom) {
+      requestAnimationFrame(() => {
+        body.scrollTop = body.scrollHeight;
+      });
+    } else if (prevHeight > 0) {
+      const diff = body.scrollHeight - prevHeight;
+      if (diff > 0) body.scrollTop = diff;
+    }
+  }
+
+  async function loadTestimonialsPage(reset) {
+    if (testimonialFeed.loading) return;
+    const SB = window.DLM_SUPABASE;
+    if (!SB || typeof SB.fetchPublicTestimonials !== "function") return;
+
+    const PAGE_SIZE = 20;
+    if (reset) {
+      testimonialFeed.items = [];
+      testimonialFeed.offset = 0;
+      testimonialFeed.hasMore = false;
+    }
+
+    testimonialFeed.loading = true;
+    renderTestimonialsBubbles(false);
+
+    try {
+      const [summary, rows] = await Promise.all([
+        reset && typeof SB.fetchTestimonialsSummary === "function"
+          ? SB.fetchTestimonialsSummary()
+          : Promise.resolve(null),
+        SB.fetchPublicTestimonials({ limit: PAGE_SIZE, offset: testimonialFeed.offset })
+      ]);
+
+      if (summary && typeof summary.total_count === "number") {
+        testimonialFeed.totalCount = summary.total_count;
+        testimonialFeed.avgRating = Number(summary.avg_rating || 5.0);
+      }
+      const list = Array.isArray(rows) ? rows : [];
+      if (reset) {
+        testimonialFeed.items = list;
+      } else {
+        const seen = new Set(testimonialFeed.items.map(i => i.id));
+        list.forEach(item => {
+          if (!seen.has(item.id)) testimonialFeed.items.push(item);
+        });
+      }
+      testimonialFeed.offset += list.length;
+      testimonialFeed.hasMore = list.length === PAGE_SIZE && (
+        testimonialFeed.totalCount === 0 || testimonialFeed.items.length < testimonialFeed.totalCount
+      );
+      testimonialFeed.loadedOnce = true;
+    } catch (e) {
+      /* graceful empty state if offline or migration pending */
+    } finally {
+      testimonialFeed.loading = false;
+      renderTestimonialsBubbles(reset);
+    }
+  }
+
+  function showTestimonialsModal() {
+    const modalRoot = $("#modal-root");
+    if (!modalRoot) return;
+    modalLastFocus = document.activeElement;
+    const appTitle = CFG.appName || "JasDor RisGold";
+
+    modalRoot.innerHTML = `
+      <div class="modal-overlay wa-chat-overlay" data-modal-overlay>
+        <div class="wa-chat-modal" role="dialog" aria-modal="true" aria-labelledby="wa-chat-title">
+          <header class="wa-chat-header">
+            <button type="button" class="wa-chat-back" data-action="close-modal" aria-label="Tutup Testimoni">
+              ${ICON.icon("chevron-left", "w-5 h-5", 2.5)}
+              <span id="wa-chat-count-badge" class="wa-chat-badge"></span>
+            </button>
+            <img src="src/assets/app-icon-64.png" alt="${U.esc(appTitle)}" class="wa-chat-avatar" width="38" height="38" />
+            <div class="wa-chat-head-copy">
+              <strong id="wa-chat-title">Testimoni ${U.esc(appTitle)}</strong>
+              <span id="wa-chat-subtitle">online • ulasan pelanggan terverifikasi</span>
+            </div>
+            <button type="button" class="wa-chat-close" data-action="close-modal" aria-label="Tutup">
+              ${ICON.icon("x", "w-5 h-5", 2.3)}
+            </button>
+          </header>
+
+          <div class="wa-chat-body" id="wa-chat-body"></div>
+
+          <footer class="wa-chat-footer">
+            <a href="/review" class="wa-chat-compose-link">
+              <span>Sudah pernah pesan? Tulis testimoni kamu di sini...</span>
+              <span class="wa-chat-send-pill">${ICON.icon("send", "w-3.5 h-3.5", 2.2)} Tulis</span>
+            </a>
+          </footer>
+        </div>
+      </div>
+    `;
+    document.body.classList.add("modal-open");
+
+    if (testimonialFeed.loadedOnce && testimonialFeed.items.length) {
+      renderTestimonialsBubbles(true);
+    } else {
+      loadTestimonialsPage(true);
+    }
   }
 
   function showTermsModal() {

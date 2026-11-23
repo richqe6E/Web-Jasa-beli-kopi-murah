@@ -100,6 +100,11 @@
       if (s.default_cost_ratio_percent != null) CFG.defaultCostRatioPercent = Number(s.default_cost_ratio_percent);
       if (s.payment_note) CFG.paymentNote = s.payment_note;
       if (s.operational_note) CFG.operationalNote = s.operational_note;
+      if (s.partner_name) CFG.partnerName = s.partner_name;
+      if (s.partner_whatsapp) CFG.partnerWhatsApp = s.partner_whatsapp;
+      if (s.partner_payment_methods) CFG.partnerPaymentMethods = s.partner_payment_methods;
+      if (s.partner_use_admin_phone != null) CFG.partnerUseAdminPhone = !!s.partner_use_admin_phone;
+      if (s.customer_payment_methods) CFG.customerPaymentMethods = s.customer_payment_methods;
       CFG.serviceFeeIncluded = CFG.serviceFeeMode === "included_per_item";
     }
 
@@ -291,6 +296,98 @@
   }
 
   /* ------------------------------------------------------------
+     TESTIMONIALS & VERIFIED REVIEW RPC / STORAGE
+     ------------------------------------------------------------ */
+
+  async function lookupOrderForReview(orderCode) {
+    return request("/rest/v1/rpc/lookup_order_for_review", {
+      method: "POST",
+      body: { p_order_code: String(orderCode || "").trim() }
+    });
+  }
+
+  async function uploadTestimonialPhoto(blobOrFile, orderCode) {
+    const safeCode = String(orderCode || "rev").replace(/[^a-zA-Z0-9_-]/g, "").toLowerCase();
+    const ext = (blobOrFile && blobOrFile.type === "image/jpeg") ? "jpg" : "webp";
+    const rand = Math.random().toString(36).slice(2, 7);
+    const objectPath = `reviews/${Date.now()}-${safeCode}-${rand}.${ext}`;
+    await request(`/storage/v1/object/testimonials/${objectPath}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": (blobOrFile && blobOrFile.type) || "image/webp",
+        "x-upsert": "false"
+      },
+      body: blobOrFile
+    });
+    return `${baseUrl()}/storage/v1/object/public/testimonials/${objectPath}`;
+  }
+
+  async function submitTestimonial(params) {
+    return request("/rest/v1/rpc/submit_testimonial", {
+      method: "POST",
+      body: {
+        p_order_code: String(params.orderCode || "").trim(),
+        p_message: String(params.message || "").trim(),
+        p_city_label: String(params.cityLabel || "").trim(),
+        p_rating: Number(params.rating || 5),
+        p_photo_url: params.photoUrl || null
+      }
+    });
+  }
+
+  async function fetchTestimonialsSummary() {
+    try {
+      return await request("/rest/v1/rpc/get_testimonials_summary", { method: "POST", body: {} });
+    } catch (e) {
+      return { total_count: 0, avg_rating: 5.0 };
+    }
+  }
+
+  async function fetchPublicTestimonials(options) {
+    const opts = options || {};
+    const limit = Math.min(50, Math.max(1, Number(opts.limit || 20)));
+    const offset = Math.max(0, Number(opts.offset || 0));
+    return request(
+      `/rest/v1/testimonials?select=id,order_code,customer_name_masked,brand_name,outlet_name,city_label,rating,message,photo_url,created_at&is_published=eq.true&order=created_at.desc&limit=${limit}&offset=${offset}`
+    );
+  }
+
+  async function fetchAdminTestimonials(limit) {
+    const lim = Math.min(300, Math.max(1, Number(limit || 200)));
+    return request(`/rest/v1/testimonials?select=*&order=created_at.desc&limit=${lim}`, { useAuth: true });
+  }
+
+  async function toggleTestimonialPublish(id, isPublished) {
+    return request(`/rest/v1/testimonials?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      useAuth: true,
+      headers: { Prefer: "return=representation" },
+      body: { is_published: !!isPublished }
+    });
+  }
+
+  async function deleteTestimonial(id, photoUrl) {
+    await request(`/rest/v1/testimonials?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      useAuth: true
+    });
+    if (photoUrl && String(photoUrl).includes("/storage/v1/object/public/testimonials/")) {
+      const objectPath = String(photoUrl).split("/storage/v1/object/public/testimonials/")[1];
+      if (objectPath) {
+        try {
+          await request(`/storage/v1/object/testimonials/${objectPath}`, {
+            method: "DELETE",
+            useAuth: true
+          });
+        } catch (e) {
+          /* ignore storage cleanup error */
+        }
+      }
+    }
+    return true;
+  }
+
+  /* ------------------------------------------------------------
      ADMIN AUTHENTICATION
      ------------------------------------------------------------ */
 
@@ -329,12 +426,13 @@
      ------------------------------------------------------------ */
 
   async function fetchAdminDataset() {
-    const [settingsRows, brands, outlets, menuItems, orders] = await Promise.all([
+    const [settingsRows, brands, outlets, menuItems, orders, testimonials] = await Promise.all([
       request("/rest/v1/app_settings?select=*&id=eq.1", { useAuth: true }),
       request("/rest/v1/brands?select=*&order=sort_order.asc&limit=50", { useAuth: true }),
       request("/rest/v1/outlets?select=*&order=sort_order.asc&limit=200", { useAuth: true }),
       request("/rest/v1/menu_items?select=*&order=brand_id.asc,sort_order.asc&limit=1000", { useAuth: true }),
-      request("/rest/v1/orders?select=*,order_items(*)&order=created_at.desc&limit=500", { useAuth: true })
+      request("/rest/v1/orders?select=*,order_items(*)&order=created_at.desc&limit=500", { useAuth: true }),
+      request("/rest/v1/testimonials?select=*&order=created_at.desc&limit=200", { useAuth: true }).catch(() => [])
     ]);
 
     return {
@@ -342,7 +440,8 @@
       brands: brands || [],
       outlets: outlets || [],
       menuItems: menuItems || [],
-      orders: orders || []
+      orders: orders || [],
+      testimonials: Array.isArray(testimonials) ? testimonials : []
     };
   }
 
@@ -468,6 +567,14 @@
     submitCustomerOrder,
     trackOrder,
     fetchCustomerOrders,
+    lookupOrderForReview,
+    uploadTestimonialPhoto,
+    submitTestimonial,
+    fetchTestimonialsSummary,
+    fetchPublicTestimonials,
+    fetchAdminTestimonials,
+    toggleTestimonialPublish,
+    deleteTestimonial,
     fetchAdminDataset,
     reconcileOrder,
     deleteOrder,
