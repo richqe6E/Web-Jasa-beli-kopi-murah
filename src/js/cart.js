@@ -91,7 +91,7 @@
       const feeMode = CFG.serviceFeeMode || "partner_exact";
       let orderServiceFee = 0;
       if (totalItems > 0) {
-        if (feeMode === "partner_exact") {
+        if (feeMode === "partner_exact" || feeMode === "flat_per_order") {
           const singleRegularKenangan =
             items.length === 1 &&
             totalItems === 1 &&
@@ -100,10 +100,14 @@
             items[0].category !== "Bundling" &&
             !items[0].isSatuan;
           orderServiceFee = singleRegularKenangan ? Number(CFG.defaultServiceFeePerOrder || 2000) : 0;
+        } else if (feeMode === "flat_per_order_all") {
+          orderServiceFee = Number(CFG.defaultServiceFeePerOrder || 0);
         } else if (feeMode === "tiered_per_order") {
           orderServiceFee = totalItems === 1 ? 1000 : 0;
-        } else if (feeMode === "flat_per_order" || feeMode === "both") {
-          orderServiceFee = Number(CFG.defaultServiceFeePerOrder || 0);
+        } else if (feeMode === "both") {
+          orderServiceFee = Number(CFG.defaultServiceFeePerOrder || 0) + (totalItems * Number(CFG.defaultServiceFeePerItem || 0));
+        } else if (feeMode === "included_per_item") {
+          orderServiceFee = 0;
         }
       }
       const grandTotal = subtotal + orderServiceFee;

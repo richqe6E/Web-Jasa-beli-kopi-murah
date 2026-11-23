@@ -33,7 +33,10 @@
     orderQuery: "",
     menuBrandFilter: "all",
     menuQuery: "",
+    menuPage: 1,
+    menuShowAll: false,
     outletBrandFilter: "all",
+    outletQuery: "",
     dataset: {
       settings: null,
       brands: [],
@@ -65,6 +68,24 @@
     if (st === "processing") return "Diproses";
     if (st === "cancelled") return "Dibatalkan";
     return "Menunggu WA";
+  }
+
+  function brandDisplayName(brandId) {
+    const found = (state.dataset.brands || []).find(b => b.id === brandId);
+    if (found && found.name) return found.name;
+    const fallback = { kenangan: "Kopi Kenangan", fore: "Fore Coffee", "janji-jiwa": "Janji Jiwa", tomoro: "Tomoro Coffee" };
+    return fallback[brandId] || String(brandId || "-").toUpperCase();
+  }
+
+  function toSafeAdminPhotoUrl(rawUrl) {
+    const u = String(rawUrl || "").trim();
+    if (!u) return "";
+    const marker = "/storage/v1/object/public/testimonials/";
+    const idx = u.indexOf(marker);
+    if (idx !== -1 && window.location.protocol.startsWith("http") && !/^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)) {
+      return `/media/testimonials/${u.slice(idx + marker.length)}`;
+    }
+    return u;
   }
 
   async function init() {
@@ -298,22 +319,22 @@
 
         <nav class="admin-tabs" aria-label="Menu Navigasi Admin">
           <button type="button" class="admin-tab ${state.activeTab === "finance" ? "is-active" : ""}" data-tab="finance">
-            ${ICON.icon("bar-chart-3", "w-4 h-4", 2.2)} Laporan Keuangan & Analitik
+            ${ICON.icon("bar-chart-3", "w-4 h-4", 2.2)} <span>Laporan Keuangan</span>
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "orders" ? "is-active" : ""}" data-tab="orders">
-            ${ICON.icon("receipt", "w-4 h-4", 2.2)} Pesanan WA (${(state.dataset.orders || []).length})
+            ${ICON.icon("receipt", "w-4 h-4", 2.2)} <span>Pesanan WA</span> <span class="tab-count">${(state.dataset.orders || []).length}</span>
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "menus" ? "is-active" : ""}" data-tab="menus">
-            ${ICON.icon("calculator", "w-4 h-4", 2.2)} Menu & Aturan Keuntungan (${(state.dataset.menuItems || []).length})
+            ${ICON.icon("calculator", "w-4 h-4", 2.2)} <span>Menu &amp; Margin</span> <span class="tab-count">${(state.dataset.menuItems || []).length}</span>
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "outlets" ? "is-active" : ""}" data-tab="outlets">
-            ${ICON.icon("store", "w-4 h-4", 2.2)} Outlet (${(state.dataset.outlets || []).length})
+            ${ICON.icon("store", "w-4 h-4", 2.2)} <span>Outlet</span> <span class="tab-count">${(state.dataset.outlets || []).length}</span>
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "testimonials" ? "is-active" : ""}" data-tab="testimonials">
-            ${ICON.icon("message-circle", "w-4 h-4", 2.2)} Testimoni (${(state.dataset.testimonials || []).length})
+            ${ICON.icon("message-circle", "w-4 h-4", 2.2)} <span>Testimoni</span> <span class="tab-count">${(state.dataset.testimonials || []).length}</span>
           </button>
           <button type="button" class="admin-tab ${state.activeTab === "settings" ? "is-active" : ""}" data-tab="settings">
-            ${ICON.icon("settings", "w-4 h-4", 2.2)} Pengaturan & Brand
+            ${ICON.icon("settings", "w-4 h-4", 2.2)} <span>Pengaturan &amp; Brand</span>
           </button>
         </nav>
 
@@ -322,6 +343,15 @@
         </main>
       </div>
     `;
+
+    const activeTabEl = root.querySelector(".admin-tab.is-active");
+    if (activeTabEl && typeof activeTabEl.scrollIntoView === "function") {
+      requestAnimationFrame(() => {
+        try {
+          activeTabEl.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+        } catch (e) { /* ignore */ }
+      });
+    }
   }
 
   function renderLoginScreen() {
@@ -546,28 +576,28 @@
             <thead>
               <tr>
                 <th>Brand</th>
-                <th>Jumlah Order</th>
-                <th>Item Terjual</th>
-                <th>Total Penjualan (Checkout)</th>
-                <th>Modal Pembelian (HPP)</th>
-                <th>Untung Selisih Harga</th>
-                <th>Untung Biaya Jasa</th>
-                <th>Total Laba Bersih</th>
+                <th class="th-num">Order</th>
+                <th class="th-num">Item</th>
+                <th class="th-num">Penjualan</th>
+                <th class="th-num">Modal (HPP)</th>
+                <th class="th-num">Selisih Harga</th>
+                <th class="th-num">Biaya Jasa</th>
+                <th class="th-num">Laba Bersih</th>
               </tr>
             </thead>
             <tbody>
               ${m.topBrands.length ? m.topBrands.map(b => `
                 <tr>
-                  <td><strong>${U.esc(b.name)}</strong></td>
-                  <td class="mono">${b.ordersCount} transaksi</td>
-                  <td class="mono">${b.cupsCount} item</td>
-                  <td class="mono"><strong>${U.rp(b.revenue)}</strong></td>
-                  <td class="mono">${U.rp(b.cost)}</td>
-                  <td class="mono">${U.rp(b.spreadProfit)}</td>
-                  <td class="mono">${U.rp(b.feeProfit)}</td>
-                  <td class="mono" style="color:var(--success);font-weight:800">+${U.rp(b.netProfit)}</td>
+                  <td class="nowrap"><strong>${U.esc(b.name)}</strong></td>
+                  <td class="mono td-num">${b.ordersCount}x</td>
+                  <td class="mono td-num">${b.cupsCount} item</td>
+                  <td class="mono td-num"><strong>${U.rp(b.revenue)}</strong></td>
+                  <td class="mono td-num">${U.rp(b.cost)}</td>
+                  <td class="mono td-num">${U.rp(b.spreadProfit)}</td>
+                  <td class="mono td-num">${U.rp(b.feeProfit)}</td>
+                  <td class="td-num"><span class="cell-profit">+${U.rp(b.netProfit)}</span></td>
                 </tr>
-              `).join("") : `<tr><td colspan="8" style="text-align:center;color:var(--muted)">Belum ada transaksi.</td></tr>`}
+              `).join("") : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Belum ada transaksi.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -616,75 +646,146 @@
           </select>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap orders-desktop-table">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Kode & Waktu</th>
-                <th>Pelanggan</th>
-                <th>Brand & Outlet</th>
+                <th style="width:190px">Order &amp; Pelanggan</th>
+                <th style="width:155px">Brand &amp; Outlet</th>
                 <th>Rincian Menu</th>
-                <th>Nominal Checkout</th>
-                <th>Modal HPP</th>
-                <th>Selisih + Jasa = Laba</th>
-                <th>Status</th>
-                <th>Share ke Partner</th>
-                <th>Aksi</th>
+                <th class="th-num" style="width:130px">Checkout &amp; HPP</th>
+                <th class="th-num" style="width:140px">Laba Bersih</th>
+                <th class="th-center" style="width:118px">Status</th>
+                <th style="width:230px">Partner &amp; Aksi</th>
               </tr>
             </thead>
             <tbody>
               ${list.length ? list.map(o => {
-                const itemsText = (o.order_items || []).map(i => `${i.quantity}x ${U.esc(i.item_name)}`).join("<br>");
+                const itemsHtml = (o.order_items || []).map(i => `<div><strong>${i.quantity}x</strong> ${U.esc(i.item_name)}</div>`).join("");
                 const waPhone = U.normalizePhone(o.customer_phone);
+                const dateStr = new Date(o.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+                const isDone = o.status === "completed";
                 return `
                   <tr>
                     <td>
-                      <strong class="mono">#${U.esc(o.order_code)}</strong>
-                      <div style="font-size:11.5px;color:var(--muted)">${new Date(o.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
-                    </td>
-                    <td>
-                      <strong>${U.esc(o.customer_name)}</strong>
-                      <div style="font-size:11.5px;color:var(--muted)">${U.esc(o.customer_phone)} • ${o.order_mode === "delivery" ? "Delivery" : "Pickup"}</div>
-                      ${waPhone ? `<a href="https://wa.me/${U.esc(waPhone)}" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:700;color:var(--wa)">Chat WA →</a>` : ""}
-                    </td>
-                    <td>
-                      <strong>${U.esc(o.brand_name)}</strong>
-                      <div style="font-size:11.5px;color:var(--muted)">${U.esc(o.outlet_name)}</div>
-                    </td>
-                    <td style="font-size:12px;line-height:1.45">${itemsText || `${o.items_count} item`}</td>
-                    <td class="mono">
-                      <strong>${U.rp(o.final_paid_total)}</strong>
-                      ${Number(o.admin_adjustment) !== 0 ? `<div style="font-size:11px;color:var(--muted)">Awal: ${U.rp(o.checkout_total)}</div>` : ""}
-                    </td>
-                    <td class="mono">${U.rp(o.total_cost_amount)}</td>
-                    <td class="mono">
-                      <div style="font-size:11px;color:var(--body)">Selisih: ${U.rp(o.price_spread_profit)} | Jasa: ${U.rp(o.service_fee_profit)}</div>
-                      <strong style="color:var(--success)">Laba: +${U.rp(o.net_profit)}</strong>
-                    </td>
-                    <td><span class="status-badge ${U.esc(o.status)}">${statusLabel(o.status)}</span></td>
-                    <td>
-                      <div style="display:flex;flex-direction:column;gap:5px;min-width:136px">
-                        <button type="button" class="btn btn-xs" style="background:#16a34a;color:#fff;border:0;justify-content:center" data-action="share-partner-wa" data-id="${o.id}" title="Kirim langsung pesanan ini ke WhatsApp Partner dengan format partner">
-                          ${ICON.brand("whatsapp", "w-3.5 h-3.5")} Kirim ke Partner
-                        </button>
-                        <div style="display:flex;gap:5px">
-                          <button type="button" class="btn btn-soft btn-xs" style="flex:1;justify-content:center" data-action="preview-partner-share" data-id="${o.id}">Preview</button>
-                          <button type="button" class="btn btn-outline btn-xs" style="flex:1;justify-content:center" data-action="copy-partner-text" data-id="${o.id}">Salin</button>
+                      <div class="cell-stack">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                          <span class="order-code-chip">#${U.esc(o.order_code)}</span>
+                          <span class="order-mode-pill">${o.order_mode === "delivery" ? "Delivery" : "Pickup"}</span>
+                        </div>
+                        <span class="cell-primary">${U.esc(o.customer_name)}</span>
+                        <span class="cell-sub mono">${U.esc(o.customer_phone)}</span>
+                        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)">
+                          <span>${U.esc(dateStr)}</span>
+                          ${waPhone ? `<a href="https://wa.me/${U.esc(waPhone)}" target="_blank" rel="noopener" style="font-weight:700;color:var(--wa)">Chat WA</a>` : ""}
                         </div>
                       </div>
                     </td>
                     <td>
-                      <div style="display:flex;gap:6px;flex-wrap:wrap">
-                        ${o.status !== "completed" ? `<button type="button" class="btn btn-success btn-xs" data-action="quick-complete-order" data-id="${o.id}">Selesai</button>` : ""}
-                        <button type="button" class="btn btn-soft btn-xs" data-action="edit-order" data-id="${o.id}">Rekonsiliasi</button>
-                        <button type="button" class="btn btn-danger btn-xs" data-action="delete-order" data-id="${o.id}" aria-label="Hapus pesanan #${U.esc(o.order_code)}">Hapus</button>
+                      <div class="cell-stack">
+                        <span class="cell-primary">${U.esc(o.brand_name)}</span>
+                        <span class="cell-sub">${U.esc(o.outlet_name)}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="order-menu-list">${itemsHtml || `<span>${o.items_count} item</span>`}</div>
+                    </td>
+                    <td class="td-num">
+                      <div class="cell-stack" style="align-items:flex-end">
+                        <strong class="mono">${U.rp(o.final_paid_total)}</strong>
+                        ${Number(o.admin_adjustment) !== 0 ? `<span class="cell-sub mono">Awal: ${U.rp(o.checkout_total)}</span>` : ""}
+                        <span class="cell-sub mono">HPP: ${U.rp(o.total_cost_amount)}</span>
+                      </div>
+                    </td>
+                    <td class="td-num">
+                      <div class="cell-stack" style="align-items:flex-end">
+                        <span class="cell-profit">+${U.rp(o.net_profit)}</span>
+                        <span class="cell-sub mono">Selisih: ${U.rp(o.price_spread_profit)}</span>
+                        <span class="cell-sub mono">Jasa: ${U.rp(o.service_fee_profit)}</span>
+                      </div>
+                    </td>
+                    <td class="td-center">
+                      <span class="status-badge ${U.esc(o.status)}">${statusLabel(o.status)}</span>
+                    </td>
+                    <td>
+                      <div class="order-actions-panel">
+                        <button type="button" class="btn btn-xs btn-wa-partner" data-action="share-partner-wa" data-id="${o.id}" title="Kirim langsung pesanan ini ke WhatsApp Partner">
+                          ${ICON.brand("whatsapp", "w-3.5 h-3.5")} Kirim ke Partner
+                        </button>
+                        <div class="order-actions-row">
+                          <button type="button" class="btn btn-soft btn-xs" data-action="preview-partner-share" data-id="${o.id}">Preview</button>
+                          <button type="button" class="btn btn-outline btn-xs" data-action="copy-partner-text" data-id="${o.id}">Salin</button>
+                        </div>
+                        <div class="order-actions-row ${isDone ? "" : "cols-3"}">
+                          ${!isDone ? `<button type="button" class="btn btn-success btn-xs" data-action="quick-complete-order" data-id="${o.id}">Selesai</button>` : ""}
+                          <button type="button" class="btn btn-soft btn-xs" data-action="edit-order" data-id="${o.id}">Edit</button>
+                          <button type="button" class="btn btn-danger btn-xs" data-action="delete-order" data-id="${o.id}" aria-label="Hapus pesanan #${U.esc(o.order_code)}">Hapus</button>
+                        </div>
                       </div>
                     </td>
                   </tr>
                 `;
-              }).join("") : `<tr><td colspan="10" style="text-align:center;color:var(--muted)">Tidak ada pesanan yang cocok.</td></tr>`}
+              }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Tidak ada pesanan yang cocok.</td></tr>`}
             </tbody>
           </table>
+        </div>
+
+        <div class="orders-mobile-list">
+          ${list.length ? list.map(o => {
+            const itemsHtml = (o.order_items || []).map(i => `<div><strong>${i.quantity}x</strong> ${U.esc(i.item_name)}</div>`).join("");
+            const waPhone = U.normalizePhone(o.customer_phone);
+            const dateStr = new Date(o.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+            const isDone = o.status === "completed";
+            return `
+              <article class="m-order-card">
+                <div class="m-order-head">
+                  <div class="cell-stack">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      <span class="order-code-chip">#${U.esc(o.order_code)}</span>
+                      <span class="order-mode-pill">${o.order_mode === "delivery" ? "Delivery" : "Pickup"}</span>
+                    </div>
+                    <span class="cell-primary">${U.esc(o.customer_name)}</span>
+                    <span class="cell-sub">${U.esc(o.brand_name)} • ${U.esc(o.outlet_name)}</span>
+                    <span class="cell-sub">${U.esc(dateStr)}${waPhone ? ` • <a href="https://wa.me/${U.esc(waPhone)}" target="_blank" rel="noopener" style="font-weight:700;color:var(--wa)">Chat WA</a>` : ""}</span>
+                  </div>
+                  <span class="status-badge ${U.esc(o.status)}">${statusLabel(o.status)}</span>
+                </div>
+                <div class="order-menu-list">${itemsHtml || `<span>${o.items_count} item</span>`}</div>
+                <div class="m-order-grid">
+                  <div>
+                    <div class="cell-sub">Checkout</div>
+                    <strong class="mono">${U.rp(o.final_paid_total)}</strong>
+                  </div>
+                  <div>
+                    <div class="cell-sub">Modal (HPP)</div>
+                    <span class="mono">${U.rp(o.total_cost_amount)}</span>
+                  </div>
+                  <div>
+                    <div class="cell-sub">Selisih / Jasa</div>
+                    <span class="mono">${U.rp(o.price_spread_profit)} / ${U.rp(o.service_fee_profit)}</span>
+                  </div>
+                  <div>
+                    <div class="cell-sub">Laba Bersih</div>
+                    <span class="cell-profit">+${U.rp(o.net_profit)}</span>
+                  </div>
+                </div>
+                <div class="m-order-actions">
+                  <button type="button" class="btn btn-xs btn-wa-partner" data-action="share-partner-wa" data-id="${o.id}">
+                    ${ICON.brand("whatsapp", "w-3.5 h-3.5")} Kirim ke Partner
+                  </button>
+                  <div class="order-actions-row">
+                    <button type="button" class="btn btn-soft btn-xs" data-action="preview-partner-share" data-id="${o.id}">Preview Teks</button>
+                    <button type="button" class="btn btn-outline btn-xs" data-action="copy-partner-text" data-id="${o.id}">Salin Partner</button>
+                  </div>
+                  <div class="order-actions-row ${isDone ? "" : "cols-3"}">
+                    ${!isDone ? `<button type="button" class="btn btn-success btn-xs" data-action="quick-complete-order" data-id="${o.id}">Selesai</button>` : ""}
+                    <button type="button" class="btn btn-soft btn-xs" data-action="edit-order" data-id="${o.id}">Edit</button>
+                    <button type="button" class="btn btn-danger btn-xs" data-action="delete-order" data-id="${o.id}">Hapus</button>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join("") : `<div style="text-align:center;color:var(--muted);padding:24px">Tidak ada pesanan yang cocok.</div>`}
         </div>
       </section>
     `;
@@ -706,11 +807,19 @@
     });
 
     const settings = state.dataset.settings || {};
+    const PAGE_SIZE = 40;
+    const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+    const currentPage = Math.min(Math.max(1, state.menuPage || 1), totalPages);
+    const visibleItems = state.menuShowAll
+      ? items
+      : items.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const startIdx = items.length ? (state.menuShowAll ? 1 : (currentPage - 1) * PAGE_SIZE + 1) : 0;
+    const endIdx = state.menuShowAll ? items.length : Math.min(items.length, currentPage * PAGE_SIZE);
 
     return `
       <section class="panel-card" style="background:linear-gradient(145deg,#ffffff 35%,#eef6ff 100%);border-color:var(--primary-line)">
-        <div class="panel-head">
-          <div>
+        <div class="panel-head" style="margin-bottom:10px">
+          <div class="panel-head-copy">
             <p class="panel-eyebrow">Skema Aktif Partner (Sinkron Reseller + Bundling +Rp 1.000)</p>
             <h2 class="panel-title">Aturan Laba Reseller &amp; Biaya Transaksi Partner</h2>
             <p class="panel-sub">
@@ -719,9 +828,11 @@
               <strong>Fore Coffee:</strong> harga persis partner, fee dasar Rp 500 (Reguler/Deli) / Rp 1.000 (1L &amp; Large), biaya admin checkout Rp 0.
             </p>
           </div>
-          <button type="button" class="btn btn-primary btn-xs" data-action="sync-reseller-hpp">
-            ${ICON.icon("refresh-cw", "w-3.5 h-3.5", 2.2)} Terapkan HPP Reseller Opsi 3
-          </button>
+          <div class="toolbar-row">
+            <button type="button" class="btn btn-primary btn-xs" data-action="sync-reseller-hpp">
+              ${ICON.icon("refresh-cw", "w-3.5 h-3.5", 2.2)} Terapkan HPP Reseller Opsi 3
+            </button>
+          </div>
         </div>
 
         <details style="margin-top:4px">
@@ -793,20 +904,17 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Menu</th>
-                <th>Brand & Kategori</th>
-                <th>Harga Normal</th>
-                <th>Modal Beli (HPP)</th>
-                <th>Harga Jual Promo</th>
-                <th>Untung Selisih Harga</th>
-                <th>Untung Biaya Jasa</th>
-                <th>Total Laba / Cup</th>
-                <th>Status</th>
-                <th>Aksi</th>
+                <th style="width:270px">Menu</th>
+                <th style="width:155px">Brand &amp; Kategori</th>
+                <th class="th-num" style="width:130px">Harga Jual</th>
+                <th class="th-num" style="width:110px">Modal (HPP)</th>
+                <th class="th-num" style="width:155px">Laba / Cup</th>
+                <th class="th-center" style="width:105px">Stok</th>
+                <th style="width:132px">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              ${items.map(it => {
+              ${visibleItems.length ? visibleItems.map(it => {
                 const orig = Number(it.price_original || 0);
                 const cost = Number(it.price_cost || 0);
                 const sell = Number(it.price_discount || 0);
@@ -817,25 +925,34 @@
                   <tr>
                     <td>
                       <div style="display:flex;align-items:center;gap:10px">
-                        <img src="${U.esc(it.image_url || "src/assets/products/iced-coffee.webp")}" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:cover;background:var(--surface-soft)">
-                        <div>
-                          <strong>${U.esc(it.name)}</strong>
-                          <div style="font-size:11px;color:var(--muted)">Terjual: ${it.sold_count || 0} • ${it.is_best_seller ? "★ Best Seller" : "Reguler"}</div>
+                        <img src="${U.esc(it.image_url || "src/assets/products/iced-coffee.webp")}" alt="" style="width:42px;height:42px;flex-shrink:0;border-radius:10px;object-fit:cover;background:var(--surface-soft);border:1px solid var(--border)" loading="lazy">
+                        <div class="cell-stack">
+                          <span class="cell-primary">${U.esc(it.name)}</span>
+                          <span class="cell-sub">Terjual ${U.num(it.sold_count || 0)} • ${it.is_best_seller ? "Best Seller" : "Reguler"}</span>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <strong>${U.esc(it.brand_id.toUpperCase())}</strong>
-                      <div style="font-size:11.5px;color:var(--muted)">${U.esc(it.category)}</div>
+                      <div class="cell-stack">
+                        <span class="cell-primary">${U.esc(brandDisplayName(it.brand_id))}</span>
+                        <span class="cell-sub">${U.esc(it.category)}</span>
+                      </div>
                     </td>
-                    <td class="mono">${U.rp(orig)}</td>
-                    <td class="mono">${U.rp(cost)}</td>
-                    <td class="mono"><strong>${U.rp(sell)}</strong></td>
-                    <td class="mono" style="color:${spreadProfit >= 0 ? "var(--ink)" : "var(--danger)"}">${U.rp(spreadProfit)}</td>
-                    <td class="mono">${U.rp(fee)}</td>
-                    <td class="mono" style="color:var(--success);font-weight:800">+${U.rp(netProfit)}</td>
-                    <td>
-                      <button type="button" class="status-badge ${it.is_available !== false ? "completed" : "cancelled"}" data-action="toggle-menu-avail" data-id="${U.esc(it.id)}" style="border:0">
+                    <td class="td-num">
+                      <div class="cell-stack" style="align-items:flex-end">
+                        <strong class="mono">${U.rp(sell)}</strong>
+                        ${orig > sell ? `<span class="cell-strike">${U.rp(orig)}</span>` : ""}
+                      </div>
+                    </td>
+                    <td class="mono td-num">${U.rp(cost)}</td>
+                    <td class="td-num">
+                      <div class="cell-stack" style="align-items:flex-end">
+                        <span class="cell-profit" style="color:${netProfit >= 0 ? "var(--success)" : "var(--danger)"}">${netProfit >= 0 ? "+" : ""}${U.rp(netProfit)}</span>
+                        <span class="cell-sub mono">Selisih ${U.rp(spreadProfit)} · Jasa ${U.rp(fee)}</span>
+                      </div>
+                    </td>
+                    <td class="td-center">
+                      <button type="button" class="status-badge is-toggle ${it.is_available !== false ? "completed" : "cancelled"}" data-action="toggle-menu-avail" data-id="${U.esc(it.id)}" title="Klik untuk ubah ketersediaan stok">
                         ${it.is_available !== false ? "Tersedia" : "Habis"}
                       </button>
                     </td>
@@ -847,10 +964,26 @@
                     </td>
                   </tr>
                 `;
-              }).join("")}
+              }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Tidak ada menu yang cocok.</td></tr>`}
             </tbody>
           </table>
         </div>
+
+        ${items.length > PAGE_SIZE ? `
+          <div class="pagination-bar">
+            <span>Menampilkan <strong>${startIdx}-${endIdx}</strong> dari <strong>${items.length}</strong> menu</span>
+            <div class="toolbar-row">
+              ${!state.menuShowAll ? `
+                <button type="button" class="btn btn-outline btn-xs" data-action="menu-page-prev" ${currentPage <= 1 ? "disabled" : ""}>Sebelumnya</button>
+                <span class="mono" style="font-size:12px;font-weight:700;padding:0 6px">${currentPage} / ${totalPages}</span>
+                <button type="button" class="btn btn-outline btn-xs" data-action="menu-page-next" ${currentPage >= totalPages ? "disabled" : ""}>Berikutnya</button>
+              ` : ""}
+              <button type="button" class="btn btn-soft btn-xs" data-action="menu-toggle-show-all">
+                ${state.menuShowAll ? "Mode Halaman (40/hal)" : `Tampilkan Semua (${items.length})`}
+              </button>
+            </div>
+          </div>
+        ` : ""}
       </section>
     `;
   }
@@ -860,24 +993,31 @@
      ------------------------------------------------------------ */
 
   function renderOutletsTab() {
-    const outlets = (state.dataset.outlets || []).filter(o =>
-      state.outletBrandFilter === "all" || o.brand_id === state.outletBrandFilter
-    );
+    const oq = (state.outletQuery || "").trim().toLowerCase();
+    const outlets = (state.dataset.outlets || []).filter(o => {
+      if (state.outletBrandFilter !== "all" && o.brand_id !== state.outletBrandFilter) return false;
+      if (oq) {
+        const hay = `${o.name} ${o.area} ${o.address} ${brandDisplayName(o.brand_id)}`.toLowerCase();
+        if (!hay.includes(oq)) return false;
+      }
+      return true;
+    });
 
     return `
       <section class="panel-card">
         <div class="panel-head">
-          <div>
+          <div class="panel-head-copy">
             <p class="panel-eyebrow">Lokasi Cabang Multi-Kota</p>
             <h2 class="panel-title">Manajemen Outlet (Samarinda, Balikpapan &amp; Tenggarong)</h2>
-            <p class="panel-sub">Kelola cabang resmi, koordinat GPS, dan jam operasional WITA. Catatan: Tomoro Coffee berstatus Coming Soon (0 cabang aktif).</p>
+            <p class="panel-sub">Kelola cabang resmi, koordinat GPS, dan jam operasional WITA. Catatan: Tomoro Coffee berstatus Segera Hadir (0 cabang aktif).</p>
           </div>
           <div class="toolbar-row">
-            <select id="admin-outlet-brand" class="select" style="width:auto;min-height:38px" aria-label="Filter brand outlet">
+            <input type="search" id="admin-outlet-search" class="input" style="width:230px" placeholder="Cari nama outlet atau alamat..." value="${U.esc(state.outletQuery)}">
+            <select id="admin-outlet-brand" class="select" aria-label="Filter brand outlet">
               <option value="all" ${state.outletBrandFilter === "all" ? "selected" : ""}>Semua Brand (${(state.dataset.outlets || []).length})</option>
               ${(state.dataset.brands || []).map(b => {
                 const cnt = (state.dataset.outlets || []).filter(o => o.brand_id === b.id).length;
-                return `<option value="${U.esc(b.id)}" ${state.outletBrandFilter === b.id ? "selected" : ""}>${U.esc(b.name)}${cnt === 0 ? " (Coming Soon)" : ` (${cnt})`}</option>`;
+                return `<option value="${U.esc(b.id)}" ${state.outletBrandFilter === b.id ? "selected" : ""}>${U.esc(b.name)}${cnt === 0 ? " (Segera Hadir)" : ` (${cnt})`}</option>`;
               }).join("")}
             </select>
             <button type="button" class="btn btn-primary btn-xs" data-action="open-outlet-modal">
@@ -890,13 +1030,13 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Nama Outlet</th>
-                <th>Brand</th>
-                <th>Kota / Area</th>
+                <th style="width:210px">Nama Outlet</th>
+                <th style="width:130px">Brand</th>
+                <th style="width:110px">Kota / Area</th>
                 <th>Alamat &amp; GPS</th>
-                <th>Jam Operasional</th>
-                <th>Status (Manual &amp; WITA)</th>
-                <th>Aksi</th>
+                <th style="width:120px">Jam WITA</th>
+                <th style="width:170px">Status Outlet</th>
+                <th style="width:130px">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -906,8 +1046,8 @@
                 return `
                 <tr>
                   <td><strong>${U.esc(o.name)}</strong></td>
-                  <td><strong>${U.esc(o.brand_id.toUpperCase())}</strong></td>
-                  <td>${U.esc(o.area)}</td>
+                  <td class="nowrap"><strong>${U.esc(brandDisplayName(o.brand_id))}</strong></td>
+                  <td class="nowrap">${U.esc(o.area)}</td>
                   <td style="font-size:12px;color:var(--body)">
                     <div>${U.esc(o.address)}</div>
                     <small class="mono" style="color:${hasGps ? "var(--success)" : "var(--muted)"}">
@@ -917,7 +1057,7 @@
                   <td class="mono" style="font-size:12px">${U.esc(o.hours)}</td>
                   <td>
                     <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">
-                      <button type="button" class="status-badge ${o.is_open !== false ? "completed" : "cancelled"}" data-action="toggle-outlet-open" data-id="${U.esc(o.id)}" style="border:0">
+                      <button type="button" class="status-badge is-toggle ${o.is_open !== false ? "completed" : "cancelled"}" data-action="toggle-outlet-open" data-id="${U.esc(o.id)}" title="Klik untuk buka/tutup outlet manual">
                         ${o.is_open !== false ? "Aktif (Buka)" : "Nonaktif (Tutup)"}
                       </button>
                       <small style="font-size:10.5px;font-weight:700;color:${wita.isOpen ? "var(--success)" : "var(--danger)"}">
@@ -933,7 +1073,7 @@
                   </td>
                 </tr>
               `;
-              }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Belum ada outlet aktif untuk brand ini (Coming Soon).</td></tr>`}
+              }).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Belum ada outlet aktif untuk filter ini.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -968,43 +1108,48 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Foto</th>
-                <th>Pelanggan & Order</th>
-                <th>Brand & Outlet</th>
-                <th>Rating & Ulasan</th>
-                <th>Status</th>
-                <th>Aksi</th>
+                <th style="width:78px">Foto</th>
+                <th style="width:190px">Pelanggan &amp; Order</th>
+                <th style="width:170px">Brand &amp; Outlet</th>
+                <th>Rating &amp; Ulasan</th>
+                <th class="th-center" style="width:120px">Status</th>
+                <th style="width:185px">Aksi</th>
               </tr>
             </thead>
             <tbody>
               ${list.length ? list.map(t => {
                 const stars = "★".repeat(Math.max(1, Math.min(5, Number(t.rating || 5))));
                 const isPub = t.is_published !== false;
+                const safePhoto = toSafeAdminPhotoUrl(t.photo_url);
                 return `
                   <tr>
                     <td>
-                      ${t.photo_url
-                        ? `<a href="${U.esc(t.photo_url)}" target="_blank" rel="noopener"><img src="${U.esc(t.photo_url)}" alt="Foto ulasan" style="width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid var(--border)" loading="lazy"></a>`
-                        : `<span style="font-size:11px;color:var(--muted)">Tanpa foto</span>`}
+                      ${safePhoto
+                        ? `<img src="${U.esc(safePhoto)}" alt="Foto ulasan" style="width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid var(--border);display:block" loading="lazy">`
+                        : `<span class="cell-sub">Tanpa foto</span>`}
                     </td>
                     <td>
-                      <strong>${U.esc(t.customer_name_masked)}</strong>
-                      <div class="mono" style="font-size:11px;color:var(--primary)">#${U.esc(t.order_code)}</div>
-                      <div style="font-size:11px;color:var(--muted)">${new Date(t.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                      <div class="cell-stack">
+                        <span class="cell-primary">${U.esc(t.customer_name_masked)}</span>
+                        <span class="order-code-chip">#${U.esc(t.order_code)}</span>
+                        <span class="cell-sub">${new Date(t.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                      </div>
                     </td>
                     <td>
-                      <strong>${U.esc(t.brand_name || "-")}</strong>
-                      <div style="font-size:11.5px;color:var(--muted)">${U.esc(t.city_label || t.outlet_name || "-")}</div>
+                      <div class="cell-stack">
+                        <span class="cell-primary">${U.esc(t.brand_name || "-")}</span>
+                        <span class="cell-sub">${U.esc(t.city_label || t.outlet_name || "-")}</span>
+                      </div>
                     </td>
-                    <td style="max-width:300px;font-size:12.5px;line-height:1.45">
-                      <div style="color:#f59e0b;font-weight:800;letter-spacing:1px">${stars}</div>
+                    <td style="font-size:13px;line-height:1.5">
+                      <div style="color:#f59e0b;font-weight:800;letter-spacing:1px;margin-bottom:2px">${stars}</div>
                       <div>${U.esc(t.message)}</div>
                     </td>
-                    <td>
+                    <td class="td-center">
                       <span class="status-badge ${isPub ? "completed" : "cancelled"}">${isPub ? "Tayang" : "Disembunyikan"}</span>
                     </td>
                     <td>
-                      <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      <div style="display:flex;gap:6px">
                         <button type="button" class="btn btn-soft btn-xs" data-action="toggle-testimonial-publish" data-id="${t.id}" data-next="${isPub ? "false" : "true"}">
                           ${isPub ? "Sembunyikan" : "Tampilkan"}
                         </button>
@@ -1013,7 +1158,7 @@
                     </td>
                   </tr>
                 `;
-              }).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Belum ada testimoni masuk (atau jalankan migrasi SQL tabel testimonials terlebih dahulu).</td></tr>`}
+              }).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Belum ada testimoni masuk.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -1027,29 +1172,24 @@
 
   function renderSettingsTab() {
     const s = getEffectiveSettings();
+    const activeFeeMode = (!s.service_fee_mode || s.service_fee_mode === "flat_per_order")
+      ? "partner_exact"
+      : s.service_fee_mode;
     return `
       <section class="panel-card">
         <div class="panel-head">
-          <div>
-            <p class="panel-eyebrow">Konfigurasi Layanan</p>
-            <h2 class="panel-title">Nomor WhatsApp Admin & Aturan Biaya Jasa Default</h2>
+          <div class="panel-head-copy">
+            <p class="panel-eyebrow">Konfigurasi Layanan &amp; Sinkronisasi Pelanggan</p>
+            <h2 class="panel-title">Nomor WhatsApp Admin &amp; Aturan Biaya Jasa</h2>
+            <p class="panel-sub">Perubahan di sini otomatis disinkronkan ke website pelanggan (nama layanan, nomor WA tujuan checkout, biaya transaksi, dan metode pembayaran).</p>
           </div>
+          <span class="sync-live-pill">${ICON.icon("circle-check", "w-3.5 h-3.5", 2.3)} Sinkron ke jasdor.web.id</span>
         </div>
 
         <form id="settings-form" class="form-grid">
           <div class="field">
             <label class="field-label" for="set-app-name">Nama Layanan</label>
-            <input type="text" id="set-app-name" class="input" value="${U.esc(s.app_name || "Dibeliin Lebih Murah")}" required>
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="set-wa-number">Nomor WhatsApp Admin (Format 628...)</label>
-            <input type="text" id="set-wa-number" class="input mono" value="${U.esc(s.admin_whatsapp || "6281234567890")}" required>
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="set-wa-display">Tampilan Nomor WhatsApp</label>
-            <input type="text" id="set-wa-display" class="input mono" value="${U.esc(s.admin_whatsapp_display || "0812-3456-7890")}" required>
+            <input type="text" id="set-app-name" class="input" value="${U.esc(s.app_name || "JasDor RisGold")}" required>
           </div>
 
           <div class="field">
@@ -1058,32 +1198,40 @@
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-fee-mode">Mode Perhitungan Biaya Jasa</label>
-            <select id="set-fee-mode" class="select">
-              <option value="flat_per_order" ${s.service_fee_mode === "flat_per_order" || !s.service_fee_mode ? "selected" : ""}>Sesuai Partner (Kopken 1 Produk Reguler Rp 2.000 • Lainnya Rp 0)</option>
-              <option value="included_per_item" ${s.service_fee_mode === "included_per_item" ? "selected" : ""}>Termasuk di Harga Jual per Item</option>
-              <option value="both" ${s.service_fee_mode === "both" ? "selected" : ""}>Gabungan (Per Item + Transaksi Partner)</option>
-            </select>
+            <label class="field-label" for="set-wa-number">No. WhatsApp Admin (Format 628...)</label>
+            <input type="text" id="set-wa-number" class="input mono" value="${U.esc(s.admin_whatsapp || "6282259871192")}" required>
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-fee-item">Biaya Jasa Default per Item (Rp)</label>
-            <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 0)}" min="0" step="1">
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="set-fee-order">Biaya Transaksi 1 Produk Kopken (Rp)</label>
-            <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order != null ? s.default_service_fee_per_order : 2000)}" min="0" step="1">
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="set-cost-ratio">Patokan Rasio Modal HPP Default (%)</label>
-            <input type="number" id="set-cost-ratio" class="input mono" value="${Number(s.default_cost_ratio_percent || 55)}" min="10" max="95">
+            <label class="field-label" for="set-wa-display">Tampilan No. WhatsApp Admin</label>
+            <input type="text" id="set-wa-display" class="input mono" value="${U.esc(s.admin_whatsapp_display || "082259871192")}" required>
           </div>
 
           <div class="field" style="grid-column:1 / -1">
-            <label class="field-label" for="set-payment-note">Catatan Pembayaran di Checkout</label>
-            <textarea id="set-payment-note" class="textarea" rows="2">${U.esc(s.payment_note || "")}</textarea>
+            <label class="field-label" for="set-fee-mode">Mode Perhitungan Biaya Jasa di Keranjang Pelanggan</label>
+            <select id="set-fee-mode" class="select">
+              <option value="partner_exact" ${activeFeeMode === "partner_exact" ? "selected" : ""}>Sesuai Partner (Kopken 1 Produk Reguler = Biaya Transaksi, Lainnya Rp 0)</option>
+              <option value="flat_per_order_all" ${activeFeeMode === "flat_per_order_all" ? "selected" : ""}>Biaya Transaksi Tetap per Order (Berlaku untuk Semua Brand)</option>
+              <option value="included_per_item" ${activeFeeMode === "included_per_item" ? "selected" : ""}>Gratis Biaya Admin Checkout (Termasuk di Harga Menu)</option>
+              <option value="both" ${activeFeeMode === "both" ? "selected" : ""}>Gabungan (Biaya per Item + Biaya Transaksi per Order)</option>
+            </select>
+          </div>
+
+          <div class="form-grid-3" style="grid-column:1 / -1">
+            <div class="field">
+              <label class="field-label" for="set-fee-order">Biaya Transaksi per Order (Rp)</label>
+              <input type="number" id="set-fee-order" class="input mono" value="${Number(s.default_service_fee_per_order != null ? s.default_service_fee_per_order : 2000)}" min="0" step="1">
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="set-fee-item">Biaya Jasa per Item (Rp)</label>
+              <input type="number" id="set-fee-item" class="input mono" value="${Number(s.default_service_fee_per_item || 0)}" min="0" step="1">
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="set-cost-ratio">Patokan Rasio HPP Default (%)</label>
+              <input type="number" id="set-cost-ratio" class="input mono" value="${Number(s.default_cost_ratio_percent || 55)}" min="10" max="95">
+            </div>
           </div>
 
           <div class="field" style="grid-column:1 / -1">
@@ -1091,32 +1239,35 @@
             <input type="text" id="set-customer-pay" class="input" value="${U.esc(s.customer_payment_methods || "QRIS / Transfer Bank / E-Wallet (konfirmasi via Admin)")}">
           </div>
 
-          <div style="grid-column:1 / -1;border-top:1px dashed var(--border);padding-top:14px;margin-top:4px">
+          <div class="field" style="grid-column:1 / -1">
+            <label class="field-label" for="set-payment-note">Catatan Pembayaran di Halaman Checkout Pelanggan</label>
+            <textarea id="set-payment-note" class="textarea" rows="2">${U.esc(s.payment_note || "")}</textarea>
+          </div>
+
+          <div class="form-section-divider">
             <p class="panel-eyebrow">Share Pesanan 1-Klik ke Partner</p>
-            <p style="font-size:12px;color:var(--muted);margin-top:2px">Atur nama &amp; nomor WA partner agar tombol <strong>Kirim ke Partner</strong> di tab Pesanan langsung membuka chat WhatsApp dengan format partner.</p>
+            <p class="panel-sub">Atur nama dan nomor WhatsApp partner agar tombol <strong>Kirim ke Partner</strong> di tab Pesanan WA langsung mengirim format pesanan yang sesuai.</p>
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-partner-name">Nama Partner (Header Pesan WA Partner)</label>
+            <label class="field-label" for="set-partner-name">Nama Partner (Header Pesan WA)</label>
             <input type="text" id="set-partner-name" class="input" value="${U.esc(s.partner_name || "Jasdor Moulii")}" placeholder="Contoh: Jasdor Moulii">
           </div>
 
           <div class="field">
-            <label class="field-label" for="set-partner-wa">Nomor WhatsApp Partner (Format 628...)</label>
+            <label class="field-label" for="set-partner-wa">No. WhatsApp Partner (Format 628...)</label>
             <input type="text" id="set-partner-wa" class="input mono" value="${U.esc(s.partner_whatsapp || "6281521692248")}" placeholder="6281521692248">
           </div>
 
-          <div class="field">
+          <div class="field" style="grid-column:1 / -1">
             <label class="field-label" for="set-partner-pay">Metode Pembayaran di Teks Partner</label>
             <input type="text" id="set-partner-pay" class="input" value="${U.esc(s.partner_payment_methods || "BCA / GoPay / Dana / QRIS")}">
           </div>
 
-          <div class="field" style="display:flex;align-items:center;padding-top:18px">
-            <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer">
-              <input type="checkbox" id="set-partner-use-admin-phone" ${s.partner_use_admin_phone ? "checked" : ""}>
-              <span>Ganti No. WA pembeli jadi No. WA Admin saat kirim ke partner</span>
-            </label>
-          </div>
+          <label class="toggle-card" for="set-partner-use-admin-phone">
+            <input type="checkbox" id="set-partner-use-admin-phone" ${s.partner_use_admin_phone ? "checked" : ""}>
+            <span>Ganti nomor WA pembeli menjadi nomor WA Admin saat mengirim pesanan ke partner</span>
+          </label>
 
           <div style="grid-column:1 / -1;display:flex;justify-content:flex-end">
             <button type="submit" class="btn btn-primary">
@@ -1128,14 +1279,14 @@
 
       <section class="panel-card">
         <div class="panel-head">
-          <div>
+          <div class="panel-head-copy">
             <p class="panel-eyebrow">Identitas Brand (Logo Resmi Terkunci)</p>
-            <h2 class="panel-title">Daftar Brand & Logo Emblem Resmi</h2>
-            <p class="panel-sub">Logo resmi Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa dikunci secara permanen agar tetap rapi dan tidak tertimpa foto lain. Anda tetap dapat mengubah badge promo & tagline.</p>
+            <h2 class="panel-title">Daftar Brand &amp; Logo Emblem Resmi</h2>
+            <p class="panel-sub">Logo resmi Tomoro, Fore, Kopi Kenangan, dan Janji Jiwa dikunci secara permanen agar tetap rapi. Anda tetap dapat mengubah badge promo dan tagline.</p>
           </div>
         </div>
 
-        <div class="kpi-grid">
+        <div class="brand-cards-grid">
           ${(state.dataset.brands || []).map(b => {
             const lockedLogo = (CFG.lockedBrandLogos && CFG.lockedBrandLogos[b.id]) || b.logo_url || `src/assets/brands/${b.id}.svg`;
             return `
@@ -1899,6 +2050,16 @@
       }
     } else if (action === "edit-brand") {
       openBrandModal(actEl.dataset.id);
+    } else if (action === "menu-page-prev") {
+      state.menuPage = Math.max(1, (state.menuPage || 1) - 1);
+      render();
+    } else if (action === "menu-page-next") {
+      state.menuPage = (state.menuPage || 1) + 1;
+      render();
+    } else if (action === "menu-toggle-show-all") {
+      state.menuShowAll = !state.menuShowAll;
+      state.menuPage = 1;
+      render();
     }
   }
 
@@ -1912,8 +2073,18 @@
   }, 260);
 
   const debouncedRenderMenus = U.debounce(() => {
+    state.menuPage = 1;
     render();
     const input = $("#admin-menu-search");
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }, 260);
+
+  const debouncedRenderOutlets = U.debounce(() => {
+    render();
+    const input = $("#admin-outlet-search");
     if (input) {
       input.focus();
       input.setSelectionRange(input.value.length, input.value.length);
@@ -1928,6 +2099,9 @@
     } else if (id === "admin-menu-search") {
       state.menuQuery = e.target.value;
       debouncedRenderMenus();
+    } else if (id === "admin-outlet-search") {
+      state.outletQuery = e.target.value;
+      debouncedRenderOutlets();
     } else if (id === "mf-orig" || id === "mf-cost" || id === "mf-sell" || id === "mf-fee") {
       updateMenuProfitPreview();
     } else if (id === "mf-image") {
@@ -1952,6 +2126,7 @@
       render();
     } else if (id === "admin-menu-brand") {
       state.menuBrandFilter = e.target.value;
+      state.menuPage = 1;
       render();
     } else if (id === "admin-outlet-brand") {
       state.outletBrandFilter = e.target.value;
