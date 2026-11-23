@@ -1172,9 +1172,10 @@
 
   function renderSettingsTab() {
     const s = getEffectiveSettings();
-    const activeFeeMode = (!s.service_fee_mode || s.service_fee_mode === "flat_per_order")
-      ? "partner_exact"
-      : s.service_fee_mode;
+    const rawFeeMode = s.service_fee_mode || "flat_per_order";
+    const activeFeeMode = rawFeeMode === "partner_exact"
+      ? "flat_per_order"
+      : (rawFeeMode === "flat_per_order_all" ? "both" : rawFeeMode);
     return `
       <section class="panel-card">
         <div class="panel-head">
@@ -1210,10 +1211,9 @@
           <div class="field" style="grid-column:1 / -1">
             <label class="field-label" for="set-fee-mode">Mode Perhitungan Biaya Jasa di Keranjang Pelanggan</label>
             <select id="set-fee-mode" class="select">
-              <option value="partner_exact" ${activeFeeMode === "partner_exact" ? "selected" : ""}>Sesuai Partner (Kopken 1 Produk Reguler = Biaya Transaksi, Lainnya Rp 0)</option>
-              <option value="flat_per_order_all" ${activeFeeMode === "flat_per_order_all" ? "selected" : ""}>Biaya Transaksi Tetap per Order (Berlaku untuk Semua Brand)</option>
+              <option value="flat_per_order" ${activeFeeMode === "flat_per_order" ? "selected" : ""}>Sesuai Partner (Kopken 1 Produk Reguler = Biaya Transaksi, Lainnya Rp 0)</option>
               <option value="included_per_item" ${activeFeeMode === "included_per_item" ? "selected" : ""}>Gratis Biaya Admin Checkout (Termasuk di Harga Menu)</option>
-              <option value="both" ${activeFeeMode === "both" ? "selected" : ""}>Gabungan (Biaya per Item + Biaya Transaksi per Order)</option>
+              <option value="both" ${activeFeeMode === "both" ? "selected" : ""}>Semua Brand (Biaya Transaksi per Order + Biaya Jasa per Item)</option>
             </select>
           </div>
 
@@ -2417,8 +2417,13 @@
         try {
           await SB.saveSettings(Object.assign({}, basePayload, partnerPatch));
         } catch (colErr) {
-          // Graceful fallback if new partner columns haven't been migrated in DB yet
-          await SB.saveSettings(basePayload);
+          const msg = String((colErr && colErr.message) || "").toLowerCase();
+          const isMissingCol = msg.includes("column") || msg.includes("does not exist") || msg.includes("schema cache");
+          if (isMissingCol) {
+            await SB.saveSettings(basePayload);
+          } else {
+            throw colErr;
+          }
         }
 
         if (newAppName) CFG.appName = newAppName;
@@ -2435,6 +2440,10 @@
         toast("Pengaturan layanan & partner berhasil disimpan!");
         await reloadData();
       } catch (err) {
+        if (err && err.code === "AUTH_REQUIRED") {
+          state.user = null;
+          render();
+        }
         toast("Gagal menyimpan pengaturan: " + err.message, "error");
       }
     }

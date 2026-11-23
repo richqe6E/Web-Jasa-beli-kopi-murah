@@ -37,14 +37,85 @@
     }
   }
 
+  let refreshPromise = null;
+
+  function isTokenNearExpiry(session) {
+    if (!session || !session.access_token) return true;
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (session.expires_at) {
+      return nowSec >= Number(session.expires_at) - 60;
+    }
+    try {
+      const parts = String(session.access_token).split(".");
+      if (parts.length === 3) {
+        const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(atob(b64));
+        if (payload && payload.exp) return nowSec >= Number(payload.exp) - 60;
+      }
+    } catch (e) {
+      /* ignore JWT decode failure */
+    }
+    return false;
+  }
+
+  async function refreshSession() {
+    if (refreshPromise) return refreshPromise;
+    const current = getSession();
+    if (!current || !current.refresh_token) return null;
+
+    refreshPromise = (async () => {
+      try {
+        const url = baseUrl();
+        const key = anonKey();
+        const res = await fetch(`${url}/auth/v1/token?grant_type=refresh_token`, {
+          method: "POST",
+          headers: {
+            apikey: key,
+            Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ refresh_token: current.refresh_token })
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data && data.access_token) {
+          setSession(data);
+          return data;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
+  }
+
+  async function getValidAccessToken() {
+    let session = getSession();
+    if (!session || !session.access_token) {
+      const err = new Error("Sesi admin telah berakhir atau keluar. Silakan login ulang.");
+      err.code = "AUTH_REQUIRED";
+      throw err;
+    }
+    if (isTokenNearExpiry(session) && session.refresh_token) {
+      const refreshed = await refreshSession();
+      if (refreshed && refreshed.access_token) {
+        session = refreshed;
+      }
+    }
+    return session.access_token;
+  }
+
   async function request(endpoint, options) {
     const url = baseUrl();
     const key = anonKey();
     if (!url || !key) throw new Error("Konfigurasi Supabase belum tersedia.");
 
     const opts = options || {};
-    const session = getSession();
-    const token = opts.useAuth && session && session.access_token ? session.access_token : key;
+    const token = opts.useAuth ? await getValidAccessToken() : key;
 
     const headers = Object.assign({
       apikey: key,
@@ -72,6 +143,16 @@
     }
 
     if (!res.ok) {
+      if (opts.useAuth && !opts._retried && res.status === 401) {
+        const refreshed = await refreshSession();
+        if (refreshed && refreshed.access_token) {
+          return request(endpoint, Object.assign({}, opts, { _retried: true }));
+        }
+        setSession(null);
+        const authErr = new Error("Sesi admin telah berakhir. Silakan login ulang.");
+        authErr.code = "AUTH_REQUIRED";
+        throw authErr;
+      }
       const msg = (data && (data.message || data.error_description || data.error || data.hint)) || `HTTP ${res.status}`;
       throw new Error(msg);
     }
@@ -527,13 +608,37 @@
     });
   }
 
+  function normalizeDbServiceFeeMode(mode) {
+    if (mode === "included_per_item" || mode === "both" || mode === "flat_per_order") return mode;
+    if (mode === "flat_per_order_all") return "both";
+    return "flat_per_order";
+  }
+
   async function saveSettings(row) {
-    const payload = Object.assign({ id: 1, updated_at: new Date().toISOString() }, row);
+    const cleanRow = Object.assign({}, row);
+    if (cleanRow.service_fee_mode != null) {
+      cleanRow.service_fee_mode = normalizeDbServiceFeeMode(cleanRow.service_fee_mode);
+    }
+    const patchBody = Object.assign({ updated_at: new Date().toISOString() }, cleanRow);
+    delete patchBody.id;
+
+    const updated = await request("/rest/v1/app_settings?id=eq.1", {
+      method: "PATCH",
+      useAuth: true,
+      headers: { Prefer: "return=representation" },
+      body: patchBody
+    });
+
+    if (Array.isArray(updated) && updated.length > 0) {
+      return updated;
+    }
+
+    const insertPayload = Object.assign({ id: 1 }, patchBody);
     return request("/rest/v1/app_settings", {
       method: "POST",
       useAuth: true,
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: [payload]
+      body: [insertPayload]
     });
   }
 
