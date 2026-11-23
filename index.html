@@ -15,18 +15,39 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://jasdor.web.id/" />
   <meta property="og:image" content="https://jasdor.web.id/src/assets/app-icon-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "JasDor RisGold",
-    "url": "https://jasdor.web.id/",
-    "description": "Jasa order minuman dan makanan resmi dari Kopi Kenangan, Fore Coffee, dan Janji Jiwa dengan harga lebih hemat."
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "JasDor RisGold",
+        "url": "https://jasdor.web.id/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://jasdor.web.id/src/assets/app-icon-512.png",
+          "width": 512,
+          "height": 512
+        }
+      },
+      {
+        "@type": "WebSite",
+        "name": "JasDor RisGold",
+        "url": "https://jasdor.web.id/",
+        "description": "Jasa order minuman dan makanan resmi dari Kopi Kenangan, Fore Coffee, dan Janji Jiwa dengan harga lebih hemat."
+      }
+    ]
   }
   </script>
 
-  <link rel="icon" type="image/png" sizes="64x64" href="src/assets/app-icon-64.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="src/assets/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/src/assets/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/src/assets/favicon-96.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/src/assets/app-icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/src/assets/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
