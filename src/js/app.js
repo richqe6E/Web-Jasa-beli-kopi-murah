@@ -176,7 +176,7 @@
           footerBrand.innerHTML = `<img src="src/assets/app-icon-64.png" alt="" class="footer-brand-logo" width="18" height="18" /> <span>${U.esc(CFG.appName)}</span>`;
         }
         const locPill = $(".outlet-loc-pill");
-        if (locPill) locPill.innerHTML = `${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}, ${U.esc(CFG.region)}`;
+        if (locPill) locPill.innerHTML = `${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} <span>${U.esc(CFG.city)}</span>`;
         const isOverlayOpen = document.body.classList.contains("modal-open") || document.body.classList.contains("sheet-open");
         const activeTag = document.activeElement && document.activeElement.tagName;
         const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA";
@@ -933,7 +933,7 @@
 
         <div class="outlet-hero-top">
           <span class="outlet-loc-pill">
-            ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} ${U.esc(CFG.city)}
+            ${ICON.icon("map-pin", "w-3.5 h-3.5", 2.3)} <span>${U.esc(CFG.city)}</span>
           </span>
           <button type="button" class="outlet-story-btn" data-action="open-how-to-order">
             ${ICON.icon("circle-help", "w-3.5 h-3.5", 2.2)} Cara Order
