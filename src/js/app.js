@@ -331,7 +331,7 @@
       title = "Data Pemesan";
       showBack = true;
     } else if (route === "history") {
-      eyebrow = "Cache Pelanggan Tersinkron";
+      eyebrow = "Pesanan & Struk Saya";
       title = "Riwayat Transaksi";
     }
 
@@ -1849,24 +1849,37 @@
     if (!main) return;
 
     const localOrders = WA.getOrders() || [];
-    const deviceShort = String(STORE.state.deviceId || "").slice(-8).toUpperCase();
 
     main.innerHTML = `
-      <section class="history-device-banner reveal">
-        <span class="history-device-icon">${ICON.icon("shield-check", "w-5 h-5", 2.2)}</span>
-        <div class="history-device-copy">
-          <strong>Riwayat Khusus Perangkatmu (ID: #${U.esc(deviceShort)})</strong>
-          <span>Riwayat transaksi disimpan pada cache browser perangkat ini &amp; disinkronkan real-time dengan server, sehingga tidak bercampur dengan pelanggan lain.</span>
+      <section class="history-hero-card reveal" id="history-summary-root">
+        <div class="history-hero-top">
+          <div>
+            <p class="history-hero-eyebrow">RINGKASAN TRANSAKSI</p>
+            <h2 class="history-hero-title">Pesanan &amp; Hemat Kamu</h2>
+          </div>
+          <span class="history-hero-badge">${ICON.icon("sparkles", "w-3.5 h-3.5", 2.2)} JasDor</span>
+        </div>
+        <div class="history-hero-stats">
+          <div class="history-stat-box">
+            <small>Total Pesanan</small>
+            <strong id="hist-stat-count">0 Order</strong>
+          </div>
+          <div class="history-stat-box is-savings">
+            <small>Total Hemat Promo</small>
+            <strong id="hist-stat-savings">Rp 0</strong>
+          </div>
         </div>
       </section>
 
-      <section class="section reveal" style="margin-top:8px">
-        <div class="tracker-search-row" style="margin-bottom:14px">
-          <input type="text" id="history-code-input" class="form-input" placeholder="Punya kode pesanan #DLM-...? Cek di sini" aria-label="Cari kode pesanan">
-          <button type="button" class="btn-primary btn-sm" data-action="history-track-code">Lacak</button>
+      <section class="section reveal" style="margin-top:12px">
+        <div class="history-track-card">
+          <div class="tracker-search-row">
+            <input type="text" id="history-code-input" class="form-input" placeholder="Lacak kode pesanan #DLM-..." aria-label="Cari kode pesanan">
+            <button type="button" class="btn-primary btn-sm" data-action="history-track-code">Lacak</button>
+          </div>
         </div>
 
-        <div class="section-head compact">
+        <div class="section-head compact" style="margin-top:16px">
           <div>
             <p class="eyebrow">Daftar Transaksi</p>
             <h2 class="section-title">Riwayat Pesanan Saya</h2>
@@ -1979,16 +1992,50 @@
     return orderCodes.map(c => map[c]);
   }
 
+  function formatCompactHistoryOptions(selections) {
+    if (!Array.isArray(selections) || !selections.length) return "";
+    if (WA && typeof WA.parseSelections === "function") {
+      const parsed = WA.parseSelections(selections);
+      if (parsed.isBundle) {
+        const parts = [];
+        if (parsed.bundleDrinks.length) parts.push(`Minuman: ${parsed.bundleDrinks.join(", ")}`);
+        if (parsed.bundleFoods.length) parts.push(`Makanan: ${parsed.bundleFoods.join(", ")}`);
+        return parts.join(" • ");
+      }
+      if (parsed.inlineSummary) return parsed.inlineSummary;
+    }
+    return formatCartOptions({ selections });
+  }
+
   function renderHistoryCards(orders) {
     const root = $("#history-list-root");
     if (!root) return;
 
-    if (!orders || !orders.length) {
+    const list = Array.isArray(orders) ? orders : [];
+    const activeOrders = list.filter(o => o.status !== "cancelled");
+    const totalSavingsSum = activeOrders.reduce((acc, o) => {
+      const directSave = Number(o.savings || o.totalSavings || 0);
+      if (directSave > 0) return acc + directSave;
+      const itemSave = (o.items || []).reduce((s, it) => {
+        const q = Math.max(1, Number(it.quantity || 1));
+        const orig = Number(it.unitOriginalPrice || it.unit_original_price || 0);
+        const sell = Number(it.unitPrice || it.unit_selling_price || 0);
+        return s + Math.max(0, orig - sell) * q;
+      }, 0);
+      return acc + itemSave;
+    }, 0);
+
+    const countEl = $("#hist-stat-count");
+    const saveEl = $("#hist-stat-savings");
+    if (countEl) countEl.textContent = `${list.length} Order`;
+    if (saveEl) saveEl.textContent = U.rp(totalSavingsSum);
+
+    if (!list.length) {
       root.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">${ICON.icon("receipt", "w-8 h-8", 1.8)}</div>
           <h3>Belum ada riwayat pesanan</h3>
-          <p>Setiap pesanan yang kamu buat dari perangkat ini akan otomatis tercatat di sini lengkap dengan status terbarunya.</p>
+          <p>Setiap pesanan yang kamu buat akan otomatis tersimpan rapi di sini lengkap dengan struk JPG &amp; status terbarunya.</p>
           <button type="button" class="btn-primary" data-action="change-outlet">
             ${ICON.icon("store", "w-4 h-4", 2.2)} Mulai Pesan Sekarang
           </button>
@@ -1997,7 +2044,7 @@
       return;
     }
 
-    root.innerHTML = orders.map(ord => {
+    root.innerHTML = list.map(ord => {
       const brand = STORE.getBrand(ord.brandId);
       const logoUrl = getLockedBrandLogo(brand);
       const meta = statusMeta(ord.status);
@@ -2010,9 +2057,7 @@
         const iQty = Math.max(1, Number(it.quantity || 1));
         const iUnit = Number(it.unitPrice || it.unit_selling_price || 0);
         const iLine = Number(it.lineTotal || it.line_total_selling || (iUnit * iQty));
-        const optSummary = Array.isArray(it.selections) && it.selections.length
-          ? formatCartOptions({ selections: it.selections })
-          : "";
+        const optSummary = formatCompactHistoryOptions(it.selections);
         return `
           <div class="history-item-card">
             <div class="history-item-line">
@@ -2026,6 +2071,7 @@
       }).join("");
 
       const extraCount = Math.max(0, (ord.items || []).length - 4);
+      const ordSave = Number(ord.savings || ord.totalSavings || 0);
 
       return `
         <article class="history-card">
@@ -2048,30 +2094,38 @@
           </div>
 
           ${ord.adminNotes ? `
-            <div style="padding:8px 10px;border-radius:10px;background:var(--surface-soft);font-size:11.5px;color:var(--body)">
+            <div class="history-admin-note">
               <strong>Info Admin:</strong> ${U.esc(ord.adminNotes)}
             </div>
           ` : ""}
 
-          <div class="history-foot">
-            <div class="history-total">
-              <small>${ord.itemsCount} item • ${ord.mode === "delivery" ? "Delivery" : "Pickup"}</small>
-              <strong>${U.rp(ord.total)}</strong>
+          <div class="history-foot-v2">
+            <div class="history-total-row">
+              <div class="history-total-meta">
+                <span>Total Pembayaran</span>
+                <small>${ord.itemsCount} item • ${ord.mode === "delivery" ? "Delivery" : "Pickup"}${ordSave > 0 ? ` • <em class="history-save-inline">Hemat ${U.rp(ordSave)}</em>` : ""}</small>
+              </div>
+              <strong class="history-total-amount">${U.rp(ord.total)}</strong>
             </div>
-            <div class="history-actions">
-              <button type="button" class="btn-soft btn-sm" data-action="open-history-receipt" data-code="${U.esc(ord.orderId)}">
-                ${ICON.icon("receipt", "w-3.5 h-3.5", 2)} Struk JPG
+
+            <div class="history-actions-util">
+              <button type="button" class="history-util-btn" data-action="open-history-receipt" data-code="${U.esc(ord.orderId)}">
+                ${ICON.icon("receipt", "w-3.5 h-3.5", 2.1)}
+                <span>Struk JPG</span>
               </button>
-              <a class="btn-soft btn-sm" href="/review?order=${encodeURIComponent(ord.orderId)}" style="text-decoration:none">
-                ${ICON.icon("star", "w-3.5 h-3.5", 2)} Ulas
+              <a class="history-util-btn is-review" href="/review?order=${encodeURIComponent(ord.orderId)}">
+                ${ICON.icon("star", "w-3.5 h-3.5", 2.1)}
+                <span>Beri Ulasan</span>
               </a>
-              <button type="button" class="btn-soft btn-sm" data-action="open-tracker" data-code="${U.esc(ord.orderId)}">
-                ${ICON.icon("package", "w-3.5 h-3.5", 2)} Status
-              </button>
-              <button type="button" class="btn-primary btn-sm" data-action="reorder-code" data-code="${U.esc(ord.orderId)}">
-                Beli Lagi
+              <button type="button" class="history-util-btn" data-action="open-tracker" data-code="${U.esc(ord.orderId)}">
+                ${ICON.icon("package", "w-3.5 h-3.5", 2.1)}
+                <span>Status</span>
               </button>
             </div>
+
+            <button type="button" class="btn-primary history-reorder-btn" data-action="reorder-code" data-code="${U.esc(ord.orderId)}">
+              ${ICON.icon("refresh-cw", "w-4 h-4", 2.2)} Beli Lagi Menu Ini
+            </button>
           </div>
         </article>
       `;
