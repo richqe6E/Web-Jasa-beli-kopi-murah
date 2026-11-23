@@ -2159,9 +2159,6 @@
       showTestimonialsModal();
     } else if (action === "load-more-testimonials") {
       loadTestimonialsPage(false);
-    } else if (action === "zoom-testimonial-photo") {
-      const src = el.dataset.photoSrc || "";
-      if (src) window.open(src, "_blank", "noopener,noreferrer");
     } else if (action === "open-how-to-order") {
       showHowToOrderModal();
     } else if (action === "install-pwa-app") {
@@ -2890,6 +2887,17 @@
      WHATSAPP-STYLE PUBLIC TESTIMONIALS CHAT MODAL (LAZY & PAGINATED)
      ============================================================ */
 
+  function toSafeTestimonialPhotoUrl(rawUrl) {
+    const u = String(rawUrl || "").trim();
+    if (!u) return "";
+    const marker = "/storage/v1/object/public/testimonials/";
+    const idx = u.indexOf(marker);
+    if (idx !== -1 && window.location.protocol.startsWith("http") && !/^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)) {
+      return `/media/testimonials/${u.slice(idx + marker.length)}`;
+    }
+    return u;
+  }
+
   function formatChatTime(iso) {
     if (!iso) return "";
     try {
@@ -2984,9 +2992,9 @@
             ${loc ? `<span class="wa-bubble-loc">• ${U.esc(loc)}</span>` : ""}
           </div>
           ${item.photo_url ? `
-            <button type="button" class="wa-bubble-photo-btn" data-action="zoom-testimonial-photo" data-photo-src="${U.esc(item.photo_url)}" aria-label="Perbesar foto testimoni">
-              <img src="${U.esc(item.photo_url)}" alt="Foto pesanan ${U.esc(item.brand_name || "kopi")}" class="wa-bubble-photo" loading="lazy" decoding="async" />
-            </button>
+            <div class="wa-bubble-photo-wrap">
+              <img src="${U.esc(toSafeTestimonialPhotoUrl(item.photo_url))}" alt="Foto pesanan ${U.esc(item.brand_name || "kopi")}" class="wa-bubble-photo" loading="lazy" decoding="async" draggable="false" />
+            </div>
           ` : ""}
           <p class="wa-bubble-text">${U.esc(item.message)}</p>
           <div class="wa-bubble-foot">

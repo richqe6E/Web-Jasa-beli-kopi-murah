@@ -7777,16 +7777,15 @@ img.is-img-failed {
   white-space: nowrap;
 }
 
-.wa-bubble-photo-btn {
+.wa-bubble-photo-wrap {
   display: block;
   width: 100%;
-  padding: 0;
   margin-bottom: 7px;
-  border: 0;
   border-radius: 12px;
   overflow: hidden;
   background: #dbeafe;
-  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .wa-bubble-photo {
@@ -7794,6 +7793,7 @@ img.is-img-failed {
   max-height: 240px;
   object-fit: cover;
   display: block;
+  pointer-events: none;
 }
 
 .wa-bubble-text {

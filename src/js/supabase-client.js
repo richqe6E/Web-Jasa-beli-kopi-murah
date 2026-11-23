@@ -237,11 +237,13 @@
 
   async function syncCatalog() {
     try {
+      const publicSettingsCols = "id,app_name,short_name,tagline,city,region,admin_whatsapp,admin_whatsapp_display,service_fee_mode,default_service_fee_per_item,default_service_fee_per_order,payment_note,operational_note,customer_payment_methods";
+      const publicMenuCols = "id,brand_id,name,category,type,description,info,image_url,price_original,price_discount,is_best_seller,is_available,rating,sold_label,sold_count,option_groups,sort_order";
       const [settingsRows, brands, outlets, menuItems] = await Promise.all([
-        request("/rest/v1/app_settings?select=*&id=eq.1"),
+        request(`/rest/v1/app_settings?select=${publicSettingsCols}&id=eq.1`),
         request("/rest/v1/brands?select=*&order=sort_order.asc&limit=50"),
         request("/rest/v1/outlets?select=*&order=sort_order.asc&limit=200"),
-        request("/rest/v1/menu_items?select=*&order=sort_order.asc&limit=1000")
+        request(`/rest/v1/menu_items?select=${publicMenuCols}&order=sort_order.asc&limit=1000`)
       ]);
 
       const payload = {
