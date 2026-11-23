@@ -1,5 +1,5 @@
 /* ============================================================
-   JASDOR RISGOLD — VERIFIED REVIEW FORM & WEBP WATERMARK ENGINE
+   JASDOR RISGOLD - VERIFIED REVIEW FORM & WEBP WATERMARK ENGINE
    ============================================================ */
 (function () {
   "use strict";

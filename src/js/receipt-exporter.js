@@ -1,5 +1,5 @@
 /* ============================================================
-   JASDOR RISGOLD — DIGITAL RECEIPT PREVIEW & JPG EXPORTER
+   JASDOR RISGOLD - DIGITAL RECEIPT PREVIEW & JPG EXPORTER
    Zero-dependency pure Canvas 2D high-DPI (2x) JPG generator
    ============================================================ */
 (function () {

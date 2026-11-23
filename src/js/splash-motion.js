@@ -1,5 +1,5 @@
 /* ============================================================
-   JASDOR RISGOLD — FULLSCREEN 3D RIBBON SPLASH ENGINE (60 FPS)
+   JASDOR RISGOLD - FULLSCREEN 3D RIBBON SPLASH ENGINE (60 FPS)
    Deterministik F0..F180 (3.00s) | Gaya Render 3D Pita (-15° -> 0°)
    Responsif Fullscreen 9:16 (Mobile) & 16:9 (Desktop)
    ============================================================ */

@@ -144,10 +144,10 @@
     lines.push("METODE PEMBAYARAN:");
     lines.push(payMethods);
     lines.push("");
-    lines.push(`Bagikan testimoni & foto minumanmu untuk ${brandTitle} setelah pesanan diterima, ya! ✨`);
-    lines.push(`🔗 ${reviewUrl}`);
+    lines.push(`Bagikan testimoni & foto minumanmu untuk ${brandTitle} setelah pesanan diterima, ya!`);
+    lines.push(`Link Testimoni: ${reviewUrl}`);
     lines.push("");
-    lines.push(`Terima kasih sudah memesan lewat ${brandTitle}! ☕✨`);
+    lines.push(`Terima kasih sudah memesan lewat ${brandTitle}!`);
 
     return lines.join("\n");
   }

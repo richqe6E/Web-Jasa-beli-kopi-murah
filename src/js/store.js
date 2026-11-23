@@ -31,7 +31,7 @@
       name: "",
       phone: "",
       notes: "",
-      pickupTime: "Secepatnya (15–20 menit)",
+      pickupTime: "Secepatnya (15-20 menit)",
       address: ""
     }
   };

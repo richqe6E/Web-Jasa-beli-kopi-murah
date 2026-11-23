@@ -1,5 +1,5 @@
 /* ============================================================
-   PRODUCT CUSTOMIZER — BOTTOM SHEET
+   PRODUCT CUSTOMIZER - BOTTOM SHEET
    ============================================================ */
 (function () {
   "use strict";

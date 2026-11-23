@@ -1,5 +1,5 @@
 /* ============================================================
-   DIBELIIN LEBIH MURAH — ADMIN & FINANCIAL SUITE CONTROLLER
+   DIBELIIN LEBIH MURAH - ADMIN & FINANCIAL SUITE CONTROLLER
    ============================================================ */
 (function () {
   "use strict";
@@ -268,7 +268,7 @@
     }
 
     const appName = (state.dataset.settings && state.dataset.settings.app_name) || CFG.appName || "Dibeliin Lebih Murah";
-    document.title = `Admin & Laporan Keuangan — ${appName}`;
+    document.title = `Admin & Laporan Keuangan - ${appName}`;
 
     root.innerHTML = `
       <div class="admin-shell">
@@ -370,7 +370,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 1 — FINANCIAL REPORT, PROFIT ENGINE & ANALYTICS
+     TAB 1 - FINANCIAL REPORT, PROFIT ENGINE & ANALYTICS
      ------------------------------------------------------------ */
 
   function renderFinanceTab() {
@@ -576,7 +576,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 2 — WHATSAPP ORDERS & CHECKOUT RECONCILIATION
+     TAB 2 - WHATSAPP ORDERS & CHECKOUT RECONCILIATION
      ------------------------------------------------------------ */
 
   function renderOrdersTab() {
@@ -691,7 +691,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 3 — MENU CATALOG & PROFIT RULES ENGINE
+     TAB 3 - MENU CATALOG & PROFIT RULES ENGINE
      ------------------------------------------------------------ */
 
   function renderMenusTab() {
@@ -856,7 +856,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 4 — MULTI-CITY OUTLETS MANAGEMENT
+     TAB 4 - MULTI-CITY OUTLETS MANAGEMENT
      ------------------------------------------------------------ */
 
   function renderOutletsTab() {
@@ -942,7 +942,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 4B — TESTIMONIALS MODERATION
+     TAB 4B - TESTIMONIALS MODERATION
      ------------------------------------------------------------ */
 
   function renderTestimonialsTab() {
@@ -1022,7 +1022,7 @@
   }
 
   /* ------------------------------------------------------------
-     TAB 5 — GLOBAL SETTINGS & BRAND LOGOS
+     TAB 5 - GLOBAL SETTINGS & BRAND LOGOS
      ------------------------------------------------------------ */
 
   function renderSettingsTab() {
@@ -1182,7 +1182,7 @@
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Rekonsiliasi Checkout WhatsApp</div>
-              <h3 class="panel-title">#${U.esc(order.order_code)} — ${U.esc(order.customer_name)}</h3>
+              <h3 class="panel-title">#${U.esc(order.order_code)} - ${U.esc(order.customer_name)}</h3>
             </div>
             <button type="button" class="btn btn-outline btn-xs" data-action="close-admin-modal">Tutup</button>
           </div>
@@ -1244,7 +1244,7 @@
           <div class="admin-modal-head">
             <div>
               <div class="panel-eyebrow">Share Pesanan ke Partner (${U.esc(settings.partner_name)})</div>
-              <h3 class="panel-title">#${U.esc(order.order_code)} — ${U.esc(order.customer_name)}</h3>
+              <h3 class="panel-title">#${U.esc(order.order_code)} - ${U.esc(order.customer_name)}</h3>
             </div>
             <button type="button" class="btn btn-outline btn-xs" data-action="close-admin-modal">Tutup</button>
           </div>
@@ -1314,7 +1314,7 @@
             <div class="field">
               <label class="field-label" for="man-menu">Menu Utama</label>
               <select id="man-menu" class="select">
-                ${menus.map(m => `<option value="${U.esc(m.id)}">${U.esc(m.name)} — ${U.rp(m.price_discount)}</option>`).join("")}
+                ${menus.map(m => `<option value="${U.esc(m.id)}">${U.esc(m.name)} - ${U.rp(m.price_discount)}</option>`).join("")}
               </select>
             </div>
             <div class="field">
@@ -1963,7 +1963,7 @@
       const outSel = $("#man-outlet");
       const menSel = $("#man-menu");
       if (outSel) outSel.innerHTML = outlets.map(o => `<option value="${U.esc(o.id)}">${U.esc(o.name)} (${U.esc(o.area)})</option>`).join("");
-      if (menSel) menSel.innerHTML = menus.map(m => `<option value="${U.esc(m.id)}">${U.esc(m.name)} — ${U.rp(m.price_discount)}</option>`).join("");
+      if (menSel) menSel.innerHTML = menus.map(m => `<option value="${U.esc(m.id)}">${U.esc(m.name)} - ${U.rp(m.price_discount)}</option>`).join("");
     } else if (id === "mf-image-file" && e.target.files && e.target.files[0]) {
       try {
         const rawFile = e.target.files[0];

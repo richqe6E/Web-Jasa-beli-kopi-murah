@@ -1,5 +1,5 @@
 /* ============================================================
-   DIBELIIN LEBIH MURAH — APP CONTROLLER (V4 OFFICIAL SUPER-UX)
+   DIBELIIN LEBIH MURAH - APP CONTROLLER (V4 OFFICIAL SUPER-UX)
    1. Intro Promo Story Splash Showcase (#splash-root)
    2. Smart Auto-Hide Header on Scroll Down / Reveal on Scroll Up
    3. Organic Curved Wave Hero & Physics-Spring Ad Carousel (#/outlet)
@@ -188,7 +188,7 @@
     if (window.DLM_SUPABASE && typeof window.DLM_SUPABASE.syncCatalog === "function") {
       window.DLM_SUPABASE.syncCatalog().then(res => {
         if (!res || !res.ok) return;
-        document.title = `${CFG.appName} — Order Kopi & Makanan ${CFG.city}`;
+        document.title = `${CFG.appName} - Order Kopi & Makanan ${CFG.city}`;
         const r = STORE.getRoute();
         renderHeader(r);
         const footerBrand = $(".footer-brand");
@@ -927,7 +927,7 @@
   }
 
   /* ============================================================
-     TAB 1 — PILIH BRAND & LOKASI OUTLET (#/outlet)
+     TAB 1 - PILIH BRAND & LOKASI OUTLET (#/outlet)
      ============================================================ */
 
   function renderOutletStep() {
@@ -1072,6 +1072,9 @@
           <button type="button" class="footer-link footer-install-btn" id="footer-install-btn" data-action="install-pwa-app">
             ${ICON.icon("download", "w-3.5 h-3.5", 2.2)} <span>Download Aplikasi</span>
           </button>
+          <a href="https://wa.me/6282259871192?text=Halo%20Developer%20JasDor%20RisGold%2C%20saya%20ingin%20bertanya%20terkait%20website." target="_blank" rel="noopener noreferrer" class="footer-link footer-dev-btn" aria-label="Hubungi Developer via WhatsApp 082259871192">
+            ${ICON.brand("whatsapp", "w-3.5 h-3.5")} <span>Hubungi Developer</span>
+          </a>
         </div>
       </footer>
     `;
@@ -1131,13 +1134,35 @@
     const countEl = $("#outlet-count");
 
     if (!allBrandOutlets.length) {
-      if (countEl) countEl.textContent = "Coming Soon";
+      if (countEl) countEl.textContent = "Segera Hadir";
+      const brandLogo = getLockedBrandLogo(brand);
+      const activeBrands = (window.DLM_BRANDS || []).filter(b => b.id !== brand.id && STORE.getBrandOutlets(b.id).length > 0);
       listEl.innerHTML = `
-        <div class="empty-state compact is-coming-soon-card">
-          <div class="empty-icon">${ICON.icon("sparkles", "w-7 h-7", 1.8)}</div>
-          <h3>${U.esc(brand.name)} — Segera Hadir (Coming Soon)</h3>
-          <p>Lokasi outlet resmi ${U.esc(brand.name)} sedang dalam tahap penentuan &amp; verifikasi. Silakan pilih brand lain yang sudah tersedia di Samarinda, Balikpapan, dan Tenggarong.</p>
-        </div>
+        <section class="coming-soon-panel" aria-label="${U.esc(brand.name)} segera hadir">
+          <div class="coming-soon-head">
+            <span class="coming-soon-logo">
+              <img src="${U.esc(brandLogo)}" alt="Logo ${U.esc(brand.name)}" width="48" height="48" />
+            </span>
+            <div class="coming-soon-head-copy">
+              <span class="coming-soon-tag">Segera Hadir</span>
+              <h3>${U.esc(brand.name)} - Segera Tersedia</h3>
+            </div>
+          </div>
+          <p class="coming-soon-desc">Cabang resmi ${U.esc(brand.name)} untuk area Samarinda, Balikpapan, dan Tenggarong sedang dalam tahap persiapan operasional. Sementara itu, kamu bisa langsung memesan dari brand resmi lain yang sudah aktif.</p>
+          ${activeBrands.length ? `
+            <div class="coming-soon-alt">
+              <span class="coming-soon-alt-label">Brand tersedia sekarang:</span>
+              <div class="coming-soon-alt-list">
+                ${activeBrands.map(ab => `
+                  <button type="button" class="coming-soon-alt-btn" data-brand-id="${U.esc(ab.id)}">
+                    <img src="${U.esc(getLockedBrandLogo(ab))}" alt="" width="18" height="18" />
+                    <span>${U.esc(ab.shortName || ab.name)}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
+        </section>
       `;
       return;
     }
@@ -1240,7 +1265,7 @@
   }
 
   /* ============================================================
-     TAB 2 — MENU PESANAN UNIK SESUAI KARAKTER BRAND (#/menu)
+     TAB 2 - MENU PESANAN UNIK SESUAI KARAKTER BRAND (#/menu)
      ============================================================ */
 
   function renderMenuStep() {
@@ -1556,7 +1581,7 @@
   }
 
   /* ============================================================
-     TAB 3 — KERANJANG (#/cart)
+     TAB 3 - KERANJANG (#/cart)
      ============================================================ */
 
   function formatCartOptions(item) {
@@ -1641,7 +1666,7 @@
 
       ${summary.orderServiceFee > 0 ? `
         <div class="cart-nudge-banner">
-          <div class="cart-nudge-icon">${ICON.icon("sparkles", "w-4 h-4", 2.2)}</div>
+          <div class="cart-nudge-icon">${ICON.icon("badge-percent", "w-4 h-4", 2.2)}</div>
           <div class="cart-nudge-copy">
             <strong>Tambah 1 menu lagi = GRATIS Biaya Admin!</strong>
             <span>Order 1 produk reguler Kopi Kenangan kena biaya transaksi Rp 2.000 (atau pilih menu Satuan / Bundling agar gratis).</span>
@@ -1761,7 +1786,7 @@
 
         <div class="form-group">
           <label class="form-label" for="pickup-time">Estimasi waktu</label>
-          <input type="text" id="pickup-time" class="form-input" value="${U.esc(customer.pickupTime)}" placeholder="Contoh: Secepatnya (15–20 menit)">
+          <input type="text" id="pickup-time" class="form-input" value="${U.esc(customer.pickupTime)}" placeholder="Contoh: Secepatnya (15-20 menit)">
         </div>
 
         <div class="form-group ${delivery ? "" : "is-hidden"}" id="address-wrap">
@@ -1840,7 +1865,7 @@
   }
 
   /* ============================================================
-     TAB 4 — RIWAYAT TRANSAKSI PELANGGAN (#/history)
+     TAB 4 - RIWAYAT TRANSAKSI PELANGGAN (#/history)
      Isolated per customer browser cache (device_id) + Live Supabase
      ============================================================ */
 
@@ -1854,20 +1879,23 @@
       <section class="history-hero-card reveal" id="history-summary-root">
         <div class="history-hero-top">
           <div>
-            <p class="history-hero-eyebrow">RINGKASAN TRANSAKSI</p>
-            <h2 class="history-hero-title">Pesanan &amp; Hemat Kamu</h2>
+            <p class="history-hero-eyebrow">PERBANDINGAN PENGELUARAN</p>
+            <h2 class="history-hero-title">Toko Resmi vs JasDor RisGold</h2>
           </div>
-          <span class="history-hero-badge">${ICON.icon("sparkles", "w-3.5 h-3.5", 2.2)} JasDor</span>
+          <span class="history-hero-badge">JasDor RisGold</span>
         </div>
         <div class="history-hero-stats">
-          <div class="history-stat-box">
-            <small>Total Pesanan</small>
-            <strong id="hist-stat-count">0 Order</strong>
+          <div class="history-stat-box is-official">
+            <small>Total di Toko Resmi</small>
+            <strong id="hist-stat-official">Rp 0</strong>
           </div>
           <div class="history-stat-box is-savings">
-            <small>Total Hemat Promo</small>
-            <strong id="hist-stat-savings">Rp 0</strong>
+            <small>Total di JasDor RisGold</small>
+            <strong id="hist-stat-jasdor">Rp 0</strong>
           </div>
+        </div>
+        <div class="history-hero-diff" id="hist-stat-diff">
+          Belum ada transaksi - pesan sekarang untuk melihat selisih hemat kamu.
         </div>
       </section>
 
@@ -1923,6 +1951,7 @@
         outletId: r.outlet_id,
         outletName: r.outlet_name,
         mode: r.order_mode || "pickup",
+        originalTotal: Number(r.original_total || 0),
         total: Number(r.final_paid_total || r.checkout_total || 0),
         savings: Number(r.customer_savings || 0),
         itemsCount: Number(r.items_count || 0),
@@ -1963,6 +1992,7 @@
         map[code].customer = loc.customer || map[code].customer;
         map[code].orderServiceFee = loc.orderServiceFee != null ? loc.orderServiceFee : map[code].orderServiceFee;
         map[code].totalSavings = loc.totalSavings != null ? loc.totalSavings : map[code].totalSavings;
+        if (!map[code].originalTotal && loc.originalTotal) map[code].originalTotal = Number(loc.originalTotal);
       } else {
         map[code] = {
           orderId: loc.orderId,
@@ -1976,6 +2006,7 @@
           customer: loc.customer || null,
           orderServiceFee: Number(loc.orderServiceFee || 0),
           totalSavings: Number(loc.totalSavings || 0),
+          originalTotal: Number(loc.originalTotal || 0),
           total: Number(loc.total || 0),
           savings: Number(loc.totalSavings || 0),
           itemsCount: Number(loc.itemsCount || (loc.items ? loc.items.length : 0)),
@@ -2013,22 +2044,40 @@
 
     const list = Array.isArray(orders) ? orders : [];
     const activeOrders = list.filter(o => o.status !== "cancelled");
-    const totalSavingsSum = activeOrders.reduce((acc, o) => {
-      const directSave = Number(o.savings || o.totalSavings || 0);
-      if (directSave > 0) return acc + directSave;
-      const itemSave = (o.items || []).reduce((s, it) => {
-        const q = Math.max(1, Number(it.quantity || 1));
-        const orig = Number(it.unitOriginalPrice || it.unit_original_price || 0);
-        const sell = Number(it.unitPrice || it.unit_selling_price || 0);
-        return s + Math.max(0, orig - sell) * q;
-      }, 0);
-      return acc + itemSave;
-    }, 0);
+    let totalOfficialSpend = 0;
+    let totalJasdorSpend = 0;
 
-    const countEl = $("#hist-stat-count");
-    const saveEl = $("#hist-stat-savings");
-    if (countEl) countEl.textContent = `${list.length} Order`;
-    if (saveEl) saveEl.textContent = U.rp(totalSavingsSum);
+    activeOrders.forEach(o => {
+      const paid = Number(o.total || 0);
+      const directOrig = Number(o.originalTotal || 0);
+      const directSave = Number(o.savings || o.totalSavings || 0);
+      const itemOrigSum = (o.items || []).reduce((s, it) => {
+        const q = Math.max(1, Number(it.quantity || 1));
+        const sell = Number(it.unitPrice || it.unit_selling_price || 0);
+        const orig = Number(it.unitOriginalPrice || it.unit_original_price || sell);
+        return s + Math.max(orig, sell) * q;
+      }, 0);
+      const official = Math.max(paid, directOrig, itemOrigSum, paid + directSave);
+      totalOfficialSpend += official;
+      totalJasdorSpend += paid;
+    });
+
+    const totalSaved = Math.max(0, totalOfficialSpend - totalJasdorSpend);
+    const officialEl = $("#hist-stat-official");
+    const jasdorEl = $("#hist-stat-jasdor");
+    const diffEl = $("#hist-stat-diff");
+    if (officialEl) officialEl.textContent = U.rp(totalOfficialSpend);
+    if (jasdorEl) jasdorEl.textContent = U.rp(totalJasdorSpend);
+    if (diffEl) {
+      if (activeOrders.length > 0 && totalSaved > 0) {
+        const pct = totalOfficialSpend > 0 ? Math.round((totalSaved / totalOfficialSpend) * 100) : 0;
+        diffEl.innerHTML = `Dari <strong>${activeOrders.length} pesanan</strong> - kamu sudah hemat <strong>${U.rp(totalSaved)}</strong>${pct > 0 ? ` (${pct}% lebih murah)` : ""}.`;
+      } else if (activeOrders.length > 0) {
+        diffEl.innerHTML = `Total dari <strong>${activeOrders.length} pesanan</strong> aktif kamu di JasDor RisGold.`;
+      } else {
+        diffEl.textContent = "Belum ada transaksi - pesan sekarang untuk melihat selisih hemat kamu.";
+      }
+    }
 
     if (!list.length) {
       root.innerHTML = `
@@ -2486,14 +2535,14 @@
     if (!summary.totalItems) return;
 
     const lines = [
-      `*RINGKASAN PATUNGAN KOPI — ${CFG.appName.toUpperCase()}*`,
+      `*RINGKASAN PATUNGAN KOPI - ${CFG.appName.toUpperCase()}*`,
       brand && outlet ? `Outlet: ${brand.name} (${outlet.name})` : "",
       ""
     ].filter(Boolean);
 
     summary.items.forEach((it, idx) => {
       const opt = formatCartOptions(it);
-      lines.push(`${idx + 1}. ${it.quantity}x ${it.name} — ${U.rp(it.unitPrice * it.quantity)}${opt ? `\n   (${opt})` : ""}`);
+      lines.push(`${idx + 1}. ${it.quantity}x ${it.name} - ${U.rp(it.unitPrice * it.quantity)}${opt ? `\n   (${opt})` : ""}`);
     });
 
     lines.push("");
@@ -2621,7 +2670,7 @@
       errors.name = "Nama minimal 2 karakter.";
     }
     if (!U.isValidPhone(customer.phone)) {
-      errors.phone = "Masukkan nomor WhatsApp yang valid (10–15 digit).";
+      errors.phone = "Masukkan nomor WhatsApp yang valid (10-15 digit).";
     }
     if (STORE.state.orderMode === "delivery" && (!customer.address || customer.address.trim().length < 8)) {
       errors.address = "Alamat pengantaran wajib diisi minimal 8 karakter.";
@@ -2738,6 +2787,7 @@
       customer,
       orderServiceFee: summary.orderServiceFee,
       totalSavings: summary.totalSavings,
+      originalTotal: summary.originalTotal,
       total: summary.grandTotal,
       itemsCount: summary.totalItems,
       items: normalizedItems,
@@ -3014,7 +3064,7 @@
               <strong>Admin ${U.esc(CFG.appName || "JasDor RisGold")}</strong>
               <span>• Samarinda</span>
             </div>
-            <p class="wa-bubble-text">Belum ada testimoni yang tampil nih! Kalau kamu sudah pernah pesan kopi lewat ${U.esc(CFG.appName || "JasDor RisGold")}, yuk jadi yang pertama kirim review &amp; foto minumanmu ☕✨</p>
+            <p class="wa-bubble-text">Belum ada testimoni yang tampil nih! Kalau kamu sudah pernah pesan kopi lewat ${U.esc(CFG.appName || "JasDor RisGold")}, yuk jadi yang pertama kirim review &amp; foto minumanmu.</p>
             <a href="/review" class="btn-primary btn-sm" style="margin-top:10px;text-decoration:none">
               ${ICON.icon("star", "w-3.5 h-3.5", 2.2)} Tulis Testimoni Pertama
             </a>
